@@ -1,0 +1,93 @@
+@startuml
+title Datenmodell – EliteGärtner
+
+
+skinparam ranksep 70
+
+class Match {
+  +<u>matchId : Int
+  +matchDate : Date
+  +status : String // active, expired, blocked
+}
+
+class Gaertner {
+  +<u>userId : Int
+  +name : String
+  +email : String
+  +passwordHash : String
+  +profileText : String
+  --
+  +login()
+  +register()
+  +updateProfileText()
+}
+
+class Preferences {
+  +interestProfileId : Int
+  +description : String
+  +dateUpdated : Date
+}
+
+class Tag {
+  +tagId : Int
+  +label : String
+}
+
+class HarvestUpload {
+  +<u>uploadId : Int
+  +imageUrl : String
+  +description : String
+  +weightKg : float
+  +quantity : Int
+  +uploadDate : Date
+  --
+  +addTags()
+  +delete()
+}
+
+class Rating {
+  +<u>ratingId : Int
+  +value : Int  // z.B. 1=Like, 0=Dislike
+  +ratingDate : Date
+}
+
+class Report {
+  +<u>reportId : Int
+  +reason : String
+  +reportDate : Date
+  +status : String
+}
+
+class LeaderboardEntry {
+  +entryId : Int
+  +rank : Int
+  +points : Int
+  +period : String // Woche, Monat, etc.
+}
+
+class ChatMessage {
+  +<u>messageId : Int
+  +timestamp : DateTime
+  +content : String
+}
+
+'--- Beziehungen ---
+
+
+Gaertner "1" -- "1" Preferences : wählt
+Gaertner "1" o-- HarvestUpload : erstellt
+HarvestUpload "*" -- "*" Tag
+Gaertner "1" o-- Rating : gibt ab
+HarvestUpload "1" -- "*" Rating : erhält
+
+Match "[0;*]" -- "[2;2]" Gaertner
+Match "1" -- "2" Rating : nur bei value >0
+
+HarvestUpload "1" -- "*" Report
+
+
+Gaertner "1" -- "*" LeaderboardEntry : hat Rang
+Gaertner "1" -- "*" ChatMessage : sendet
+Gaertner "1" -- "*" ChatMessage : empfängt
+
+@enduml

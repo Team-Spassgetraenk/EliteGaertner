@@ -1,0 +1,29 @@
+﻿@startuml
+title KI generiertes Bsp. Für Komponentendiagram 
+
+package Kunden {
+  component "PreferencesUseCasePreferences\nKunden" as UseCaseKunden #00CCCC
+  component "PreferencesETPreferences\nKunde" as ETKunde #FFCC00
+}
+
+package Bestellungen {
+  component "PreferencesUseCase\nBestellungen" as UseCaseBestellungen #00CCCC
+  component "PreferencesETPreferences\nBestellung" as ETBestellung #FFCC00
+}
+
+component "PreferencesUseCasePreferences\nBestellerfassung" as UseCaseBestellerfassung #00CCCC
+
+interface IBestellErfassung
+interface IKunden
+interface IBestellungen
+
+UseCaseBestellerfassung ..> IBestellErfassung : <<use>>
+UseCaseBestellerfassung ..> IKunden : <<use>>
+
+IKunden ..|> Kunden
+IBestellErfassung ..|> Bestellungen
+
+UseCaseBestellerfassung ..> IBestellungen : <<use>>
+
+
+@enduml
