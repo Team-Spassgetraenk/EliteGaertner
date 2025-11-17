@@ -8,19 +8,19 @@
     "net9.0": []
   },
   "packageFolders": {
-    "C:\\Users\\Krabulus\\.nuget\\packages\\": {}
+    "/Users/aleksandarcvijic/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\03_Uni\\BA_3\\spassgetraenk\\EliteGaertner\\EliteGaertner\\EliteGaertner.csproj",
+      "projectUniqueName": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/EliteGaertner/EliteGaertner.csproj",
       "projectName": "EliteGaertner",
-      "projectPath": "D:\\03_Uni\\BA_3\\spassgetraenk\\EliteGaertner\\EliteGaertner\\EliteGaertner.csproj",
-      "packagesPath": "C:\\Users\\Krabulus\\.nuget\\packages\\",
-      "outputPath": "D:\\03_Uni\\BA_3\\spassgetraenk\\EliteGaertner\\EliteGaertner\\obj\\",
+      "projectPath": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/EliteGaertner/EliteGaertner.csproj",
+      "packagesPath": "/Users/aleksandarcvijic/.nuget/packages/",
+      "outputPath": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/EliteGaertner/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Krabulus\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/aleksandarcvijic/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -44,7 +44,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net9.0": {
@@ -65,7 +65,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Users\\Krabulus\\.dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
