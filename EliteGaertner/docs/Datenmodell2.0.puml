@@ -5,8 +5,9 @@ title Datenmodell – EliteGärtner
 skinparam ranksep 70
 
 class Match {
-   +count : Int
-   +matchedDate : Date     
+    +<u>matchId : int
+    +count : Int
+    +matchedDate : Date     
 }
 
 class User {
@@ -41,6 +42,8 @@ class HarvestUpload {
 
 class Rating {
     +<u>ratingId : Int
+    +value : Int //z.b. 1=Like, 0=Dislike
+    +ratingDate : Date
 }
 
 class Report {
@@ -64,14 +67,16 @@ User "1" -- "*" LeaderboardEntry : hat Rang
 User "1" -- "1" Preferences : wählt/hat
 User "1" -- "*" HarvestUpload : erstellt
 User "1" -- "*" Report : erstellt
-User -- Match : hat
+User"2" -- "*"Match : hat
 
-Preferences "*" -- "*" Tags : enthalten
+Preferences "*" -- "*" Tags : greifen zu
 
-HarvestUpload "*" -- "*" Tags : enthalten
-HarvestUpload "1" -- "*" Report : enthalten
+HarvestUpload "*" -- "*" Tags : greifen zu
+HarvestUpload "1" -- "*" Report : erhalten
 HarvestUpload "n" -- "1" Rating : wählt aus
-User "n" -- "1" Rating : wählt aus
+User "n" -- "1" Rating : gibt ab
+Rating "2" -- "1" Match : beide User haben haben sich geliked -> value > 0
+
 
 
 
