@@ -6,7 +6,6 @@ skinparam ranksep 70
 
 class Match {
    +count : Int
-   +matchedUser : User[]
    +matchedDate : Date     
 }
 
@@ -18,12 +17,10 @@ class User {
     +eMail : String 
     +passwordHash : String 
     +profileText : String 
-    +harvestUpload : HarvestUpload[]
 }
 
 class Preferences {
     +preferencesID : Int 
-    +tags : Int[] 
     +dateUpdated : Date 
 }
 
@@ -40,13 +37,10 @@ class HarvestUpload {
     +WeightKg : float 
     +quantity : Int 
     +uploadDate : Date 
-    +tags : int[] 
-    +reports : int  
 }
 
 class Rating {
-    +userCreator: User[]
-    +userShowcasePicture: HarvestUpload[]
+    +ratingId : Int
 }
 
 class Report {
