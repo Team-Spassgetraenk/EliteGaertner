@@ -33,7 +33,7 @@ rectangle "Logic" #DDFFDD {
         UploadService -- hUpload
     }
 
-    component "HarvestSuggestion" as HSugg {
+    component "Harvest Suggestion" as HSugg {
         IHarvestDBSSuggestion -- HSugg
     }
     
@@ -87,6 +87,7 @@ MatchMgm -> Leaderboard
 UserSugg --> IUserDBS
 UserSugg --> IPreferencesDBS
 PM --> IPreferencesDBS
+HSugg --> IPreferencesDBS
 PM --> IProfilDBS
 Leaderboard --> ILeaderboardDBS
 MatchMgm --> IProfilDBS
