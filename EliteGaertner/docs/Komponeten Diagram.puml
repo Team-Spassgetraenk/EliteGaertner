@@ -18,6 +18,7 @@ rectangle "Logic" #DDFFDD {
     interface IUserSuggestion
     interface IProfileMgm
     interface ILeaderboard
+    interface IMatchmgm
 
     component AppLogic {
         AppLogic --> UploadService
@@ -25,6 +26,7 @@ rectangle "Logic" #DDFFDD {
         AppLogic --> IUserSuggestion
         AppLogic --> IProfileMgm
         AppLogic --> ILeaderboard
+        AppLogic --> IMatchmgm
     }
 
     component "Harvest Upload" as hUpload {
@@ -34,12 +36,19 @@ rectangle "Logic" #DDFFDD {
     component "HarvestSuggestion" as HSugg {
         IHarvestDBSSuggestion -- HSugg
     }
+    
+    component "MatchManager" as MatchMgm {
+        IMatchmgm -- MatchMgm
+        
+    }
+    
+    
 
     component "User Suggestion" as UserSugg {
         IUserSuggestion -- UserSugg
     }
 
-    component "ProfileManagment" as PM {
+    component "Profile  Managment" as PM {
         IProfileMgm -- PM
     }
     
@@ -57,22 +66,29 @@ rectangle "Infrastructure" #CCEEFF {
     interface IHarvestDBS
     interface IUserDBS
     interface IProfilDBS
+    interface IMatchesDBS
 
     IPreferencesDBS -- DBM
     IUploadDBS -- DBM
     IHarvestDBS -- DBM
     IUserDBS -- DBM
     IProfilDBS -- DBM
-    Leaderboard -- ILeaderboardDBS
+    ILeaderboardDBS -- DBM
+    IMatchesDBS -- DBM
+    
 }
 
+MatchMgm --> IMatchesDBS
 hUpload --> IUploadDBS
 HSugg --> IHarvestDBS
-HSugg -> UserSugg
+HSugg ->  UserSugg
+UserSugg -> MatchMgm
+MatchMgm -> Leaderboard
 UserSugg --> IUserDBS
 UserSugg --> IPreferencesDBS
 PM --> IPreferencesDBS
 PM --> IProfilDBS
-ILeaderboardDBS --> DBM
+Leaderboard --> ILeaderboardDBS
+MatchMgm --> IProfilDBS
 
 @enduml
