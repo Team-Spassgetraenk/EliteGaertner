@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EliteGaertner", "EliteGaertner\EliteGaertner.csproj", "{A9D072C6-EAEB-4A48-AA59-26E6132FAC62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PresentationLayer", "PresentationLayer\PresentationLayer\PresentationLayer.csproj", "{EE0FB2DB-EA83-4521-9DBA-DA613E6A52AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{A9D072C6-EAEB-4A48-AA59-26E6132FAC62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9D072C6-EAEB-4A48-AA59-26E6132FAC62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9D072C6-EAEB-4A48-AA59-26E6132FAC62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE0FB2DB-EA83-4521-9DBA-DA613E6A52AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE0FB2DB-EA83-4521-9DBA-DA613E6A52AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE0FB2DB-EA83-4521-9DBA-DA613E6A52AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE0FB2DB-EA83-4521-9DBA-DA613E6A52AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
