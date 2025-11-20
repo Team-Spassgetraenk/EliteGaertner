@@ -1,0 +1,90 @@
+@startuml
+title Datenmodell – EliteGärtner
+
+
+skinparam ranksep 70
+
+class Match {
+    +<u>matchId : int
+    +count : Int
+    +matchedDate : Date     
+}
+
+class User {
+    +<u>userId : Int 
+    +userName : String 
+    +firstName : String 
+    +lastName : String 
+    +eMail : String 
+    +passwordHash : String 
+    +profileText : String 
+}
+
+class Preferences {
+    +<u>preferencesID : Int 
+    +dateUpdated : Date 
+}
+
+class Tags {
+    +<u>tagId : Int
+    +label : String
+}
+
+class HarvestUpload {
+    +<u>uploadId : Int 
+    +userId : int 
+    +ImageUrl : String 
+    +Description: String 
+    +WeightKg : float 
+    +quantity : Int 
+    +uploadDate : Date 
+}
+
+class Rating {
+    +<u>ratingId : Int
+    +value : Int //z.b. 1=Like, 0=Dislike
+    +ratingDate : Date
+}
+
+class Report {
+  +<u>reportId : Int
+  +reason : String
+  +reportDate : Date
+}
+
+class LeaderboardEntry {
+  +<u>entryId : Int
+  +rank : Int
+  +points : Int
+  +period : String // Woche, Monat, etc.
+}
+
+
+
+'--- Beziehungen ---
+
+User "1" -- "*" LeaderboardEntry : hat Rang
+User "1" -- "1" Preferences : wählt/hat
+User "1" -- "*" HarvestUpload : erstellt
+User "1" -- "*" Report : erstellt
+User"2" -- "*"Match : hat
+
+Preferences "*" -- "*" Tags : greifen zu
+
+HarvestUpload "*" -- "*" Tags : greifen zu
+HarvestUpload "1" -- "*" Report : erhalten
+HarvestUpload "n" -- "1" Rating : wählt aus
+User "n" -- "1" Rating : gibt ab
+Rating "2" -- "1" Match : beide User haben haben sich geliked -> value > 0
+
+
+
+
+
+
+
+
+
+
+
+@enduml

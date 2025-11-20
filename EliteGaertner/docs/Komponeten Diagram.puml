@@ -1,29 +1,95 @@
 ﻿@startuml
-title KI generiertes Bsp. Für Komponentendiagram 
+skinparam componentStyle rectangle
+skinparam shadowing false
 
-package Kunden {
-  component "PreferencesUseCasePreferences\nKunden" as UseCaseKunden #00CCCC
-  component "PreferencesETPreferences\nKunde" as ETKunde #FFCC00
+' PRESENTATION LAYER
+rectangle "Presentation Layer" #DDDDFF {
+    component BlazorComponents as Blazor
+    interface IAppLogic
+    Blazor --> IAppLogic
 }
 
-package Bestellungen {
-  component "PreferencesUseCase\nBestellungen" as UseCaseBestellungen #00CCCC
-  component "PreferencesETPreferences\nBestellung" as ETBestellung #FFCC00
+' LOGIC
+rectangle "Logic" #DDFFDD {
+    IAppLogic -- AppLogic
+
+    interface UploadService
+    interface IHarvestDBSSuggestion
+    interface IUserSuggestion
+    interface IProfileMgm
+    interface ILeaderboard
+    interface IMatchmgm
+
+    component AppLogic {
+        AppLogic --> UploadService
+        AppLogic --> IHarvestDBSSuggestion
+        AppLogic --> IUserSuggestion
+        AppLogic --> IProfileMgm
+        AppLogic --> ILeaderboard
+        AppLogic --> IMatchmgm
+    }
+
+    component "Harvest Upload" as hUpload {
+        UploadService -- hUpload
+    }
+
+    component "Harvest Suggestion" as HSugg {
+        IHarvestDBSSuggestion -- HSugg
+    }
+    
+    component "MatchManager" as MatchMgm {
+        IMatchmgm -- MatchMgm
+        
+    }
+    
+    
+
+    component "User Suggestion" as UserSugg {
+        IUserSuggestion -- UserSugg
+    }
+
+    component "Profile  Managment" as PM {
+        IProfileMgm -- PM
+    }
+    
+    component Leaderboard
+    
+    ILeaderboard -- Leaderboard
+    
 }
 
-component "PreferencesUseCasePreferences\nBestellerfassung" as UseCaseBestellerfassung #00CCCC
+' INFRASTRUCTURE LAYER
+rectangle "Infrastructure" #CCEEFF {
+    component Databasemanagement as DBM
+    interface IPreferencesDBS
+    interface IUploadDBS
+    interface IHarvestDBS
+    interface IUserDBS
+    interface IProfilDBS
+    interface IMatchesDBS
 
-interface IBestellErfassung
-interface IKunden
-interface IBestellungen
+    IPreferencesDBS -- DBM
+    IUploadDBS -- DBM
+    IHarvestDBS -- DBM
+    IUserDBS -- DBM
+    IProfilDBS -- DBM
+    ILeaderboardDBS -- DBM
+    IMatchesDBS -- DBM
+    
+}
 
-UseCaseBestellerfassung ..> IBestellErfassung : <<use>>
-UseCaseBestellerfassung ..> IKunden : <<use>>
-
-IKunden ..|> Kunden
-IBestellErfassung ..|> Bestellungen
-
-UseCaseBestellerfassung ..> IBestellungen : <<use>>
-
+MatchMgm --> IMatchesDBS
+hUpload --> IUploadDBS
+HSugg --> IHarvestDBS
+HSugg ->  UserSugg
+UserSugg -> MatchMgm
+MatchMgm -> Leaderboard
+UserSugg --> IUserDBS
+UserSugg --> IPreferencesDBS
+PM --> IPreferencesDBS
+HSugg --> IPreferencesDBS
+PM --> IProfilDBS
+Leaderboard --> ILeaderboardDBS
+MatchMgm --> IProfilDBS
 
 @enduml

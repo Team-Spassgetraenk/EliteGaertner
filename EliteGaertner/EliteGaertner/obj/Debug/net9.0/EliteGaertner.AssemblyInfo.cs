@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EliteGaertner")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e3ad97aa27b6d06ea330a23b7e08173aa21d5693")]
 [assembly: System.Reflection.AssemblyProductAttribute("EliteGaertner")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EliteGaertner")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
