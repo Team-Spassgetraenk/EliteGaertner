@@ -1,0 +1,45 @@
+﻿@page "/logintest"
+
+<div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div class="card shadow p-4" style="width: 400px; border-radius: 15px;">
+        
+        <!-- Logo und Titel -->
+        <div class="text-center mb-4">
+            <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:80px;"/>
+            <h2 class="elitegaertner-title mt-2">EliteGärtner.</h2>
+        </div>
+
+        <!-- Input-Felder -->
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input class="form-control" placeholder="Email eingeben..." @bind="email"/>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Passwort</label>
+            <input class="form-control" type="password" placeholder="Passwort eingeben..." @bind="password"/>
+        </div>
+
+        <!-- Anmelden Button -->
+        <button class="btn w-100 mb-3" style="background-color:#8011d1; color:white;" @onclick="FakeLogin">
+            Anmelden
+        </button>
+
+        <!-- Registrieren-Link -->
+        <p class="text-center text-muted mb-0">Ich habe noch keinen Account?</p>
+        <p class="text-center">
+            <a href="/registertest" style="color:#8011d1; font-weight:bold;">Jetzt registrieren</a>
+        </p>
+
+    </div>
+</div>
+
+@code {
+    string email = "";
+    string password = "";
+
+    void FakeLogin()
+    {
+        Console.WriteLine($"Eingegeben: {email} / {password}");
+    }
+}

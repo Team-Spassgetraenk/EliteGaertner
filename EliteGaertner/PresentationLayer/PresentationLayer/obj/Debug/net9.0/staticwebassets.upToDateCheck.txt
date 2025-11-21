@@ -1,4 +1,3 @@
-wwwroot\app.css
 wwwroot\favicon.png
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
@@ -44,7 +43,8 @@ wwwroot\lib\bootstrap\dist\js\bootstrap.js
 wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
 wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
 wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
-C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\PresentationLayer\PresentationLayer\wwwroot\app.css
+wwwroot\pictures\EliteGärtner-logo.png
+wwwroot\app.css
 C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\PresentationLayer\PresentationLayer\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\PresentationLayer\PresentationLayer\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\PresentationLayer\PresentationLayer\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -89,3 +89,4 @@ C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\P
 C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\PresentationLayer\PresentationLayer\wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
 C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\PresentationLayer\PresentationLayer\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
 C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\PresentationLayer\PresentationLayer\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
+C:\Users\jonas\RiderProjects\Projekt Spaßgetränk\spassgetraenk\EliteGaertner\PresentationLayer\PresentationLayer\wwwroot\app.css
