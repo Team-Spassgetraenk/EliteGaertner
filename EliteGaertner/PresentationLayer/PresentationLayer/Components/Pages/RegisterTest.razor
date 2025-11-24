@@ -3,44 +3,48 @@
 <div class="d-flex justify-content-center align-items-center vh-100 bg-light">
     <div class="card shadow p-4" style="width: 400px; border-radius: 15px;">
         
-        <!-- Logo und Titel -->
+        <!--Logo und Titel -->
         <div class="text-center mb-4">
             <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:80px;"/>
             <h2 class="elitegaertner-title mt-2">EliteGärtner.</h2>
         </div>
-
-        <!-- Input-Felder -->
+        
+        <!--Name Inputfeld -->
         <div class="mb-3">
             <label class="form-label">Name</label>
             <input class="form-control" placeholder="" @bind="sirname"/>
         </div>
 
+        <!--Vorname Inputfeld -->
         <div class="mb-4">
             <label class="form-label">Vorname</label>
             <input class="form-control" placeholder="" @bind="prename"/>
         </div>
         
+        <!--Email Inputfeld -->
         <div class="mb-4">
             <label class="form-label">Email</label>
             <input class="form-control" placeholder="" @bind="email"/>
         </div>
         
+        <!--Benutzername Inputfeld -->
         <div class="mb-4">
             <label class="form-label">Benutzername</label>
             <input class="form-control" placeholder="@@" @bind="username"/>
         </div>
 
+        <!--Passwort Inputfeld -->
         <div class="mb-4">
             <label class="form-label">Passwort</label>
             <input class="form-control" type="password" placeholder="" @bind="password"/>
         </div>
         
-        <!-- Anmelden Button -->
+        <!-- Registrieren Button -->
         <button class="btn w-100 mb-3" style="background-color:#8011d1; color:white;" @onclick="FakeLogin">
-            Anmelden
+            Registrieren
         </button>
 
-        <!-- Registrieren-Link -->
+        <!-- Anmelden-Link -->
         <p class="text-center text-muted mb-0">Ich habe bereits einen Account?</p>
         <p class="text-center">
             <a href="/logintest" style="color:#8011d1; font-weight:bold;">Jetzt Anmelden</a>

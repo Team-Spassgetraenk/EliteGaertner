@@ -59,7 +59,7 @@ h1:focus {
     text-align: start;
 }
 
-/* Playfair Display Font importieren */
+/* Playfair Display Font */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
 /* Nur für den EliteGärtner-Schriftzug */
