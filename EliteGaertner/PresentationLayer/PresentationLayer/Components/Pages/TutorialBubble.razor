@@ -1,0 +1,27 @@
+@page "/Test02"
+
+<div class="speech-container">
+    <img src="pictures/Profil_02.png" class="avatar" style="height: 100px; width: 100px" />
+
+    <div class="speech-bubble @bubbleAnimationClass">
+        <span class="typing">@visibleText</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Text { get; set; } = "";
+    private string visibleText = "";
+    private bool animationDone = false;
+    private string bubbleAnimationClass => animationDone ? "bubble-finished" : "bubble-anim";
+
+    protected override async Task OnInitializedAsync()
+    {
+        foreach (var c in Text)
+        {
+            visibleText += c;
+            await Task.Delay(35); // Geschwindigkeit
+            StateHasChanged();
+        }
+        animationDone = true;  // Startet Puls-Animation
+    }
+}
