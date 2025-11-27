@@ -15,7 +15,7 @@ public interface IUserSuggestion
     //in HarvestSuggestion nimmt und diese den passenden Usern zuweist.
     //Diese IDictionary, wird dann genutzt um auf der Bewertungsseite, das Profil mitsamt dem passenden
     //Bild anzuzeigen.
-    IDictionary<ProfilMgmDTO, HarvestUploadDTO> ReturnRecommendedUserList(int userId, IList<HarvestUploadDTO> harvestUploadDtos);
+    IDictionary<ProfilMgmDto, HarvestUploadDto> ReturnRecommendedUserList(int userId, IList<HarvestUploadDto> harvestUploadDtos);
 
 
     //Hier wird überprüft ob der Content Receiver den Content Creator 
@@ -26,7 +26,7 @@ public interface IUserSuggestion
     //Die Methode überprüft ob noch genug User in der Liste sind. Das stellt er durch den
     //threshholdCount fest. z.B. bei 10 -> sind weniger als 10 Prozent von 
     
-    bool RecommendedProfileCount(IDictionary<ProfilMgmDTO, HarvestUploadDTO> userList, int threshholdCount);
+    bool RecommendedProfileCount(IDictionary<ProfilMgmDto, HarvestUploadDto> userList, int threshholdCount);
 
 
 

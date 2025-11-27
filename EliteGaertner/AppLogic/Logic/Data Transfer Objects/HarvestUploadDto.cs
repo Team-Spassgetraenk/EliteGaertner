@@ -1,3 +1,3 @@
 namespace AppLogic.Logic.Data_Transfer_Objects;
 
-public record HarvestUploadDTO();
+public record HarvestUploadDto();

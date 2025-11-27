@@ -9,7 +9,6 @@
 
     <ItemGroup>
       <Folder Include="Logic\Entities\" />
-      <Folder Include="Logic\Services\" />
     </ItemGroup>
 
 </Project>

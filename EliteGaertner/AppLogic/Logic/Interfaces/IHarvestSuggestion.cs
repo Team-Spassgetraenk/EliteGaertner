@@ -13,11 +13,11 @@ public interface IHarvestSuggestion
     //Diese Methode gibt uns eine Liste mit HarvestUploads zurück.
     //Wir möchten schon die passenden HarvestUploads buffern, damit die 
     //Performance beim bewerten der Profile/Bilder flüssig bleibt.
-    IList<HarvestUploadDTO> GetNextSuggestion(int userId, int count);
+    IList<HarvestUploadDto> GetNextSuggestion(int userId, int count);
 
     
     //Gibt das DTO eines Harvest Uploads zurück.
-    HarvestUploadDTO GetHarvest(int uploadId);
+    HarvestUploadDto GetHarvest(int uploadId);
 
     
     //Gibt die URL des Erntebilds zurück.
