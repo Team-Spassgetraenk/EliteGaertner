@@ -7,10 +7,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="Infrastructure\Interfaces\" />
-      <Folder Include="Logic\Entities\" />
-      <Folder Include="Logic\Services\" />
-    </ItemGroup>
-
 </Project>

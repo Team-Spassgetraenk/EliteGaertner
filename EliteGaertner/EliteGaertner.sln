@@ -1,10 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EliteGaertner", "EliteGaertner\EliteGaertner.csproj", "{A9D072C6-EAEB-4A48-AA59-26E6132FAC62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLogic", "AppLogic\AppLogic.csproj", "{A9D072C6-EAEB-4A48-AA59-26E6132FAC62}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PresentationLayer", "PresentationLayer\PresentationLayer\PresentationLayer.csproj", "{EE0FB2DB-EA83-4521-9DBA-DA613E6A52AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{19847B85-B531-4825-BC6C-E5F67FEE252D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{150E992E-CF99-4D38-85C7-5275EBAE3CB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,9 @@ Global
 		{19847B85-B531-4825-BC6C-E5F67FEE252D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19847B85-B531-4825-BC6C-E5F67FEE252D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19847B85-B531-4825-BC6C-E5F67FEE252D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{150E992E-CF99-4D38-85C7-5275EBAE3CB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{150E992E-CF99-4D38-85C7-5275EBAE3CB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{150E992E-CF99-4D38-85C7-5275EBAE3CB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{150E992E-CF99-4D38-85C7-5275EBAE3CB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

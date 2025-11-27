@@ -1,5 +1,6 @@
-using EliteGaertner.Logic.Data_Transfer_Objects;
-namespace EliteGaertner.Logic.Interfaces;
+using AppLogic.Logic.Data_Transfer_Objects;
+
+namespace AppLogic.Logic.Interfaces;
 
 
 
