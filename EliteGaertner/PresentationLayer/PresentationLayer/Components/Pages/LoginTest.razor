@@ -1,36 +1,61 @@
-﻿@page "/logintest"
+﻿@page "/"
 
-<div class="d-flex justify-content-center align-items-center vh-100 bg-light">
-    <div class="card shadow p-4" style="width: 400px; border-radius: 15px;">
-        
-        <!-- Logo und Titel -->
-        <div class="text-center mb-4">
-            <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:80px;"/>
-            <h2 class="elitegaertner-title mt-2">EliteGärtner.</h2>
+<style>
+    /* Hintergrundbild */
+    .login-bg {
+        background-image: url('pictures/FarmBackground.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100vh;
+        width: 100%;
+    }
+    
+    .login-right {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        height: 100%;
+        padding-right: 50px;
+    }
+</style>
+
+<div class="login-bg">
+    <div class="login-right">
+
+        <!-- Login-Karte -->
+        <div class="card shadow p-4" style="width: 400px; border-radius: 15px; background: rgba(255, 255, 255, 0.9);">
+
+            <!-- Logo und Titel -->
+            <div class="text-center mb-4">
+                <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:80px;" />
+                <h2 class="elitegaertner-title mt-2">EliteGärtner.</h2>
+            </div>
+
+            <!-- Email Input -->
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input class="form-control" placeholder="Email eingeben..." @bind="email" />
+            </div>
+
+            <!-- Passwort Input -->
+            <div class="mb-4">
+                <label class="form-label">Passwort</label>
+                <input class="form-control" type="password" placeholder="Passwort eingeben..." @bind="password" />
+            </div>
+
+            <!-- Anmelde Button -->
+            <button class="btn w-100 mb-3" style="background-color:#8011d1; color:white;" @onclick="FakeLogin">
+                Anmelden
+            </button>
+
+            <!-- Registrierungslink -->
+            <p class="text-center text-muted mb-0">Ich habe noch keinen Account?</p>
+            <p class="text-center">
+                <a href="/registertest" style="color:#8011d1; font-weight:bold;">Jetzt registrieren</a>
+            </p>
+
         </div>
-
-        <!-- Email Input -->
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input class="form-control" placeholder="Email eingeben..." @bind="email"/>
-        </div>
-
-        <!-- Passwort Input -->
-        <div class="mb-4">
-            <label class="form-label">Passwort</label>
-            <input class="form-control" type="password" placeholder="Passwort eingeben..." @bind="password"/>
-        </div>
-
-        <!-- Anmelden Button -->
-        <button class="btn w-100 mb-3" style="background-color:#8011d1; color:white;" @onclick="FakeLogin">
-            Anmelden
-        </button>
-
-        <!-- Registrieren-Link -->
-        <p class="text-center text-muted mb-0">Ich habe noch keinen Account?</p>
-        <p class="text-center">
-            <a href="/registertest" style="color:#8011d1; font-weight:bold;">Jetzt registrieren</a>
-        </p>
 
     </div>
 </div>
