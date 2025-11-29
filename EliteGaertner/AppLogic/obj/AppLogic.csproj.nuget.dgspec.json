@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jonas\\RiderProjects\\Projekt Spaßgetränk\\spassgetraenk\\EliteGaertner\\AppLogic\\AppLogic.csproj": {}
+    "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/AppLogic/AppLogic.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jonas\\RiderProjects\\Projekt Spaßgetränk\\spassgetraenk\\EliteGaertner\\AppLogic\\AppLogic.csproj": {
+    "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/AppLogic/AppLogic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jonas\\RiderProjects\\Projekt Spaßgetränk\\spassgetraenk\\EliteGaertner\\AppLogic\\AppLogic.csproj",
+        "projectUniqueName": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/AppLogic/AppLogic.csproj",
         "projectName": "AppLogic",
-        "projectPath": "C:\\Users\\jonas\\RiderProjects\\Projekt Spaßgetränk\\spassgetraenk\\EliteGaertner\\AppLogic\\AppLogic.csproj",
-        "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jonas\\RiderProjects\\Projekt Spaßgetränk\\spassgetraenk\\EliteGaertner\\AppLogic\\obj\\",
+        "projectPath": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/AppLogic/AppLogic.csproj",
+        "packagesPath": "/Users/aleksandarcvijic/.nuget/packages/",
+        "outputPath": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/AppLogic/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/aleksandarcvijic/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -38,7 +38,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net9.0": {
@@ -59,7 +59,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

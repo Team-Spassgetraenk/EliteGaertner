@@ -8,19 +8,19 @@
     "net9.0": []
   },
   "packageFolders": {
-    "C:\\Users\\jonas\\.nuget\\packages\\": {}
+    "/Users/aleksandarcvijic/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\jonas\\RiderProjects\\Projekt Spaßgetränk\\spassgetraenk\\EliteGaertner\\Infrastructure\\Infrastructure.csproj",
+      "projectUniqueName": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/Infrastructure/Infrastructure.csproj",
       "projectName": "Infrastructure",
-      "projectPath": "C:\\Users\\jonas\\RiderProjects\\Projekt Spaßgetränk\\spassgetraenk\\EliteGaertner\\Infrastructure\\Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\jonas\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\jonas\\RiderProjects\\Projekt Spaßgetränk\\spassgetraenk\\EliteGaertner\\Infrastructure\\obj\\",
+      "projectPath": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/Infrastructure/Infrastructure.csproj",
+      "packagesPath": "/Users/aleksandarcvijic/.nuget/packages/",
+      "outputPath": "/Users/aleksandarcvijic/Library/Mobile Documents/com~apple~CloudDocs/Dokumente/Studium/Module/Software Development Basics/RiderProjects/Projektarbeit/spassgetraenk/EliteGaertner/Infrastructure/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\jonas\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/aleksandarcvijic/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -44,7 +44,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net9.0": {
@@ -65,7 +65,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.307/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
