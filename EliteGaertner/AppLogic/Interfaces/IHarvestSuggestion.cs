@@ -4,20 +4,14 @@ namespace AppLogic.Logic.Interfaces;
 
 
 
-//Das Interface ist für die HarvestSuggestion Klasse zuständig.
-//Sie ist dafür zuständig anhand dem Interessensprofil des Users die passenden 
-//Harvest-Uploads aus der Datenbank zurückzugeben.
-public interface IHarvestSuggestion
+//Das Interface ist für die HarvestSuggestionManagement Klasse zuständig.
+//Sie beschreibt, welche Anforderungen an den Zugriff der einzelnen
+//HarvestSuggestions besteht.
+public interface IGetHarvestSuggestions
 {
 
-    //Diese Methode gibt uns eine Liste mit HarvestUploads zurück.
-    //Wir möchten schon die passenden HarvestUploads buffern, damit die 
-    //Performance beim bewerten der Profile/Bilder flüssig bleibt.
-    IList<HarvestUploadDto> GetNextSuggestion(int userId, int count);
-
-    
     //Gibt das DTO eines Harvest Uploads zurück.
-    HarvestUploadDto GetHarvest(int uploadId);
+    HarvestUploadDto GetHarvest(int? uploadId);
 
     
     //Gibt die URL des Erntebilds zurück.
