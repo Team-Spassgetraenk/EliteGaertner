@@ -1,9 +1,11 @@
 using AppLogic.Logic.Data_Transfer_Objects;
 using AppLogic.Logic.Interfaces;
+using Infrastructure.Interfaces;
 
 namespace AppLogic.Logic.Services;
 
-public class HarvestSuggestionManagement : IGetHarvestSuggestions, 
+
+public class HarvestSuggestionManagement : IGetHarvestSuggestions, IHarvestSuggestionRepository
 {
 
     private readonly IList<HarvestUploadDto> _harvestSuggestionsList;
@@ -12,11 +14,9 @@ public class HarvestSuggestionManagement : IGetHarvestSuggestions,
     HarvestSuggestionManagement(int userId, int count)
     {
         _harvestSuggestionsList = new List<HarvestUploadDto>();
-
-        while (count >= 0)
-        {
-            _harvestSuggestionsList.Add(GetHarvest());
-        }
+        
+        _harvestSuggestionsList.Add(new IHarvestDBS.);
+        
 
     }
 
@@ -24,9 +24,12 @@ public class HarvestSuggestionManagement : IGetHarvestSuggestions,
     public HarvestUploadDto GetHarvest(int? uploadId)
     {
         var dto = _harvestSuggestionsList.Get
-        
-        if()
+            
     }
+    
+    
+    public HarvestUploadDto? GetById(int uploadId)
+        => _harvestSuggestionsList.FirstOrDefault(dto => dto.UploadId == uploadId);
 
     public string GetUrl(int uploadId)
         => GetHarvest(uploadId).ImageUrl;
