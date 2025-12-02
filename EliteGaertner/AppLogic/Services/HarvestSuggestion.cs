@@ -1,30 +1,33 @@
-using AppLogic.Logic.Data_Transfer_Objects;
-using AppLogic.Logic.Interfaces;
+using Contracts.Data_Transfer_Objects;
+using AppLogic.Interfaces;
 using Infrastructure.Interfaces;
+using Infrastructure.Repositories;
 
-namespace AppLogic.Logic.Services;
+
+namespace AppLogic.Services;
 
 
-public class HarvestSuggestionManagement : IGetHarvestSuggestions, IHarvestSuggestionRepository
+public class HarvestSuggestion : IGetHarvestSuggestions
 {
 
-    private readonly IList<HarvestUploadDto> _harvestSuggestionsList;
+    private readonly List<HarvestUploadDto> _harvestSuggestionsList;
     
     //WIE ÜBERGEBEN WIR DIE INTERESSEN?
-    HarvestSuggestionManagement(int userId, int count)
+    public HarvestSuggestion(int userId, int preloadCount, PreferenceDto userPreference)
     {
         _harvestSuggestionsList = new List<HarvestUploadDto>();
-        
-        _harvestSuggestionsList.Add(new IHarvestDBS.);
-        
-
+        //Das muss glaub ich in die PROGRAM.CS
+        IHarvestDBS harvestRepo = new HarvestDBS();
+        _harvestSuggestionsList.AddRange(harvestRepo.GetHarvestUploadRepo(userId, preloadCount, userPreference));
     }
 
     //NICHT FERTIG
-    public HarvestUploadDto GetHarvest(int? uploadId)
+    public HarvestUploadDto GetHarvest(int uploadId)
     {
-        var dto = _harvestSuggestionsList.Get
-            
+        var dto = GetById(uploadId);
+        if (dto is null)
+            throw new ArgumentException($"Upload {uploadId} existiert nicht!");
+        return dto;
     }
     
     

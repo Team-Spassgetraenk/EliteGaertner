@@ -1,10 +1,8 @@
-namespace AppLogic.Logic.Data_Transfer_Objects;
+namespace Contracts.Data_Transfer_Objects;
 
 public record HarvestUploadDto
 {
-
     public int UploadId { get; init; }
-    
     public int UserId { get; init; }
     public string ImageUrl { get; init; }
     public string Description { get; init; }

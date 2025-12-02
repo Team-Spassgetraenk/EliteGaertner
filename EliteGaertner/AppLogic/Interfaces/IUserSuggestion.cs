@@ -1,7 +1,7 @@
-using AppLogic.Logic.Data_Transfer_Objects;
+using Contracts.Data_Transfer_Objects;
 
-namespace AppLogic.Logic.Interfaces;
-using AppLogic.Logic.Data_Transfer_Objects;
+namespace AppLogic.Interfaces;
+
 
 public interface IUserSuggestion
 {
@@ -15,7 +15,7 @@ public interface IUserSuggestion
     //in HarvestSuggestion nimmt und diese den passenden Usern zuweist.
     //Diese IDictionary, wird dann genutzt um auf der Bewertungsseite, das Profil mitsamt dem passenden
     //Bild anzuzeigen.
-    IDictionary<ProfilMgmDto, HarvestUploadDto> ReturnRecommendedUserList(int userId, IList<HarvestUploadDto> harvestUploadDtos);
+    IDictionary<ProfileDto, HarvestUploadDto> ReturnRecommendedUserList(int userId, IList<HarvestUploadDto> harvestUploadDtos);
 
 
     //Hier wird überprüft ob der Content Receiver den Content Creator 

@@ -1,6 +1,6 @@
-﻿using AppLogic.Logic.Data_Transfer_Objects;
+﻿using Contracts.Data_Transfer_Objects;
 
-namespace AppLogic.Logic.Interfaces;
+namespace AppLogic.Interfaces;
 
 public interface IProfileMgm
 {

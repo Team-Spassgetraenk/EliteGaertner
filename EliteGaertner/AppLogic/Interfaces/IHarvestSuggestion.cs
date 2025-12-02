@@ -1,6 +1,6 @@
-using AppLogic.Logic.Data_Transfer_Objects;
+using Contracts.Data_Transfer_Objects;
 
-namespace AppLogic.Logic.Interfaces;
+namespace AppLogic.Interfaces;
 
 
 
@@ -11,8 +11,7 @@ public interface IGetHarvestSuggestions
 {
 
     //Gibt das DTO eines Harvest Uploads zurück.
-    HarvestUploadDto GetHarvest(int? uploadId);
-
+    HarvestUploadDto GetHarvest(int uploadId);
     
     //Gibt die URL des Erntebilds zurück.
     string GetUrl(int uploadId);

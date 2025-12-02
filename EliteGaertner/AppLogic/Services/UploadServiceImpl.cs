@@ -1,7 +1,7 @@
-﻿using AppLogic.Logic.Data_Transfer_Objects;
-using AppLogic.Logic.Interfaces;
+﻿using AppLogic.Interfaces;
+using Contracts.Data_Transfer_Objects;
 
-namespace AppLogic.Logic.Services;
+namespace AppLogic.Services;
 
 public class UploadServiceImpl : IUploadService
 {
