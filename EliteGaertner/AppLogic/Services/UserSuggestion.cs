@@ -9,19 +9,30 @@ public class UserSuggestion : IUserSuggestion
 {
 
     private readonly IDictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
+    private readonly int _preloadCount;
 
 
 
     public UserSuggestion(int userId, int preloadCount)
     {
         _userSuggestionList = new Dictionary<ProfileDto, HarvestUploadDto>();
-        IPreferenceDBS userPreference = new PreferenceDBS();
-        HarvestSuggestion harvestSuggestion = new HarvestSuggestion(userId, preloadCount, userPreference.GetUserPreference(userId));
+        _preloadCount = preloadCount;
+        CreateUserSuggestions(CreateHarvestSuggestions(userId));
     }
-    
-    
-    
-    
+
+    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestions(List<HarvestUploadDto> harvestSuggestions)
+    {
+        throw new NotImplementedException();
+    }
+
+    private List<HarvestUploadDto> CreateHarvestSuggestions(int userId)
+    {
+        IPreferenceDBS userPreference = new PreferenceDBS();
+        var harvestSuggestion = new HarvestSuggestion(userId, _preloadCount, userPreference.GetUserPreference(userId));
+        return harvestSuggestion.GetHarvestSuggestionList();
+    }
+
+
     public bool RateUser(int userId, int targetUserId, int value)
     {
         throw new NotImplementedException();

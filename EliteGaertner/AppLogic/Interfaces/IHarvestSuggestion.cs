@@ -7,9 +7,14 @@ namespace AppLogic.Interfaces;
 //Das Interface ist für die HarvestSuggestionManagement Klasse zuständig.
 //Sie beschreibt, welche Anforderungen an den Zugriff der einzelnen
 //HarvestSuggestions besteht.
-public interface IGetHarvestSuggestions
+public interface IHarvestSuggestion
 {
 
+    
+    
+    //Gib die Liste der HarvestSuggestions zurück
+    List<HarvestUploadDto> GetHarvestSuggestionList();
+    
     //Gibt das DTO eines Harvest Uploads zurück.
     HarvestUploadDto GetHarvest(int uploadId);
     

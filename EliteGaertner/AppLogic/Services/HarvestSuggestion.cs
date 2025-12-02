@@ -7,7 +7,7 @@ using Infrastructure.Repositories;
 namespace AppLogic.Services;
 
 
-public class HarvestSuggestion : IGetHarvestSuggestions
+public class HarvestSuggestion : IHarvestSuggestion
 {
 
     private readonly List<HarvestUploadDto> _harvestSuggestionsList;
@@ -21,7 +21,9 @@ public class HarvestSuggestion : IGetHarvestSuggestions
         _harvestSuggestionsList.AddRange(harvestRepo.GetHarvestUploadRepo(userId, preloadCount, userPreference));
     }
 
-    //NICHT FERTIG
+    public List<HarvestUploadDto> GetHarvestSuggestionList()
+        => _harvestSuggestionsList;
+
     public HarvestUploadDto GetHarvest(int uploadId)
     {
         var dto = GetById(uploadId);
@@ -29,7 +31,6 @@ public class HarvestSuggestion : IGetHarvestSuggestions
             throw new ArgumentException($"Upload {uploadId} existiert nicht!");
         return dto;
     }
-    
     
     public HarvestUploadDto? GetById(int uploadId)
         => _harvestSuggestionsList.FirstOrDefault(dto => dto.UploadId == uploadId);
