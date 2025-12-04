@@ -8,7 +8,7 @@ namespace AppLogic.Services;
 public class UserSuggestion : IUserSuggestion
 {
     
-    private readonly IDictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
+    private readonly Dictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
     
 
     
@@ -17,6 +17,9 @@ public class UserSuggestion : IUserSuggestion
         _userSuggestionList = new Dictionary<ProfileDto, HarvestUploadDto>();
         CreateUserSuggestions(CreateHarvestSuggestions(userId, preloadCount));
     }
+
+    public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList(int userId)
+        => _userSuggestionList;
 
     public void CreateUserSuggestions(List<HarvestUploadDto> harvestSuggestions)
     {
