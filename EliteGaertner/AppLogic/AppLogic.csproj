@@ -8,12 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Entities\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Contracts\Contracts.csproj" />
-      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+      <ProjectReference Include="..\DataManagement\DataManagement.csproj" />
     </ItemGroup>
 
 </Project>

@@ -13,7 +13,7 @@ public interface IHarvestDBS
     
     //Erstell mir eine Repository an HarvestUploadDtos die zum dem Interessensprofil
     //des Users passen. Die Menge der DTOs wird vom preloadCount bestimmt.
-    public IList<HarvestUploadDto> GetHarvestUploadRepo(int userId, int preloadCount, PreferenceDto userPreference);
+    public IList<HarvestUploadDto> GetHarvestUploadRepo(int userId, List<string> preferences, int preloadCount);
     
     
 

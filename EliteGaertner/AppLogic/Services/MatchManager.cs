@@ -10,7 +10,7 @@ public class MatchManager : IMatchManager
     private readonly ProfileDto _contentReceiver;
     private readonly PreferenceDto _preferenceDto;
     private readonly int _preloadCount;
-    private IDictionary<ProfileDto, HarvestUploadDto> userSuggestionList;
+    private Dictionary<ProfileDto, HarvestUploadDto> userSuggestionList;
     
     
     
@@ -18,25 +18,28 @@ public class MatchManager : IMatchManager
     //Könnten einfach mit einem ProfileDto arbeiten.
     public MatchManager(ProfileDto contentReceiver, int preloadCount)
     {
+
+        IPreferenceDBS preferenceDBS = new ManagementDBS();
+        
         _contentReceiver = contentReceiver;
+        _preferenceDto = preferenceDBS.GetUserPreference(contentReceiver.UserId);
         _preloadCount = preloadCount;
-        userSuggestionList = CreateUserSuggestionList(contentReceiver.UserId, preloadCount);
+        userSuggestionList = CreateUserSuggestionList(_contentReceiver.UserId, _preferenceDto.Tags, _preloadCount);
     }
 
-    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(int userId, int preloadCount)
+    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(int userId, List<String> preferences, int preloadCount)
     {
-        var userSuggestion = new UserSuggestion(userId, preloadCount);
+        var userSuggestion = new UserSuggestion(userId, preferences, preloadCount);
         return userSuggestion.GetUserSuggestionList(userId);
     }
 
     public void RateUser(ProfileDto targetProfile, bool value)
     {
-        IMatchesDBS matchesDbs = new MatchesDBS();
+        IMatchesDBS matchesDbs = new ManagementDBS();
         MatchDto matchDto = matchesDbs.GetMatchDto(_contentReceiver, targetProfile);
 
         var contentReceiver = matchDto.ContentReceiver;
         var contentReceiverValue = matchDto.ContentReceiverValue;
-
         var targetUser = matchDto.TargetUser;
         var targetUserValue = matchDto.TargetUserValue;
         
@@ -49,12 +52,19 @@ public class MatchManager : IMatchManager
         
         var dto = new MatchDto
         {
-            ContentReceiver = _contentReceiver,
+            ContentReceiver = contentReceiver,
             ContentReceiverValue = contentReceiverValue,
-            TargetUser = targetProfile,
+            TargetUser = targetUser,
             TargetUserValue = targetUserValue
         };
         matchesDbs.SaveMatchInfo(dto);
+
+        userSuggestionList.Remove(targetProfile);
+
+        if (userSuggestionList.Count < 5)
+        {
+            userSuggestionList.AddRange(CreateUserSuggestionList(_contentReceiver.UserId, _preferenceDto.Tags, _preloadCount));
+        }
     }
 
     public void CreateMatch(ProfileDto targetProfile)

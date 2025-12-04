@@ -16,7 +16,7 @@ public interface IUserSuggestion
     //Falls die User-Suggestions unter einem Schwellenwert fallen, dann
     //soll diese wieder aufgefüllt werden. Dabei lassen wir uns wieder eine Liste an Harvest-Suggestions
     //übergeben, die wir an die CreateUserSuggestions-Methode übergeben
-    List<HarvestUploadDto> CreateHarvestSuggestions(int userId, int preloadCount);
+    List<HarvestUploadDto> CreateHarvestSuggestions(int userId, List<string> preferences, int preloadCount);
 
 
     //Die Methode gibt eine Dictionary mit den passenden Usern und Harvestuploads zurück.

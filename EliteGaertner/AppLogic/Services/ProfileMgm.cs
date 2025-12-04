@@ -3,7 +3,7 @@ using Contracts.Data_Transfer_Objects;
 
 namespace AppLogic.Services;
 
-public class ProfileMgmImpl : IProfileMgm
+public class ProfileMgm : IProfileMgm
 {
     public ProfileDto GetProfile(int userId)
     {

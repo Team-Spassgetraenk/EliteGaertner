@@ -10,12 +10,11 @@ public class UserSuggestion : IUserSuggestion
     
     private readonly Dictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
     
-
     
-    public UserSuggestion(int userId, int preloadCount)
+    public UserSuggestion(int userId, List<string> preferences, int preloadCount)
     {
         _userSuggestionList = new Dictionary<ProfileDto, HarvestUploadDto>();
-        CreateUserSuggestions(CreateHarvestSuggestions(userId, preloadCount));
+        CreateUserSuggestions(CreateHarvestSuggestions(userId, preferences, preloadCount));
     }
 
     public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList(int userId)
@@ -23,7 +22,7 @@ public class UserSuggestion : IUserSuggestion
 
     public void CreateUserSuggestions(List<HarvestUploadDto> harvestSuggestions)
     {
-        IProfileDBS profileDbs = new ProfileDBS();
+        IProfileDBS profileDbs = new ManagementDBS();
         foreach (HarvestUploadDto harvestUpload in harvestSuggestions)
         {
             ProfileDto profile = profileDbs.GetProfile(harvestUpload.UserId);
@@ -31,18 +30,14 @@ public class UserSuggestion : IUserSuggestion
         }
     }
 
-    public List<HarvestUploadDto> CreateHarvestSuggestions(int userId, int preloadCount)
+    public List<HarvestUploadDto> CreateHarvestSuggestions(int userId, List<string> preferences, int preloadCount)
     {
-        IPreferenceDBS userPreference = new PreferenceDBS();
-        var harvestSuggestion = new HarvestSuggestion(userId, preloadCount, userPreference.GetUserPreference(userId));
+        var harvestSuggestion = new HarvestSuggestion(userId, preferences, preloadCount);
         return harvestSuggestion.GetHarvestSuggestionList();
     }
-
     
-
     public bool WasProfileShown(int userId, int targetUserId)
     {
         throw new NotImplementedException();
     }
-    
 }
