@@ -8,6 +8,7 @@ namespace AppLogic.Services;
 public class MatchManager : IMatchManager
 {
     private readonly ProfileDto _contentReceiver;
+    private readonly PreferenceDto _preferenceDto;
     private readonly int _preloadCount;
     private IDictionary<ProfileDto, HarvestUploadDto> userSuggestionList;
     
