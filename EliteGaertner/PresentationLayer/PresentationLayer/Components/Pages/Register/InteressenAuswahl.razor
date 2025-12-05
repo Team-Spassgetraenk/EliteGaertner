@@ -1,0 +1,62 @@
+@page "/registrierung/interessen"
+
+<div class="interessen-container">
+    <h2>Wähle deine Interessen</h2>
+
+    <h3>Gemüse</h3>
+    <div class="tag-grid">
+        @foreach (var tag in GemueseTags)
+        {
+            <div class="tag @(SelectedTags.Contains(tag) ? "selected" : "")"
+                 @onclick="() => ToggleTag(tag)">
+                @tag
+            </div>
+        }
+    </div>
+
+    <h3>Obst</h3>
+    <div class="tag-grid">
+        @foreach (var tag in ObstTags)
+        {
+            <div class="tag @(SelectedTags.Contains(tag) ? "selected" : "")"
+                 @onclick="() => ToggleTag(tag)">
+                @tag
+            </div>
+        }
+    </div>
+
+    <button class="weiter-button"
+            disabled="@(!SelectedTags.Any())"
+            @onclick="Weiter">
+        Weiter
+    </button>
+</div>
+
+@code {
+    List<string> GemueseTags = new()
+    {
+        "Auberginen", "Gurken", "Tomaten", "Kürbisse", "Paprika",
+        "Zucchini", "Kartoffeln", "Karotten"
+    };
+
+    List<string> ObstTags = new()
+    {
+        "Äpfel", "Birnen", "Melonen", "Pflaumen", "Kirschen", "Erdbeeren", "Himbeeren"
+    };
+
+    public HashSet<string> SelectedTags { get; set; } = new();
+
+    void ToggleTag(string tag)
+    {
+        if (SelectedTags.Contains(tag))
+            SelectedTags.Remove(tag);
+        else
+            SelectedTags.Add(tag);
+    }
+
+    void Weiter()
+    {
+        // Hier später speichern / Navigation
+        // z.B.: NavigationManager.NavigateTo("/registrierung/kontaktdaten");
+    }
+}
