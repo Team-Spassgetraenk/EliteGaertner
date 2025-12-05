@@ -1,6 +1,45 @@
 @page "/registrierung/profilerstellung"
-<h3>profilerstellen</h3>
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager NavigationManager
+
+<h2>Erstelle dein Gärtnerprofil</h2>
+
+<div class="profil-container">
+    <label for="bio">Profilbeschreibung</label>
+    <textarea id="bio" @bind="Bio" placeholder="Erzähle etwas über dich..." maxlength="250"></textarea>
+
+    <label for="imageUpload">Lade ein erstes Bild deiner Ernte hoch</label>
+    <InputFile OnChange="HandleFileSelected" />
+
+    @if (ImagePreview != null)
+    {
+        <div class="image-preview">
+            <img src="@ImagePreview" alt="Vorschau Erntebild" />
+        </div>
+    }
+
+    <button class="weiter-button" @onclick="Weiter" disabled="@(!IsFormValid)">Weiter</button>
+</div>
 
 @code {
-    
+    private string Bio { get; set; }
+    private IBrowserFile SelectedFile { get; set; }
+    private string ImagePreview { get; set; }
+
+    private bool IsFormValid => !string.IsNullOrWhiteSpace(Bio) && SelectedFile != null;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        SelectedFile = e.File;
+        var buffer = new byte[SelectedFile.Size];
+        await SelectedFile.OpenReadStream().ReadAsync(buffer);
+        ImagePreview = $"data:{SelectedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    private void Weiter()
+    {
+        // Logik zum Speichern von Bio und Bild hier einfügen
+        // z.B. Navigation zur finalen Registrierungsseite
+        NavigationManager.NavigateTo("/registrierung/kontaktdaten");
+    }
 }

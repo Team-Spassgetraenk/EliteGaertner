@@ -65,7 +65,60 @@ h1:focus {
 /* Nur für den EliteGärtner-Schriftzug */
 .elitegaertner-title {
     font-family: 'Playfair Display', serif;
-    font-weight: 600;
-    font-size: 2.5rem;
     color: #000000;
+}
+
+
+
+
+
+
+.board {
+    width: 300px;
+    height: 300px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin: 20px 0;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    background: #f0f0f0;
+    border: 2px solid #333;
+    font-size: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell:hover {
+    background: #ddd;
+}
+
+.icon {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+}
+
+.result {
+    font-size: 22px;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.reset-btn {
+    padding: 8px 16px;
+    background: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.reset-btn:hover {
+    background: #444;
 }

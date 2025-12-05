@@ -1,6 +1,94 @@
-@page "/KontaktdatenFreigeben"
-<h3>KontaktdatenFreigeben</h3>
+@page "/registrierung/kontaktdaten"
+@inject NavigationManager NavigationManager
+@inject UserRegistrationState RegistrationState
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .card-custom {
+        width: 450px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        padding: 30px;
+    }
+
+    .form-check-input:checked {
+        background-color: #8011d1; /* lila */
+        border-color: #8011d1;
+    }
+
+    .btn-save {
+        background-color: #8011d1;
+        border: none;
+        color: white;
+        width: 100%;
+        padding: 8px 0;
+    }
+
+    .btn-save:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="login-container">
+    <div class="card-custom">
+
+        <!-- Titel & Logo -->
+        <div class="text-center mb-4">
+            <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:50px;"/>
+            <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.5rem">EliteGärtner.</h2>
+            <h5>Wähle, welche Kontaktdaten du mit gematchten Gärtnern teilen möchtest.</h5>
+        </div>
+        <!-- Email -->
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="shareEmail" @bind="shareEmail" />
+            <label class="form-check-label" for="shareEmail">
+                Email
+                <input class="form-control mt-1" placeholder="✉ Email eingeben..." @bind="email" disabled="@(!shareEmail)" />
+            </label>
+        </div>
+
+        <!-- Telefonnummer -->
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="shareTel" @bind="shareTelephone" />
+            <label class="form-check-label" for="shareTel">
+                Telefonnummer
+                <input class="form-control mt-1" placeholder="✆ Telefonnummer eingeben..." @bind="telephone" disabled="@(!shareTelephone)" />
+            </label>
+        </div>
+
+        <!-- Speichern Button -->
+        <button class="btn-save mt-3"
+                disabled="@(!shareEmail && !shareTelephone)"
+                @onclick="GoNext">
+            Speichern
+        </button>
+
+    </div>
+</div>
 
 @code {
-    
+    string email = "";
+    string telephone = "";
+    bool shareEmail = false;
+    bool shareTelephone = false;
+
+    void GoNext()
+    {
+        // Speichern im Service
+        RegistrationState.Email = email;
+        RegistrationState.Telephone = telephone;
+        RegistrationState.ShareEmail = shareEmail;
+        RegistrationState.ShareTelephone = shareTelephone;
+
+        // Weiterleitung zur Interessen-Seite
+        NavigationManager.NavigateTo("/registrierung/interessen");
+    }
 }

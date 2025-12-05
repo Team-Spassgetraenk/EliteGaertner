@@ -1,62 +1,122 @@
 @page "/registrierung/interessen"
+@inject UserRegistrationState RegistrationState
+@inject NavigationManager NavigationManager
 
-<div class="interessen-container">
-    <h2>Wähle deine Interessen</h2>
+<style>
+    .tag-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
 
-    <h3>Gemüse</h3>
-    <div class="tag-grid">
-        @foreach (var tag in GemueseTags)
-        {
-            <div class="tag @(SelectedTags.Contains(tag) ? "selected" : "")"
-                 @onclick="() => ToggleTag(tag)">
-                @tag
-            </div>
-        }
-    </div>
+    .tag {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border: 1px solid #aaa;
+        border-radius: 15px;
+        cursor: pointer;
+        background-color: #f0f0f0;
+        transition: all 0.2s;
+    }
 
-    <h3>Obst</h3>
-    <div class="tag-grid">
-        @foreach (var tag in ObstTags)
-        {
-            <div class="tag @(SelectedTags.Contains(tag) ? "selected" : "")"
-                 @onclick="() => ToggleTag(tag)">
-                @tag
-            </div>
-        }
-    </div>
+    .tag.selected {
+        background-color: #8011d1;
+        color: white;
+        border-color: #8011d1;
+    }
 
-    <button class="weiter-button"
-            disabled="@(!SelectedTags.Any())"
-            @onclick="Weiter">
-        Weiter
-    </button>
+    .weiter-button {
+        background-color: #8011d1;
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 8px 0;
+    }
+
+    .weiter-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+</style>
+
+<h2>Wähle dein Interessensprofil</h2>
+
+<h3>Gemüse</h3>
+<div class="tag-grid">
+    @foreach (var tag in GemueseTags)
+    {
+        <div class="tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
+             @onclick="() => ToggleTag(tag.Name)">
+            <span>@tag.Icon</span>
+            <span>@tag.Name</span>
+        </div>
+    }
 </div>
 
+<h3>Obst</h3>
+<div class="tag-grid">
+    @foreach (var tag in ObstTags)
+    {
+        <div class="tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
+             @onclick="() => ToggleTag(tag.Name)">
+            <span>@tag.Icon</span>
+            <span>@tag.Name</span>
+        </div>
+    }
+</div>
+
+<button class="weiter-button"
+        disabled="@( !RegistrationState.SelectedTags.Any() )"
+        @onclick="Speichern">
+    Speichern
+</button>
+
 @code {
-    List<string> GemueseTags = new()
+    public record TagItem(string Name, string Icon);
+
+    List<TagItem> GemueseTags = new()
     {
-        "Auberginen", "Gurken", "Tomaten", "Kürbisse", "Paprika",
-        "Zucchini", "Kartoffeln", "Karotten"
+        new("Auberginen", "🍆"),
+        new("Gurken", "🥒"),
+        new("Tomaten", "🍅"),
+        new("Kürbisse", "🎃"),
+        new("Paprika", "🌶️"),
+        new("Zucchini", "🥒"),
+        new("Kartoffeln", "🥔"),
+        new("Karotten", "🥕"),
+        new("Salate", "🥬"),
+        new("Zwiebeln", "🧅")
     };
 
-    List<string> ObstTags = new()
+    List<TagItem> ObstTags = new()
     {
-        "Äpfel", "Birnen", "Melonen", "Pflaumen", "Kirschen", "Erdbeeren", "Himbeeren"
+        new("Melonen", "🍉"),
+        new("Äpfel", "🍎"),
+        new("Birnen", "🍐"),
+        new("Pflaumen", "🍑"),
+        new("Kirschen", "🍒"),
+        new("Erdbeeren", "🍓"),
+        new("Trauben", "🍇")
     };
-
-    public HashSet<string> SelectedTags { get; set; } = new();
 
     void ToggleTag(string tag)
     {
-        if (SelectedTags.Contains(tag))
-            SelectedTags.Remove(tag);
-        else
-            SelectedTags.Add(tag);
+        if (!RegistrationState.SelectedTags.Add(tag))
+            RegistrationState.SelectedTags.Remove(tag);
     }
 
-    void Weiter()
+    void Speichern()
     {
-        // Hier später speichern / Navigation
-        // z.B.: NavigationManager.NavigateTo("/registrierung/kontaktdaten");
+        Console.WriteLine("Kontaktdaten:");
+        if (RegistrationState.ShareEmail) Console.WriteLine($"Email: {RegistrationState.Email}");
+        if (RegistrationState.ShareTelephone) Console.WriteLine($"Telefon: {RegistrationState.Telephone}");
+
+        Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", RegistrationState.SelectedTags));
+
+        // Weiterleitung zur Abschlussseite
+        NavigationManager.NavigateTo("/registrierung/kontaktdaten");
     }
 }

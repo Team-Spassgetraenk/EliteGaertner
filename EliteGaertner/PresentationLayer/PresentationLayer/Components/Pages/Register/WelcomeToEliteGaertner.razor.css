@@ -1,0 +1,39 @@
+.welcome-container {
+    width: 80%;
+    max-width: 1300px;
+    margin: 30px auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(150, 75, 200, 0.25);
+}
+
+.welcome-container h2 {
+    text-align: center;
+    margin-top: 25px;
+    margin-bottom: 30px;
+}
+
+h3 {
+    margin-top: 15px;
+    color: #6d2fa5;
+    font-size: 18px;
+}
+
+.weiter-btn {
+    padding: 14px 80px 14px 80px;
+    background: linear-gradient(135deg, #a558ff, #7e2edb);
+    color: white;
+    border: none;
+    border-radius: 13px;
+    font-size: 19px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.weiter-btn:hover {
+    box-shadow: 0 0 10px #b042ff;
+}
+
