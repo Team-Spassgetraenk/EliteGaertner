@@ -1,45 +1,43 @@
-using AppLogic.Logic.Data_Transfer_Objects;
+using Contracts.Data_Transfer_Objects;
 
-namespace AppLogic.Logic.Interfaces;
+namespace AppLogic.Interfaces;
 
 
 
-//Das Interface ist für die HarvestSuggestion Klasse zuständig.
-//Sie ist dafür zuständig anhand dem Interessensprofil des Users die passenden 
-//Harvest-Uploads aus der Datenbank zurückzugeben.
+//Das Interface ist für die HarvestSuggestionManagement Klasse zuständig.
+//Sie beschreibt, welche Anforderungen an den Zugriff der einzelnen
+//HarvestSuggestions besteht.
 public interface IHarvestSuggestion
 {
-
-    //Diese Methode gibt uns eine Liste mit HarvestUploads zurück.
-    //Wir möchten schon die passenden HarvestUploads buffern, damit die 
-    //Performance beim bewerten der Profile/Bilder flüssig bleibt.
-    IList<HarvestUploadDto> GetNextSuggestion(int userId, int count);
-
     
-    //Gibt das DTO eines Harvest Uploads zurück.
-    HarvestUploadDto GetHarvest(int uploadId);
-
-    
-    //Gibt die URL des Erntebilds zurück.
-    string GetUrl(int uploadId);
-
-    
-    //Gibt die Beschreibung des Harvest-Uploads zurück.
-    string GetDescription(int uploadId);
-
-    
-    //Gibt das Gewicht des Harvest-Uploads zurück.
-    float GetWeight(int uploadId);
-
-    
-    //Gibt die Länge des Harvest-Uploads zurück.
-    float GetLength(int uploadId);
-
-    
-    //Gibt die Breite des Harvest-Uploads zurück.
-    float GetWidth(int uploadId);
+    //Gib die Liste der HarvestSuggestions zurück
+    List<HarvestUploadDto> GetHarvestSuggestionList();
     
     
-    //Gibt das Upload-Datum zurück.
-    DateTime GetDate(int uploadId);
+// Bin mir nicht sicher ob wir das überhaupt benötigen!!!    
+//    //Gibt das DTO eines Harvest Uploads zurück.
+//    HarvestUploadDto GetHarvest(int uploadId);
+//    
+//    //Gibt die URL des Erntebilds zurück.
+//    string GetUrl(int uploadId);
+//
+//    
+//    //Gibt die Beschreibung des Harvest-Uploads zurück.
+//    string GetDescription(int uploadId);
+//
+//    
+//    //Gibt das Gewicht des Harvest-Uploads zurück.
+//    float GetWeight(int uploadId);
+//
+//    
+//    //Gibt die Länge des Harvest-Uploads zurück.
+//    float GetLength(int uploadId);
+//
+//    
+//    //Gibt die Breite des Harvest-Uploads zurück.
+//    float GetWidth(int uploadId);
+//    
+//    
+//    //Gibt das Upload-Datum zurück.
+//    DateTime GetDate(int uploadId);
 }

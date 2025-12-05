@@ -1,0 +1,57 @@
+using Contracts.Data_Transfer_Objects;
+using AppLogic.Interfaces;
+using Infrastructure.Interfaces;
+using Infrastructure.Repositories;
+
+
+namespace AppLogic.Services;
+
+
+public class HarvestSuggestion : IHarvestSuggestion
+{
+
+    
+    private readonly List<HarvestUploadDto> _harvestSuggestionsList;
+    
+   
+    public HarvestSuggestion(int userId, List<string> preferences, int preloadCount)
+    {
+        _harvestSuggestionsList = new List<HarvestUploadDto>();
+        //Das muss glaub ich in die PROGRAM.CS
+        IHarvestDBS harvestRepo = new ManagementDBS();
+        _harvestSuggestionsList.AddRange(harvestRepo.GetHarvestUploadRepo(userId, preferences, preloadCount));
+    }
+    
+    public List<HarvestUploadDto> GetHarvestSuggestionList()
+        => _harvestSuggestionsList;
+
+//   Bin mir noch nicht sicher ob wir das überhaupt brauchen. 
+//   public HarvestUploadDto GetHarvest(int uploadId)
+//   {
+//       var dto = GetById(uploadId);
+//       if (dto is null)
+//           throw new ArgumentException($"Upload {uploadId} existiert nicht!");
+//       return dto;
+//   }
+//   
+//   public HarvestUploadDto? GetById(int uploadId)
+//       => _harvestSuggestionsList.FirstOrDefault(dto => dto.UploadId == uploadId);
+//
+//   public string GetUrl(int uploadId)
+//       => GetHarvest(uploadId).ImageUrl;
+//
+//   public string GetDescription(int uploadId)
+//       => GetHarvest(uploadId).Description;
+//
+//   public float GetWeight(int uploadId)
+//       => GetHarvest(uploadId).WeightKg;
+//
+//   public float GetLength(int uploadId)
+//       => GetHarvest(uploadId).LengthCm;
+//
+//   public float GetWidth(int uploadId)
+//       => GetHarvest(uploadId).WidthCm; 
+//
+//   public DateTime GetDate(int uploadId)
+//       => GetHarvest(uploadId).UploadDate;
+}
