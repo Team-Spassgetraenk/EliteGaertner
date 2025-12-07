@@ -2,13 +2,12 @@
 @rendermode InteractiveServer
 @inject NavigationManager Nav
 
-
 <div class="welcome-container">
     <div class="text-center mb-4">
         <h2 class="" style="margin-bottom: 15px;">
             Willkommen bei
         </h2>
-        <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:100px;"/>
+        <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" style="width:100px;"/>
         
         <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem">
             EliteGärtner.
@@ -28,6 +27,6 @@
 @code {
     private void GoToStartseite()
     {
-        Nav.NavigateTo("/MainpageTest");
+        Nav.NavigateTo("/MainpageTest", forceLoad: true);
     }
 }

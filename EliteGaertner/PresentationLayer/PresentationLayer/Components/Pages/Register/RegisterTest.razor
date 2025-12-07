@@ -1,4 +1,6 @@
 ﻿@page "/registertest"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
 
 <style>
     /* Hintergrundbild */
@@ -29,7 +31,7 @@
         
         <!--Logo und Titel -->
         <div class="text-center mb-4">
-            <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:80px;"/>
+            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" style="width:80px;"/>
             <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
         </div>
         
@@ -64,7 +66,7 @@
         </div>
         
         <!-- Registrieren Button -->
-        <button class="btn w-100 mb-3" style="background-color:#8011d1; color:white;" @onclick="FakeLogin">
+        <button class="btn w-100 mb-3" style="background-color:#8011d1; color:white;" @onclick="Registrieren">
             Registrieren
         </button>
 
@@ -84,8 +86,9 @@
     string username = "";
     string password = "";
 
-    void FakeLogin()
+    void Registrieren()
     {
+        Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
         Console.WriteLine($"Eingegeben: {email} / {password} / {username} / {sirname} / {prename}");
     }
 }

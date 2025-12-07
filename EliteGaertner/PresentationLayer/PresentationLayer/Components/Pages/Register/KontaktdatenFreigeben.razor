@@ -1,6 +1,7 @@
 @page "/registrierung/kontaktdaten"
-@inject NavigationManager NavigationManager
+@inject NavigationManager Nav
 @inject UserRegistrationState RegistrationState
+@rendermode InteractiveServer
 
 <style>
     .login-container {
@@ -42,7 +43,7 @@
 
         <!-- Titel & Logo -->
         <div class="text-center mb-4">
-            <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:50px;"/>
+            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" style="width:50px;"/>
             <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.5rem">EliteGärtner.</h2>
             <h5>Wähle, welche Kontaktdaten du mit gematchten Gärtnern teilen möchtest.</h5>
         </div>
@@ -88,7 +89,7 @@
         RegistrationState.ShareEmail = shareEmail;
         RegistrationState.ShareTelephone = shareTelephone;
 
-        // Weiterleitung zur Interessen-Seite
-        NavigationManager.NavigateTo("/registrierung/interessen");
+        // Weiterleitung zur Profilerstellungs-Seite
+        Nav.NavigateTo("/registrierung/profilerstellung", forceLoad: true);
     }
 }

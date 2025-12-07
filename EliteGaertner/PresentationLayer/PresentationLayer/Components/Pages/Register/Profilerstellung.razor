@@ -1,6 +1,7 @@
 @page "/registrierung/profilerstellung"
 @using Microsoft.AspNetCore.Components.Forms
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <h2>Erstelle dein Gärtnerprofil</h2>
 
@@ -40,6 +41,6 @@
     {
         // Logik zum Speichern von Bio und Bild hier einfügen
         // z.B. Navigation zur finalen Registrierungsseite
-        NavigationManager.NavigateTo("/registrierung/kontaktdaten");
+        NavigationManager.NavigateTo("/ernte-hochladen", forceLoad: true);
     }
 }

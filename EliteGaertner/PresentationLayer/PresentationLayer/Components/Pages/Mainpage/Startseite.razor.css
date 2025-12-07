@@ -1,0 +1,271 @@
+/* Definiere die Hauptfarben */
+:root {
+    /* Ähnlich dem Lilaton der Aubergine */
+    --main-purple: #8B45B3;
+    --dislike-red: #D62828;
+    --like-green: #4CAF50;
+    --border-color: #000;
+}
+
+/* Allgemeine Layout-Stile */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #f7f7f7; /* Leichter Hintergrund */
+    position: relative;
+    font-family: Arial, sans-serif; /* Basis-Schriftart */
+    overflow: hidden;
+}
+
+/* --- Header-Bar (Rangliste und Menü) --- */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #ccc;
+    background-color: #fff;
+    z-index: 10;
+}
+
+.rangliste {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.rangliste-icon {
+    margin-right: 5px;
+    /* Dies ist ein Platzhalter für das eigentliche Icon-Design */
+}
+
+.menu-icon-container {
+    cursor: pointer;
+}
+
+.menu-icon {
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 1;
+    color: var(--border-color);
+}
+
+/* --- Logout-Menü (Dropdown) --- */
+.logout-menu {
+    position: absolute;
+    top: 50px; /* An die Header-Bar anpassen */
+    right: 15px;
+    width: 150px;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 20;
+    padding: 5px 0;
+}
+
+.logout-menu p {
+    padding: 5px 10px;
+    margin: 0;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: right;
+}
+
+.logout-menu p:hover {
+    background-color: #eee;
+}
+
+/* --- Haupt-Karten-Bereich --- */
+.tinder-card-area {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+}
+
+.tinder-card {
+    width: 100%;
+    max-width: 400px; /* Maximale Breite für das "Smartphone"-Layout */
+    height: 80vh; /* Relative Höhe zur Ansichtshöhe */
+    max-height: 600px;
+    border: 3px solid var(--border-color);
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 5px 5px 0 0 var(--border-color); /* Sketch-Effekt */
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-image-placeholder {
+    width: 100%;
+    /* Berechnet die Höhe, damit der untere Bereich Platz für Icons und Infos hat */
+    flex-grow: 1;
+    background-color: #eee;
+    overflow: hidden;
+}
+
+.harvest-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Stellt sicher, dass das Bild den Container ausfüllt */
+}
+
+/* --- Info-Box (Gurken-Details) --- */
+.info-box {
+    position: absolute;
+    bottom: 120px; /* Über den Rating-Icons */
+    left: 20px;
+    right: 20px;
+    background-color: rgba(139, 69, 19, 0.7); /* Transparente braune/rötliche Farbe */
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 2px 2px 0 0 var(--border-color);
+    display: flex;
+    font-size: 14px;
+}
+
+.details {
+    flex: 1;
+    padding-right: 10px;
+    border-right: 1px solid white;
+}
+
+.comment {
+    flex: 2;
+    padding-left: 10px;
+}
+
+.username {
+    font-style: italic;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* --- Bewertungs-Icons (Mitte-Unten) --- */
+.rating-icons {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 50px;
+    z-index: 5;
+}
+
+.rating-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: 2px solid var(--border-color);
+    position: relative;
+    box-shadow: 2px 2px 0 0 var(--border-color);
+    transition: transform 0.1s ease;
+}
+
+.rating-icon:active {
+    transform: translate(-50%, 0) scale(0.95);
+    box-shadow: 1px 1px 0 0 var(--border-color);
+}
+
+.dislike-icon {
+    background-color: var(--dislike-red);
+}
+
+.like-icon {
+    background-color: var(--like-green);
+}
+
+.flag-icon, .settings-icon {
+    background-color: #fff;
+}
+
+.notification-dot {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--dislike-red);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid var(--border-color);
+}
+
+/* --- Bottom Nav (Unten) --- */
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    border-top: 3px solid var(--border-color);
+    background-color: #fff;
+    z-index: 10;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.nav-icon-wrapper {
+    position: relative;
+}
+
+.nav-icon {
+    width: 50px; /* Größe der Icons anpassen */
+    height: 50px;
+    /* Optional: Icons wie in der Vorlage darstellen (Sketch-Look) */
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    box-shadow: 2px 2px 0 0 var(--border-color);
+}
+
+/* Spezieller Stil für EliteGärtner (Aubergine) */
+.nav-item:nth-child(2) .nav-icon {
+    background-color: var(--main-purple);
+    /* Hier ist das Bild der Aubergine (elitegaertner_icon.png) */
+}
+
+/* Spezieller Stil für Matches (Gurkenhände) */
+.nav-item:nth-child(1) .nav-icon {
+    /* Hier ist das Bild der Gurkenhände (matches_icon.png) */
+    background-color: #fff;
+}
+
+/* Spezieller Stil für Profil (Gärtner) */
+.nav-item:nth-child(3) .nav-icon {
+    /* Hier ist das Bild des Gärtners (profil_icon.png) */
+    background-color: #fff;
+}
+
+.small-dot {
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    font-size: 7px;
+}

@@ -1,89 +1,184 @@
 @page "/MainpageTest"
 @rendermode InteractiveServer
 
+
+
 <div class="position-relative d-flex flex-column align-items-center vh-100 bg-light">
 
-    <!-- Ranglisten-Icon -->
+
+
+    <!-- Ranglisten-Icon oben links -->
+
     <a href="/RanglisteTest" class="top-left-icon">
+
         <img src="pictures/Rangliste.png" alt="icon-rangliste" />
+
     </a>
+
     
+
     <!-- Große Box / Card -->
+
     <div class="card shadow p-5 text-center mb-5" style="width: 350px; height: 500px; border-radius: 15px;">
+
         <h1 class="elitegaertner-title mb-3">Willkommen bei EliteGärtner</h1>
+
         <p class="text-muted">Nur ein Test...aber probiere gerne das Navigations Menü aus</p>
+
     </div>
 
-    <!-- Icon-Leiste unten -->
-    <div class="icon-container">
+
+
+    <!-- Box für die drei Icons -->
+
+    <div class="icon-box shadow rounded-pill d-flex justify-content-center align-items-center p-3 mb-5">
+
         <a href="/MatchesTest" class="icon-link">
+
             <img src="pictures/MatchesIcon.png" alt="Matches" class="icon-matches"/>
+
         </a>
+
         <a href="/" class="icon-link">
-            <img src="pictures/EliteGärtner-logo.png" alt="Home" class="icon-home"/>
+
+            <img src="pictures/EliteGärtner_logo.png" alt="Home" class="icon-home"/>
+
         </a>
+
         <a href="/ProfilTest" class="icon-link">
+
             <img src="pictures/Profil_04.png" alt="Profil" class="icon-profil" />
+
         </a>
+
     </div>
+
 </div>
 
+
+
 <style>
+
 .position-relative {
+
     position: relative;
+
 }
 
-/* Ranglisten-Icon */
+
+
+/* Ranglisten-Icon oben links */
+
 .top-left-icon {
+
     position: absolute;
-    top: 20px;   /* Abstand vom oberen Rand */
-    left: 20px;  /* Abstand vom linken Rand */
+
+    top: 20px;
+
+    left: 20px;
+
 }
+
+
 
 .top-left-icon img {
+
     width: 50px;
+
     height: 50px;
+
     transition: transform 0.3s, opacity 0.3s;
+
     cursor: pointer;
+
 }
+
+
 
 .top-left-icon img:hover {
+
     transform: scale(1.2);
+
     opacity: 0.8;
+
 }
 
-/* Icon-Leiste unten */
-.icon-container {
+
+
+/* Box für die drei Icons */
+
+.icon-box {
+
+    background-color: #ffffff;
+
+    border-radius: 15px; /* abgerundete Ecken */
+
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
     display: flex;
+
     justify-content: center;
-    gap: 110px;
-    margin-top: 5px;
-    margin-bottom: 50px;
+
+    align-items: center;
+
+    gap: 60px; /* Abstand zwischen den Icons */
+
+    padding: 15px 30px; /* Innenabstand */
+
 }
+
+
+
+/* Icons */
 
 .icon-link img {
+
     transition: transform 0.3s, opacity 0.3s;
+
     cursor: pointer;
+
 }
+
+
 
 .icon-link img:hover {
+
     transform: scale(1.2);
+
     opacity: 0.8;
+
 }
+
+
 
 /* individuelle Icon-Größen */
+
 .icon-matches {
+
     width: 60px;
+
     height: 45px;
+
 }
+
+
 
 .icon-home {
+
     width: 43px;
+
     height: 50px;
+
 }
 
+
+
 .icon-profil {
-    width: 55px;
-    height: 55px;
+
+    width: 50px;
+
+    height: 50px;
+
 }
+
 </style>

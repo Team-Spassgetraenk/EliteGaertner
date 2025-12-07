@@ -1,9 +1,10 @@
-@page "/registrierung/ernte-parameter"
+@page "/ernte-hochladen"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
 
 <div class="ernte-parameter-container">
-    <!-- Titel & Logo -->
     <div class="text-center mb-4">
-        <img src="pictures/EliteGärtner-logo.png" alt="EliteGärtner Logo" style="width:50px;"/>
+        <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" style="width:50px;"/>
         <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.5rem">EliteGärtner.</h2>
     </div>
     <div class="form-layout">
@@ -12,9 +13,11 @@
             <div class="ernte-image-container">
                 <img src="@HochgeladenesBild" alt="Erntebild" class="ernte-image" />
             </div>
-                
-            <button class="publish-button-under-image" @onclick="Veröffentlichen" 
-                    style="border-radius: 0 0 20px 20px; margin-top: -10px;">
+            
+            <button class="publish-button-under-image" 
+                    @onclick="Veröffentlichen" 
+                    disabled="@(string.IsNullOrEmpty(SelectedTag))"
+                    style="border-radius: 0 0 20px 20px; margin-top: -10px; @(string.IsNullOrEmpty(SelectedTag) ? "opacity: 0.5; cursor: not-allowed;" : "")">
                 Ernte veröffentlichen
             </button>
         </div>
@@ -24,7 +27,7 @@
             <div class="tag-grid">
                 @foreach (var tag in GemueseTags)
                 {
-                    <div class="tag @(SelectedTags.Contains(tag.Name) ? "selected" : "")"
+                    <div class="tag @(SelectedTag == tag.Name ? "selected" : "")"
                          @onclick="() => ToggleTag(tag.Name)">
                         <span class="emoji">@tag.Emoji</span> @tag.Name
                     </div>
@@ -35,7 +38,7 @@
             <div class="tag-grid">
                 @foreach (var tag in ObstTags)
                 {
-                    <div class="tag @(SelectedTags.Contains(tag.Name) ? "selected" : "")"
+                    <div class="tag @(SelectedTag == tag.Name ? "selected" : "")"
                          @onclick="() => ToggleTag(tag.Name)">
                         <span class="emoji">@tag.Emoji</span> @tag.Name
                     </div>
@@ -60,66 +63,75 @@
                               placeholder="Beschreibe kurz deine Ernte..."></textarea>
         <div class="char-counter">@Kommentar.Length / 150</div>
     </div>
-    </div>
+</div>
 
 
-    @code {
-        public string HochgeladenesBild { get; set; } =
-            "pictures/Testbilder/Gurken_01.jpg"; 
+@code {
+    public string HochgeladenesBild { get; set; } =
+        "pictures/Testbilder/Gurken_01.jpg"; 
 
-        public class TagItem(string name, string emoji)
-        {
-            public string Name { get; set; } = name;
-            public string Emoji { get; set; } = emoji;
-        }
-        
-        List<TagItem> GemueseTags = new()
-        {
-            new("Auberginen", "🍆"),
-            new("Gurken", "🥒"),
-            new("Tomaten", "🍅"),
-            new("Kürbisse", "🎃"),
-            new("Paprika", "🌶️"),
-            new("Zucchini", "🥒"),
-            new("Kartoffeln", "🥔"),
-            new("Karotten", "🥕"),
-            new("Salate", "🥬"),
-            new("Zwiebeln", "🧅")
-        };
-
-        List<TagItem> ObstTags = new()
-        {
-            new("Melonen", "🍉"),
-            new("Äpfel", "🍎"),
-            new("Birnen", "🍐"),
-            new("Pflaumen", "🍑"),
-            new("Kirschen", "🍒"),
-            new("Erdbeeren", "🍓"),
-            new("Trauben", "🍇")
-        };
-
-        List<string> SelectedTags = new(); 
-
-        int? Groesse { get; set; }
-        int? Gewicht { get; set; }
-        string Kommentar { get; set; } = "";
-
-        void ToggleTag(string tag)
-        {
-            if (SelectedTags.Contains(tag))
-                SelectedTags.Remove(tag);
-            else
-                SelectedTags.Add(tag);
-        }
-
-        void Veröffentlichen()
-        {
-            Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", SelectedTags));
-            Console.WriteLine($"Größe: {Groesse}, Gewicht: {Gewicht}");
-            Console.WriteLine($"Kommentar: {Kommentar}");
-
-            NavigationManager.NavigateTo("/main");
-        }
-
-        [Inject] NavigationManager NavigationManager { get; set; }
+    public class TagItem(string name, string emoji)
+    {
+        public string Name { get; set; } = name;
+        public string Emoji { get; set; } = emoji;
     }
+    
+    List<TagItem> GemueseTags = new()
+    {
+        new("Auberginen", "🍆"),
+        new("Gurken", "🥒"),
+        new("Tomaten", "🍅"),
+        new("Kürbisse", "🎃"),
+        new("Paprika", "🌶️"),
+        new("Zucchini", "🥒"),
+        new("Kartoffeln", "🥔"),
+        new("Karotten", "🥕"),
+        new("Salate", "🥬"),
+        new("Zwiebeln", "🧅")
+    };
+
+    List<TagItem> ObstTags = new()
+    {
+        new("Melonen", "🍉"),
+        new("Äpfel", "🍎"),
+        new("Birnen", "🍐"),
+        new("Pflaumen", "🍑"),
+        new("Kirschen", "🍒"),
+        new("Erdbeeren", "🍓"),
+        new("Trauben", "🍇")
+    };
+
+    // ÄNDERUNG: Einzelner String statt Liste (nullable, da am Anfang nichts gewählt ist)
+    string? SelectedTag = null; 
+
+    int? Groesse { get; set; }
+    int? Gewicht { get; set; }
+    string Kommentar { get; set; } = "";
+
+    // ÄNDERUNG: Logik für Einzelauswahl
+    void ToggleTag(string tag)
+    {
+        if (SelectedTag == tag)
+        {
+            // Wenn man auf das bereits ausgewählte Tag klickt, wird es abgewählt
+            SelectedTag = null;
+        }
+        else
+        {
+            // Neues Tag setzen (überschreibt das alte automatisch)
+            SelectedTag = tag;
+        }
+    }
+
+    void Veröffentlichen()
+    {
+        // Sicherheitshalber prüfen, obwohl der Button disabled sein sollte
+        if (string.IsNullOrEmpty(SelectedTag)) return;
+
+        Console.WriteLine("Ausgewähltes Tag: " + SelectedTag);
+        Console.WriteLine($"Größe: {Groesse}, Gewicht: {Gewicht}");
+        Console.WriteLine($"Kommentar: {Kommentar}");
+
+        Nav.NavigateTo("/ProfilTest", forceLoad: true);
+    }
+}

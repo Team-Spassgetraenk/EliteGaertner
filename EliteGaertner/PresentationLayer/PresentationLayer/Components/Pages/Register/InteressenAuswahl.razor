@@ -1,46 +1,7 @@
 @page "/registrierung/interessen"
 @inject UserRegistrationState RegistrationState
-@inject NavigationManager NavigationManager
-
-<style>
-    .tag-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-
-    .tag {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border: 1px solid #aaa;
-        border-radius: 15px;
-        cursor: pointer;
-        background-color: #f0f0f0;
-        transition: all 0.2s;
-    }
-
-    .tag.selected {
-        background-color: #8011d1;
-        color: white;
-        border-color: #8011d1;
-    }
-
-    .weiter-button {
-        background-color: #8011d1;
-        color: white;
-        border: none;
-        width: 100%;
-        padding: 8px 0;
-    }
-
-    .weiter-button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-    }
-</style>
+@inject NavigationManager Nav
+@rendermode InteractiveServer
 
 <h2>Wähle dein Interessensprofil</h2>
 
@@ -115,8 +76,48 @@
         if (RegistrationState.ShareTelephone) Console.WriteLine($"Telefon: {RegistrationState.Telephone}");
 
         Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", RegistrationState.SelectedTags));
-
-        // Weiterleitung zur Abschlussseite
-        NavigationManager.NavigateTo("/registrierung/kontaktdaten");
+        
+        Nav.NavigateTo("/registrierung/kontaktdaten", forceLoad: true);
     }
 }
+
+<style>
+    .tag-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .tag {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border: 1px solid #aaa;
+        border-radius: 15px;
+        cursor: pointer;
+        background-color: #f0f0f0;
+        transition: all 0.2s;
+    }
+
+    .tag.selected {
+        background-color: #8011d1;
+        color: white;
+        border-color: #8011d1;
+    }
+
+    .weiter-button {
+        background-color: #8011d1;
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 8px 0;
+    }
+
+    .weiter-button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+</style>
+
