@@ -5,7 +5,9 @@ namespace Infrastructure.Interfaces;
 public interface IMatchesDBS
 {
 
-    public MatchDto GetMatchDto(ProfileDto contentReceiver, ProfileDto targetProfile );
+    public MatchDto GetMatchInfo(ProfileDto contentReceiver, ProfileDto targetProfile );
+
+    public List<MatchDto> GetSuccessfulMatches(ProfileDto contentReceiver);
 
     public void SaveMatchInfo(MatchDto matchDto);
 

@@ -8,8 +8,7 @@ public record HarvestUploadDto
     public string Description { get; init; }
     public float WeightKg { get; init; }
     public float WidthCm { get; init; }
-    public float LengthCm { get; init; }
-    public int Quantity { get; init; }
+    public float LengthCm { get; init; }wa
     public DateTime UploadDate { get; init; }
     
 }
