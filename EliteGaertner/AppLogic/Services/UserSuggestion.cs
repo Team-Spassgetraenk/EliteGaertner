@@ -25,7 +25,7 @@ public class UserSuggestion : IUserSuggestion
         IProfileDBS profileDbs = new ManagementDBS();
         foreach (HarvestUploadDto harvestUpload in harvestSuggestions)
         {
-            ProfileDto profile = profileDbs.GetProfile(harvestUpload.UserId);
+            ProfileDto profile = profileDbs.GetProfile(harvestUpload.ProfileId);
             _userSuggestionList.Add(profile, harvestUpload);
         }
     }

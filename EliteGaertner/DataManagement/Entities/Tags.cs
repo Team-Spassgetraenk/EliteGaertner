@@ -1,4 +1,4 @@
-namespace Infrastructure.Repositories.Entities;
+namespace DataManagement.Entities;
 
 public class Tags
 {

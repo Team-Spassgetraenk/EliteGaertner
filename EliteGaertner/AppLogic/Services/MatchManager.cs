@@ -41,7 +41,7 @@ public class MatchManager : IMatchManager
         //Speicher die Daten der MatchDto in den lokalen Variablen der Methode ab.
         var contentReceiver = matchDto.ContentReceiver;
         var contentReceiverValue = matchDto.ContentReceiverValue;
-        var targetUser = matchDto.TargetUser;
+        var targetUser = matchDto.TargetProfile;
         var targetUserValue = matchDto.TargetUserValue;
         
         //Überprüfe, ob der Content Receiver das targetProfile positiv oder negativ bewertet hat.
@@ -58,7 +58,7 @@ public class MatchManager : IMatchManager
         {
             ContentReceiver = contentReceiver,
             ContentReceiverValue = contentReceiverValue,
-            TargetUser = targetUser,
+            TargetProfile = targetUser,
             TargetUserValue = targetUserValue
         };
         matchesDbs.SaveMatchInfo(dto);

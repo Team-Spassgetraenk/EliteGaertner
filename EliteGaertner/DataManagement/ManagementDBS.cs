@@ -1,9 +1,9 @@
 using System.Runtime.CompilerServices;
-using Infrastructure.Interfaces;
+using DataManagement.Interfaces;
 
-namespace Infrastructure.Repositories;
+namespace DataManagement;
 
-public class ManagementDBS : IHarvestDBS, IMatchesDBS, IPreferenceDBS, IProfileDBS
+public class ManagementDBS : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileDbs
 {
     
 }

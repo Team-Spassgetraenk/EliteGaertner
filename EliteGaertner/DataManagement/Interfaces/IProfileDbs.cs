@@ -1,8 +1,8 @@
 using Contracts.Data_Transfer_Objects;
 
-namespace Infrastructure.Interfaces;
+namespace DataManagement.Interfaces;
 
-public interface IProfileDBS
+public interface IProfileDbs
 {
 
     //Gibt ein P

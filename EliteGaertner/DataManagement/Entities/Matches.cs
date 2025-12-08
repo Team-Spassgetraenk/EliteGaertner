@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices.JavaScript;
 
-namespace Infrastructure.Repositories.Entities;
+namespace DataManagement.Entities;
 
 public class Matches
 {

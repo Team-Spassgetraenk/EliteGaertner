@@ -1,11 +1,10 @@
 using Contracts.Data_Transfer_Objects;
 
-namespace Infrastructure.Interfaces;
-
+namespace DataManagement.Interfaces;
 
 
 //Dieses Interface implementiert
-public interface IHarvestDBS
+public interface IHarvestDbs
 {
 
     //Gib mir die Harvestuploads des Users zurück.

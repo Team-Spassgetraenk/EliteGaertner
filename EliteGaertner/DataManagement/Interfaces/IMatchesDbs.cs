@@ -1,8 +1,8 @@
 using Contracts.Data_Transfer_Objects;
 
-namespace Infrastructure.Interfaces;
+namespace DataManagement.Interfaces;
 
-public interface IMatchesDBS
+public interface IMatchesDbs
 {
 
     public MatchDto GetMatchInfo(ProfileDto contentReceiver, ProfileDto targetProfile );
