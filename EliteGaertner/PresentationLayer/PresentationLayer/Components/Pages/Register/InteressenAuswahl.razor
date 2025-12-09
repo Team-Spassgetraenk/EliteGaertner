@@ -3,39 +3,65 @@
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
-<h2>Wähle dein Interessensprofil</h2>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet"> @* NEU HINZUGEFÜGT FÜR DEN TITEL *@
+<link href="css/InteressenAuswahl.css" rel="stylesheet" />
+<link href="css/app.css" rel="stylesheet" />
 
-<h3>Gemüse</h3>
-<div class="tag-grid">
-    @foreach (var tag in GemueseTags)
-    {
-        <div class="tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
-             @onclick="() => ToggleTag(tag.Name)">
-            <span>@tag.Icon</span>
-            <span>@tag.Name</span>
+<div class="register-page-container">
+    <div class="login-center">
+
+        <div class="register-card">
+
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
+            </div>
+            
+            <h3 class="register-title">Wähle dein Interessensprofil</h3>
+            
+            <h4 class="tag-headline">Gemüse</h4>
+            <div class="tag-grid">
+                @foreach (var tag in GemueseTags)
+                {
+                    <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
+                         @onclick="() => ToggleTag(tag.Name)">
+                        <span>@tag.Icon</span>
+                        <span>@tag.Name</span>
+                    </div>
+                }
+            </div>
+
+            <h4 class="tag-headline">Obst</h4>
+            <div class="tag-grid">
+                @foreach (var tag in ObstTags)
+                {
+                    <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
+                         @onclick="() => ToggleTag(tag.Name)">
+                        <span>@tag.Icon</span>
+                        <span>@tag.Name</span>
+                    </div>
+                }
+            </div>
+
+            <button class="app-button primary-button weiter-button"
+                    disabled="@( !RegistrationState.SelectedTags.Any() )"
+                    @onclick="Speichern">
+                Speichern
+            </button>
+            
+            @if ( !RegistrationState.SelectedTags.Any() )
+            {
+                <p class="disabled-hint">Bitte mindestens ein Interesse auswählen.</p>
+            }
+
         </div>
-    }
-</div>
 
-<h3>Obst</h3>
-<div class="tag-grid">
-    @foreach (var tag in ObstTags)
-    {
-        <div class="tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
-             @onclick="() => ToggleTag(tag.Name)">
-            <span>@tag.Icon</span>
-            <span>@tag.Name</span>
-        </div>
-    }
+    </div>
 </div>
-
-<button class="weiter-button"
-        disabled="@( !RegistrationState.SelectedTags.Any() )"
-        @onclick="Speichern">
-    Speichern
-</button>
 
 @code {
+    // Die Model- und Logik-Definition bleibt unverändert
     public record TagItem(string Name, string Icon);
 
     List<TagItem> GemueseTags = new()
@@ -57,7 +83,7 @@
         new("Melonen", "🍉"),
         new("Äpfel", "🍎"),
         new("Birnen", "🍐"),
-        new("Pflaumen", "🍑"),
+        new("Pfirsiche", "🍑"),
         new("Kirschen", "🍒"),
         new("Erdbeeren", "🍓"),
         new("Trauben", "🍇")
@@ -71,53 +97,168 @@
 
     void Speichern()
     {
-        Console.WriteLine("Kontaktdaten:");
-        if (RegistrationState.ShareEmail) Console.WriteLine($"Email: {RegistrationState.Email}");
-        if (RegistrationState.ShareTelephone) Console.WriteLine($"Telefon: {RegistrationState.Telephone}");
-
         Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", RegistrationState.SelectedTags));
-        
         Nav.NavigateTo("/registrierung/kontaktdaten", forceLoad: true);
     }
 }
 
 <style>
-    .tag-grid {
+    /* --- Farben und Font --- */
+    /* Wir nutzen die hartcodierten Werte aus der Login-Seite */
+
+    /* --- Seiten- und Hintergrundlayout --- */
+    .register-page-container {
+        background-image: url('pictures/FarmBackground.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100vh;
+        width: 100%;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+    }
+
+    .login-center {
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- Registrierungs-Karte (Übernommen) --- */
+    .register-card {
+        width: 90%;
+        max-width: 600px; /* Mittlere Breite, da es nicht zweispaltig ist */
+        background: rgba(255, 255, 255, 0.95);
+        border: 3px solid #000;
+        border-radius: 15px;
+        box-shadow: 6px 6px 0 0 #000;
+        padding: 30px;
+        margin: 20px;
+    }
+
+    .logo-container {
+        text-align: center;
         margin-bottom: 20px;
     }
 
-    .tag {
+    .app-logo {
+        width: 80px;
+    }
+
+    .app-title {
+        font-weight: bold;
+        font-size: 2.5rem;
+        color: #000;
+        margin-top: 5px;
+        line-height: 1;
+    }
+    
+    .register-title {
+        font-weight: bold;
+        font-size: 1.8rem;
+        color: #000;
+        margin-bottom: 20px;
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+    }
+    
+    .tag-headline {
+        font-weight: bold;
+        font-size: 1.4rem;
+        color: #000;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    /* --- Tag-Design (Im Sketch-Stil) --- */
+
+    .tag-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px; /* Etwas größerer Abstand */
+        margin-bottom: 20px;
+    }
+
+    .app-tag {
         display: flex;
         align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border: 1px solid #aaa;
-        border-radius: 15px;
+        gap: 8px;
+        padding: 8px 15px;
+        
+        /* Sketch-Stil */
+        border: 3px solid #000;
+        border-radius: 8px;
+        box-shadow: 2px 2px 0 0 #000;
+        
         cursor: pointer;
-        background-color: #f0f0f0;
-        transition: all 0.2s;
+        background-color: #f0f0f0; /* Hellgrau als Standard */
+        font-size: 1.2rem;
+        font-weight: bold;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    
+    .app-tag:hover {
+        transform: translate(1px, 1px);
+        box-shadow: 1px 1px 0 0 #000;
     }
 
     .tag.selected {
-        background-color: #8011d1;
-        color: white;
-        border-color: #8011d1;
+        background-color: #8B45B3; /* Main Purple */
+        color: #ffffff;
+        border-color: #000; 
+        box-shadow: 4px 4px 0 0 #000;
+    }
+    
+    .tag.selected:hover {
+        /* Kein Effekt beim Hovern, wenn ausgewählt */
+        transform: none; 
+        box-shadow: 4px 4px 0 0 #000;
     }
 
-    .weiter-button {
-        background-color: #8011d1;
-        color: white;
-        border: none;
+    /* --- Button --- */
+    .app-button {
         width: 100%;
-        padding: 8px 0;
+        padding: 12px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        border: 3px solid #000;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 20px;
+        box-shadow: 4px 4px 0 0 #000;
+        transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
     }
 
-    .weiter-button:disabled {
-        background-color: #ccc;
+    .primary-button {
+        background-color: #8B45B3; /* Main Purple */
+        color: white;
+    }
+
+    .app-button:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 0 #000;
+    }
+
+    /* Stil für DEAKTIVIERTEN Button */
+    .app-button:disabled {
+        background-color: #ccc; 
+        color: #999; 
+        border-color: #999; 
         cursor: not-allowed;
+        transform: none;
+        box-shadow: 2px 2px 0 0 #999;
+    }
+    
+    /* Hinweis-Text, wenn Button deaktiviert ist */
+    .disabled-hint {
+        text-align: center;
+        color: #999;
+        font-size: 1rem;
+        margin-top: 10px;
+        margin-bottom: 0;
+        font-style: italic;
     }
 </style>
-

@@ -130,7 +130,7 @@
     margin-bottom: 5px;
 }
 
-/* Optional: Hover Effekte */
+
 .nav-item:hover {
     transform: scale(1.05);
     transition: transform 0.2s;
