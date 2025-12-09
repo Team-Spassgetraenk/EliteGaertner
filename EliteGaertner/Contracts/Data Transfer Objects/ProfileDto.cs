@@ -10,4 +10,7 @@ public record ProfileDto
     public string PasswordHash { get; init; }
     public string phoneNumber { get; init; }
     public string profileText { get; init; }
+    public bool ShareMail { get; init; }
+    public bool SharePhoneNumber { get; init; }
+    public DateTime UserCreated { get; init; }
 }
