@@ -26,7 +26,7 @@ public interface IMatchManager
     
     
 
-    public ProfileDto VisitUserProfile(int userId);
+    public void VisitUserProfile(int userId);
 
     
     public List<ProfileDto> ShowMatches(int userId);

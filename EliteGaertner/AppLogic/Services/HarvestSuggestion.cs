@@ -1,7 +1,7 @@
 using Contracts.Data_Transfer_Objects;
 using AppLogic.Interfaces;
-using Infrastructure.Interfaces;
-using Infrastructure.Repositories;
+using DataManagement.Interfaces;
+using DataManagement;
 
 
 namespace AppLogic.Services;
@@ -14,11 +14,11 @@ public class HarvestSuggestion : IHarvestSuggestion
     private readonly List<HarvestUploadDto> _harvestSuggestionsList;
     
    
-    public HarvestSuggestion(int userId, List<string> preferences, int preloadCount)
+    public HarvestSuggestion(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
     {
         _harvestSuggestionsList = new List<HarvestUploadDto>();
         //Das muss glaub ich in die PROGRAM.CS
-        IHarvestDBS harvestRepo = new ManagementDBS();
+        IHarvestDbs harvestRepo = new ManagementDbs();
         _harvestSuggestionsList.AddRange(harvestRepo.GetHarvestUploadRepo(userId, preferences, preloadCount));
     }
     

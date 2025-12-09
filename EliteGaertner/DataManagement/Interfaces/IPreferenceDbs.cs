@@ -1,8 +1,8 @@
 using Contracts.Data_Transfer_Objects;
 
-namespace Infrastructure.Interfaces;
+namespace DataManagement.Interfaces;
 
-public interface IPreferenceDBS
+public interface IPreferenceDbs
 {
     
     //Gib die Preference des Users zurück

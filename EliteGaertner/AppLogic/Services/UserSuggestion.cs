@@ -1,7 +1,7 @@
 using AppLogic.Interfaces;
 using Contracts.Data_Transfer_Objects;
-using Infrastructure.Interfaces;
-using Infrastructure.Repositories;
+using DataManagement.Interfaces;
+using DataManagement;
 
 namespace AppLogic.Services;
 
@@ -11,33 +11,38 @@ public class UserSuggestion : IUserSuggestion
     private readonly Dictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
     
     
-    public UserSuggestion(int userId, List<string> preferences, int preloadCount)
+    public UserSuggestion(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
     {
         _userSuggestionList = new Dictionary<ProfileDto, HarvestUploadDto>();
-        CreateUserSuggestions(CreateHarvestSuggestions(userId, preferences, preloadCount));
+        CreateUserSuggestions(contentReceiver.UserId, CreateHarvestSuggestions(contentReceiver, preferences, preloadCount));
     }
 
     public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList(int userId)
         => _userSuggestionList;
 
-    public void CreateUserSuggestions(List<HarvestUploadDto> harvestSuggestions)
+    public void CreateUserSuggestions(int userId, List<HarvestUploadDto> harvestSuggestions)
     {
-        IProfileDBS profileDbs = new ManagementDBS();
+        IProfileDbs profileDbs = new ManagementDbs();
+        
+        //ÜBERPRÜFUNG OB MATCH SCHON BESTEHT FEHLT!!!!
         foreach (HarvestUploadDto harvestUpload in harvestSuggestions)
         {
-            ProfileDto profile = profileDbs.GetProfile(harvestUpload.UserId);
+            var profile = profileDbs.GetProfile(harvestUpload.ProfileId);
+            if(ProfileAlreadyRated(userId, profile.UserId ))
             _userSuggestionList.Add(profile, harvestUpload);
         }
     }
 
-    public List<HarvestUploadDto> CreateHarvestSuggestions(int userId, List<string> preferences, int preloadCount)
+    public List<HarvestUploadDto> CreateHarvestSuggestions(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
     {
         var harvestSuggestion = new HarvestSuggestion(userId, preferences, preloadCount);
         return harvestSuggestion.GetHarvestSuggestionList();
     }
     
-    public bool WasProfileShown(int userId, int targetUserId)
+    public bool ProfileAlreadyRated(ProfileDto content int targetUserId)
     {
-        throw new NotImplementedException();
+        IMatchesDbs matchesDbs = new ManagementDbs();
+
+        MatchDto match = matchesDbs.GetMatchInfo();
     }
 }
