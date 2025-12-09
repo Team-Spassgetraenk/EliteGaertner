@@ -3,10 +3,9 @@
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
+@* WICHTIG: Beide Schriftarten laden, da Patrick Hand für den allgemeinen Text und Playfair Display für den EliteGärtner-Titel verwendet wird *@
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet"> @* NEU HINZUGEFÜGT FÜR DEN TITEL *@
-<link href="css/InteressenAuswahl.css" rel="stylesheet" />
-<link href="css/app.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 
 <div class="register-page-container">
     <div class="login-center">
@@ -15,7 +14,8 @@
 
             <div class="logo-container">
                 <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
-                <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
+                @* Style entfernt und über die CSS-Klasse elitegaertner-title definiert *@
+                <h2 class="elitegaertner-title mt-2">EliteGärtner.</h2>
             </div>
             
             <h3 class="register-title">Wähle dein Interessensprofil</h3>
@@ -52,7 +52,7 @@
             
             @if ( !RegistrationState.SelectedTags.Any() )
             {
-                <p class="disabled-hint">Bitte mindestens ein Interesse auswählen.</p>
+                <p class="disabled-hint">Bitte mindestens ein Tag auswählen.</p>
             }
 
         </div>
@@ -61,7 +61,7 @@
 </div>
 
 @code {
-    // Die Model- und Logik-Definition bleibt unverändert
+
     public record TagItem(string Name, string Icon);
 
     List<TagItem> GemueseTags = new()
@@ -103,12 +103,9 @@
 }
 
 <style>
-    /* --- Farben und Font --- */
-    /* Wir nutzen die hartcodierten Werte aus der Login-Seite */
-
     /* --- Seiten- und Hintergrundlayout --- */
     .register-page-container {
-        background-image: url('pictures/FarmBackground.jpg');
+        background-image: url('pictures/IconBackground.jpeg');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -122,13 +119,12 @@
         justify-content: center;
         align-items: center;
         height: 100%;
-        background: rgba(0, 0, 0, 0.1);
     }
 
-    /* --- Registrierungs-Karte (Übernommen) --- */
+    /* --- Registrierungs-Karte --- */
     .register-card {
         width: 90%;
-        max-width: 600px; /* Mittlere Breite, da es nicht zweispaltig ist */
+        max-width: 600px;
         background: rgba(255, 255, 255, 0.95);
         border: 3px solid #000;
         border-radius: 15px;
@@ -137,6 +133,7 @@
         margin: 20px;
     }
 
+    /* --- Logo und Titel --- */
     .logo-container {
         text-align: center;
         margin-bottom: 20px;
@@ -146,11 +143,12 @@
         width: 80px;
     }
 
-    .app-title {
-        font-weight: bold;
+    .elitegaertner-title {
+        font-family: 'Playfair Display', serif; /* Schriftart für Titel */
+        font-weight: 600; 
         font-size: 2.5rem;
         color: #000;
-        margin-top: 5px;
+        margin-top: 8px; 
         line-height: 1;
     }
     
@@ -172,12 +170,11 @@
         margin-bottom: 10px;
     }
 
-    /* --- Tag-Design (Im Sketch-Stil) --- */
-
+    /* --- Tag-Design --- */
     .tag-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 15px; /* Etwas größerer Abstand */
+        gap: 15px;
         margin-bottom: 20px;
     }
 
@@ -187,13 +184,12 @@
         gap: 8px;
         padding: 8px 15px;
         
-        /* Sketch-Stil */
         border: 3px solid #000;
         border-radius: 8px;
         box-shadow: 2px 2px 0 0 #000;
         
         cursor: pointer;
-        background-color: #f0f0f0; /* Hellgrau als Standard */
+        background-color: #f0f0f0;
         font-size: 1.2rem;
         font-weight: bold;
         transition: transform 0.1s, box-shadow 0.1s;
@@ -205,19 +201,25 @@
     }
 
     .tag.selected {
-        background-color: #8B45B3; /* Main Purple */
-        color: #ffffff;
+        background-color: #8B45B3;
+        color: white;
         border-color: #000; 
         box-shadow: 4px 4px 0 0 #000;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    
+    /* Klick-Effekt auf ausgewählte Tags */
+    .tag.selected:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 0 #000; 
     }
     
     .tag.selected:hover {
-        /* Kein Effekt beim Hovern, wenn ausgewählt */
         transform: none; 
         box-shadow: 4px 4px 0 0 #000;
     }
 
-    /* --- Button --- */
+    /* --- Button Styles --- */
     .app-button {
         width: 100%;
         padding: 12px;
@@ -228,15 +230,17 @@
         border-radius: 8px;
         cursor: pointer;
         margin-top: 20px;
+        
         box-shadow: 4px 4px 0 0 #000;
         transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
     }
 
     .primary-button {
-        background-color: #8B45B3; /* Main Purple */
+        background-color: #8B45B3; 
         color: white;
     }
 
+    /* Klick-Effekt für den Button */
     .app-button:active {
         transform: translate(4px, 4px);
         box-shadow: 0 0 0 0 #000;

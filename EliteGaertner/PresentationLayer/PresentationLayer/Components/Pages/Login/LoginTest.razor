@@ -2,35 +2,35 @@
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
-<link href="css/background.css" rel="stylesheet" />
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
 <div class="login-page-container">
     <div class="login-center">
+        
 
         <div class="login-card">
 
             <div class="logo-container">
-                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo"/>
                 <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
             </div>
 
             <div class="input-group">
                 <label for="email-input">Email</label>
-                <input id="email-input" class="app-input" placeholder="Email eingeben..." @bind="email" @bind:event="oninput" />
+                <input id="email-input" class="app-input" placeholder="Email eingeben..." @bind="email" @bind:event="oninput"/>
             </div>
 
             <div class="input-group">
                 <label for="password-input">Passwort</label>
-                <input id="password-input" class="app-input" type="password" placeholder="Passwort eingeben..." @bind="password" @bind:event="oninput" />
+                <input id="password-input" class="app-input" type="password" placeholder="Passwort eingeben..." @bind="password" @bind:event="oninput"/>
             </div>
 
-            <button class="app-button primary-button" 
-                    @onclick="Login" 
+            <button class="app-button primary-button"
+                    @onclick="Login"
                     disabled="@(!LoginEnabled)">
                 Anmelden
             </button>
-            
+
             @if (!LoginEnabled)
             {
                 <p class="disabled-hint">Bitte zuerst E-Mail und Passwort eingeben.</p>
@@ -67,6 +67,10 @@
 <style>
     /* --- Seiten- und Hintergrundlayout --- */
     .login-page-container {
+        background-image: url('pictures/IconBackground.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         height: 100vh;
         width: 100%;
         font-family: 'Patrick Hand', cursive, sans-serif;
@@ -77,7 +81,6 @@
         justify-content: center;
         align-items: center;
         height: 100%;
-        background: rgba(0, 0, 0, 0.1);
     }
 
     /* --- Login-Karte (Sketch-Design) --- */

@@ -1,0 +1,136 @@
+@page "/404"
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<div class="login-page-container">
+    <div class="login-center">
+
+        <div class="login-card">
+
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
+            </div>
+            
+            <div class="error-content">
+                <h1 class="error-code">404</h1>
+                <h3 class="error-message">Seite nicht gefunden.</h3>
+                <p class="error-description">
+                    Hoppla!
+                    Die gesuchte Gärtner-Seite existiert leider nicht mehr oder wurde umgepflanzt.
+                </p>
+            </div>
+            
+            <button class="app-button primary-button" 
+                    @onclick="GoHome">
+                Zurück zur Startseite
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+@code {
+    void GoHome()
+    {
+        Nav.NavigateTo("/startseite", forceLoad: true); 
+    }
+}
+
+<style>
+    /* --- Styles übernommen von der Login-Seite --- */
+    .login-page-container {
+        height: 100vh;
+        width: 100%;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+    }
+
+    .login-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    /* --- Login-Karte (Sketch-Design) --- */
+    .login-card {
+        width: 90%;
+        max-width: 400px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 3px solid #000;
+        border-radius: 15px;
+        box-shadow: 6px 6px 0 0 #000;
+        padding: 30px;
+        margin: 20px;
+    }
+
+    .logo-container {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .app-logo {
+        width: 80px;
+    }
+    
+    .elitegaertner-title {
+        font-weight: 600; 
+        font-size: 2.5rem;
+    }
+
+    /* --- Button --- */
+    .app-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        border: 3px solid #000;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        box-shadow: 4px 4px 0 0 #000;
+        transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+    }
+
+    .primary-button {
+        background-color: #8B45B3;
+        color: white;
+    }
+
+    .app-button:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 0 #000;
+    }
+
+    /* --- Spezifische 404-Styles --- */
+    .error-content {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .error-code {
+        font-size: 6rem; /* Große, auffällige 404 */
+        font-weight: 900;
+        color: #000;
+        line-height: 1;
+        margin: 0 0 10px 0;
+    }
+
+    .error-message {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #8B45B3; /* Akzentfarbe für die Nachricht */
+        margin: 0 0 20px 0;
+    }
+    
+    .error-description {
+        font-size: 1.3rem;
+        color: #000;
+        margin-bottom: 30px;
+    }
+    
+</style>
