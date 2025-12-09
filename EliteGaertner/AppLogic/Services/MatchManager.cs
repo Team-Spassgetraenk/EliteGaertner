@@ -1,7 +1,7 @@
 using AppLogic.Interfaces;
 using Contracts.Data_Transfer_Objects;
-using Infrastructure.Interfaces;
-using Infrastructure.Repositories;
+using DataManagement.Interfaces;
+using DataManagement;
 
 namespace AppLogic.Services;
 
@@ -17,17 +17,17 @@ public class MatchManager : IMatchManager
     public MatchManager(ProfileDto contentReceiver, int preloadCount)
     {
 
-        IPreferenceDBS preferenceDBS = new ManagementDBS();
+        IPreferenceDbs preferenceDBS = new ManagementDbs();
         
         _contentReceiver = contentReceiver;
         _preferenceDto = preferenceDBS.GetUserPreference(contentReceiver.UserId);
         _preloadCount = preloadCount;
-        userSuggestionList = CreateUserSuggestionList(_contentReceiver.UserId, _preferenceDto.Tags, _preloadCount);
+        userSuggestionList = CreateUserSuggestionList(_contentReceiver, _preferenceDto.Tags, _preloadCount);
     }
     
-    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(int userId, List<String> preferences, int preloadCount)
+    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(ProfileDto contentReceiver, List<String> preferences, int preloadCount)
     {
-        var userSuggestion = new UserSuggestion(userId, preferences, preloadCount);
+        var userSuggestion = new UserSuggestion(contentReceiver, preferences, preloadCount);
         return userSuggestion.GetUserSuggestionList(userId);
     }
 
@@ -35,14 +35,14 @@ public class MatchManager : IMatchManager
     {
         //Initialisiere die passende Datenbankschnittstelle.
         //Datenbank gibt das passende MatchDto zurück.
-        IMatchesDBS matchesDbs = new ManagementDBS();
+        IMatchesDbs matchesDbs = new ManagementDbs();
         MatchDto matchDto = matchesDbs.GetMatchInfo(_contentReceiver, targetProfile);
 
         //Speicher die Daten der MatchDto in den lokalen Variablen der Methode ab.
         var contentReceiver = matchDto.ContentReceiver;
         var contentReceiverValue = matchDto.ContentReceiverValue;
         var targetUser = matchDto.TargetProfile;
-        var targetUserValue = matchDto.TargetUserValue;
+        var targetUserValue = matchDto.TargetProfileValue;
         
         //Überprüfe, ob der Content Receiver das targetProfile positiv oder negativ bewertet hat.
         //Falls sich beide User gegenseitig positiv bewertet haben, wird ein Match erstellt (CreateMatch).

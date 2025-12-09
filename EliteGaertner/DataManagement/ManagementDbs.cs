@@ -3,7 +3,7 @@ using DataManagement.Interfaces;
 
 namespace DataManagement;
 
-public class ManagementDBS : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileDbs
+public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileDbs
 {
     
 }
