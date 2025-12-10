@@ -22,7 +22,8 @@ public interface IMatchManager
 
 
     //Diese Methode erstellt für den Match Manager ein User Suggestion List.
-    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(int userId, int preloadCount);
+    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(ProfileDto contentReceiver,
+        List<string> preferences, int preloadCount);
     
     
 

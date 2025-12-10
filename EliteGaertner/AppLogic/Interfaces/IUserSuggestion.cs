@@ -24,7 +24,7 @@ public interface IUserSuggestion
     //Hier wird überprüft ob der Content Receiver den Content Creator 
     //bereits bewertet hat.
     bool ProfileAlreadyRated (ProfileDto contentReceiver,  ProfileDto targetProfile);
-
+    
     
     
     
