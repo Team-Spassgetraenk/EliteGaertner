@@ -1,0 +1,18 @@
+INSERT INTO TAGS (Label) VALUES
+('Auberginen'),
+('Gurken'),
+('Tomaten'),
+('Kürbisse'),
+('Paprika'),
+('Zucchini'),
+('Kartoffeln'),
+('Karotten'),
+('Salate'),
+('Zwiebeln'),
+('Melonen'),
+('Äpfel'),
+('Birnen'),
+('Pfirsiche'),
+('Kirschen'),
+('Erdbeeren'),
+('Trauben');        
