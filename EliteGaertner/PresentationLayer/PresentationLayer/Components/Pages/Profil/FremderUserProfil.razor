@@ -1,199 +1,183 @@
 @page "/profil/{Username}"
-@rendermode InteractiveServer
 @inject NavigationManager Nav
+@rendermode InteractiveServer
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
-<div class="mobile-container">
-    
+<div class="page-container background-style">
+
+    @* --- TOP BAR: Rangliste und Menü --- *@
     <header class="top-bar">
-        <div class="icon-wrapper left" @onclick="GoToRanks">
-            <img src="pictures/Rangliste.png" alt="Rangliste" height="40" /> 
+
+        @* Ranglisten-Icon (links) *@
+        <div class="icon-wrapper" @onclick="GoToRanks">
+            <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
             <span class="icon-label">Rangliste</span>
         </div>
-        
-        <div class="icon-wrapper right menu-wrapper">
+
+        @* Titel (Leer, da der Username im Header-Feld steht) *@
+        <h1 class="page-title"></h1>
+
+        @* Hamburger Menü für Melden/Logout *@
+        <div class="header-right-action menu-wrapper">
             <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
             @if (showLogout)
             {
-                <div class="logout-menu">
-                    <p @onclick="NavigateToLogout">Logout &lt;</p>
-                </div>
+            <div class="logout-menu comic-box">
+                <p @onclick="ReportUser">Melden</p> @* Aktion für Fremdprofil *@
+                <p @onclick="NavigateToLogout">Logout &lt;</p>
+            </div>
             }
         </div>
     </header>
 
-    <div class="scroll-content profile-content">
-        
-        <div class="profile-header-box">
+    <div class="scroll-content">
+
+        @* --- Profil-Header Box (Comic-Stil, Dicke Ränder) --- *@
+        <div class="profile-header-box comic-box">
+
+            @* KEIN: Profil Verwalten Button *@
+
             <div class="profile-info">
+                @* Profilbild (Placeholder) *@
                 <div class="profile-pic-placeholder">
+                    @* Platzhalter Bild für fremde User *@
                     <img src="pictures/Profil_03.png" alt="Profilbild" class="profile-pic" />
                 </div>
+
+                @* Username *@
                 <h2 class="username-display">@@@UsernameDisplay</h2>
             </div>
-            
-            <p class="profile-description">
-                Hallo, ich bin ein Hobbygärtner.
-                Leidenschaftlich pflanze ich Gurken an
-            </p>
-        </div>
-        
-        <div class="harvest-grid">
-            @foreach (var imgPath in HarvestImages)
-            {
-                <div class="grid-item">
-                    <img src="@imgPath" alt="Erntebild" class="harvest-image-thumb" />
-                </div>
-            }
+
+            @* Bio/Beschreibung *@
+            <p class="profile-description">@bioText</p>
         </div>
 
+        @* GALERIE: Box im Comic-Stil, die das Grid umschließt *@
+        <div class="harvest-gallery-box comic-box">
+            <div class="harvest-grid">
+
+                @* Statische Bilder (Kein Plus-Icon) *@
+                @foreach (var imgPath in HarvestImages)
+                {
+                <div class="grid-item comic-grid-item">
+                    <img src="@imgPath" alt="Erntebild" class="harvest-photo" />
+                </div>
+                }
+            </div>
+        </div>
     </div>
 
+    @* --- Bottom Nav (Startseite-Stil) --- *@
     <footer class="bottom-nav">
         <div class="nav-item" @onclick="GoToMatches">
-            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" /> 
+            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
             <span>Matches</span>
         </div>
-        
+
         <div class="nav-item" @onclick="GoToMainpage">
-            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" /> 
-            <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
+            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
+            <span class="elitegaertner-title mt-2">EliteGärtner.</span>
         </div>
-        
-        <div class="nav-item active" @onclick="GoToProfile">
-            <img src="pictures/Profil_04.png" alt="Profile" height="40" /> 
+
+        @* Aktives Profil-Icon sollte hier nicht gesetzt sein, da man ein Fremdprofil betrachtet. *@
+        <div class="nav-item" @onclick="GoToProfile">
+            <img src="pictures/Profil_04.png" alt="Profile" height="40" />
             <span>Profil</span>
         </div>
     </footer>
 </div>
 
-@code {
-    [Parameter]
-    public string Username { get; set; } = ""; // Default-Wert, falls direkt /ProfileTest aufgerufen wird
-
-    private bool showLogout = false;
-    
-    public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
-
-
-    // Platzhalter für die Bilder der Ernte-Galerie (8 Bilder)
-    private readonly List<string> HarvestImages = new List<string>
-    {
-        "pictures/Gurken_01.jpg",
-        "pictures/Tomaten_01.jpg",
-        "pictures/harvest_3.jpg",
-        "pictures/harvest_4.jpg",
-        "pictures/harvest_5.jpg",
-        "pictures/harvest_6.jpg",
-        "pictures/harvest_7.jpg",
-        "pictures/harvest_8.jpg"
-    };
-
-    protected override void OnInitialized()
-    {
-        // Wenn die Seite direkt über /ProfileTest aufgerufen wird,
-        // und Sie ein spezifisches Profil sehen möchten, muss die Username-Variable gesetzt sein.
-        // In einer echten Anwendung würden Sie hier Daten für den angegebenen User laden.
-        Console.WriteLine($"Profil für User: {UsernameDisplay} wird geladen.");
-    }
-    
-    // --- Navigations-Methoden (aus MatchesTest übernommen) ---
-    private void ToggleLogoutMenu()
-    {
-        showLogout = !showLogout;
-    }
-
-    private void NavigateToLogout()
-    {
-        Nav.NavigateTo("/", forceLoad: true);
-    }
-
-    private void GoToRanks()
-    {
-        Nav.NavigateTo("/RanglisteTest", forceLoad: true);
-    }
-    
-    private void GoToMatches()
-    {
-        Nav.NavigateTo("/MatchesTest", forceLoad: true);
-    }
-    
-    private void GoToMainpage()
-    {
-        Nav.NavigateTo("/startseite", forceLoad: true); // Oder MainpageTest
-    }
-    
-    private void GoToProfile()
-    {
-        // Navigiert zum eigenen Profil
-        Nav.NavigateTo("/ProfilTest", forceLoad: true);
-    }
-}
-
-
 <style>
-
-    /* Basisanpassungen für das Layout (Übernahme aus MatchesTest-Styles) */
-    .mobile-container {
-        font-family: 'Patrick Hand', cursive, sans-serif;
+    /* Globale Container und Schrift */
+    .page-container {
         display: flex;
         flex-direction: column;
         height: 100vh;
-        max-width: 100%;
-        background-color: white;
+        position: relative;
         overflow: hidden;
     }
 
-    :root {
-        --main-purple: #8B45B3; /* Der Auberginen-Lilaton */
-        --border-color: #000;
+    .background-style {
+        background-image: url('pictures/LightIconBackground.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 100%;
+        min-height: 100vh;
+        font-family: 'Patrick Hand', cursive, sans-serif;
     }
 
-    /* --- Top Bar (Header) --- */
+    /* --- TOP BAR (Einheitlicher Startseite-Stil) --- */
     .top-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 10px 15px;
-        background: white;
+        border-bottom: 3px solid #000;
+        background-color: #fff;
         z-index: 10;
-        border-bottom: 2px solid #ccc; /* Optische Trennung */
+        box-shadow: 0 4px 0 0 #000;
+        flex-shrink: 0;
     }
 
+    .page-title {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 0;
+        flex-grow: 1;
+        text-align: center;
+        color: transparent; /* Versteckt den leeren Titel */
+    }
+
+    /* Icon Wrapper (Rangliste) */
     .icon-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
+        font-weight: bold;
+        font-size: 12px;
         cursor: pointer;
         width: 60px;
+        transition: transform 0.2s;
     }
 
-    .icon-label {
-        font-size: 0.8rem;
-        line-height: 1;
-        color: black;
+    .icon-wrapper:hover {
+        transform: scale(1.05);
+    }
+
+    .icon-wrapper img {
+        margin-bottom: 2px;
+    }
+
+    /* Rechtes Aktionsfeld (Hamburger Menü) */
+    .header-right-action {
+        width: 60px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* Hamburger Menü und Logout/Melden */
+    .menu-wrapper {
+        position: relative;
     }
 
     .hamburger-icon {
-        font-size: 2rem;
-    }
-
-    /* Logout Menü */
-    .menu-wrapper {
-        position: relative;
-        align-items: flex-end;
+        font-size: 30px;
+        line-height: 1;
+        color: #000;
+        cursor: pointer;
     }
 
     .logout-menu {
         position: absolute;
-        top: 50px;
+        top: 45px;
         right: 0px;
         width: 150px;
         background-color: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 3px solid #000;
+        border-radius: 8px;
+        box-shadow: 3px 3px 0 0 #000;
         z-index: 20;
         padding: 5px 0;
     }
@@ -210,102 +194,117 @@
         background-color: #eee;
     }
 
-
-    /* --- Profil Inhalt --- */
+    /* --- CONTENT AREA & PROFIL BOX --- */
     .scroll-content {
-        flex: 1;
+        flex-grow: 1;
+        padding: 20px 15px;
         overflow-y: auto;
-        padding: 10px 20px;
-        scrollbar-width: thin;
     }
 
-    .profile-content {
-        padding-top: 20px;
-    }
-
-    .profile-header-box {
-        border: 3px solid var(--border-color);
+    .comic-box {
+        /* Dickerer Rand für die Hauptboxen (von ProfilTest übernommen) */
+        border: 5px solid #000;
         border-radius: 10px;
+        box-shadow: 6px 6px 0 0 #000; /* Größerer Shadow */
+        background-color: #fff;
+    }
+
+    /* Profil Info Box */
+    .profile-header-box {
         padding: 15px;
         margin-bottom: 20px;
-        box-shadow: 4px 4px 0 0 var(--border-color); /* Sketch-Effekt */
-        background-color: #fff;
+        position: relative;
     }
 
     .profile-info {
         display: flex;
         align-items: center;
         margin-bottom: 10px;
+        padding-top: 10px; /* Beibehalten, da es das Layout unter dem (fehlenden) Button ausrichtet */
     }
 
     .profile-pic-placeholder {
         width: 60px;
         height: 60px;
         border-radius: 50%;
-        border: 2px solid var(--border-color);
+        border: 2px solid #000;
         overflow: hidden;
         margin-right: 15px;
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: white;
+        background-color: #eee;
     }
 
     .profile-pic {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: cover;
     }
 
     .username-display {
-        font-size: 1.8rem;
+        font-size: 28px;
+        font-weight: bold;
         margin: 0;
-        color: var(--border-color);
+        color: #000;
     }
 
     .profile-description {
-        font-size: 1.2rem;
+        font-size: 18px;
         margin-top: 5px;
         line-height: 1.3;
+        margin-bottom: 0;
     }
 
+    /* --- UMSCHLIEßENDE GALERIE BOX (von ProfilTest übernommen) --- */
+    .harvest-gallery-box {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
 
-    /* --- Ernte-Galerie --- */
+    /* --- BILDER-RASTER (4 Spalten, von ProfilTest übernommen) --- */
     .harvest-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr); /* 4 Spalten wie im Bild */
-        gap: 10px; /* Abstand zwischen den Bildern */
-        padding-bottom: 20px; /* Platz zur Navigationsleiste unten */
+        grid-template-columns: repeat(4, 1fr);
+        gap: 17px;
     }
 
     .grid-item {
-        width: 100%;
-        /* Verhältnisse beibehalten (Quadratisch) */
-        padding-bottom: 100%;
         position: relative;
+        width: 100%;
+        /* 9:16 Hochformat (von ProfilTest übernommen) */
+        padding-bottom: 177.77%;
         overflow: hidden;
-        border: 2px solid #ccc;
-        border-radius: 5px;
     }
 
-    .harvest-image-thumb {
+    .comic-grid-item {
+        background-color: #fff;
+        /* Dickerer Rand für einzelne Bilder (von ProfilTest übernommen) */
+        border: 4px solid #000;
+        border-radius: 8px;
+        /* Angepasster Shadow (von ProfilTest übernommen) */
+        box-shadow: 4px 4px 0 0 #000;
+    }
+
+    .harvest-photo {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Bilder füllen das Feld aus */
+        object-fit: cover;
     }
 
-
-    /* --- Bottom Nav (Übernahme aus MatchesTest-Styles) --- */
+    /* --- BOTTOM NAV (Startseite-Stil) --- */
     .bottom-nav {
         display: flex;
         justify-content: space-around;
-        align-items: flex-end;
         padding: 10px 0 20px 0;
         background: white;
-        border-top: 1px solid #eee;
+        border-top: 3px solid #000;
+        z-index: 10;
+        box-shadow: 0 -4px 0 0 #000;
+        flex-shrink: 0;
     }
 
     .nav-item {
@@ -313,10 +312,64 @@
         flex-direction: column;
         align-items: center;
         cursor: pointer;
-        font-size: 0.9rem;
+        font-size: 12px;
+        font-weight: bold;
+        position: relative;
+        opacity: 1;
+        transition: transform 0.2s;
         width: 80px;
         text-align: center;
-        color: black;
     }
-    
+
+    .nav-item:hover {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+
+    /* Der Link zum eigenen Profil wird deaktiviert, da dies das Fremdprofil ist */
+    .nav-item:nth-child(3) {
+        opacity: 0.6;
+    }
+
+    .elitegaertner-title {
+        font-weight: 600;
+        font-size: 1.0rem;
+    }
 </style>
+
+@code {
+[Parameter]
+public string Username { get; set; } = "";
+
+private string bioText = "Hier steht die Profilbeschreibung des fremden Users... Ein leidenschaftlicher Hobbygärtner, der sich auf seltene Chilisorten spezialisiert hat und regelmäßig an Wettbewerben teilnimmt.";
+private List<string> HarvestImages = new List<string>
+{
+"pictures/Testbilder/Gurken_01.jpg",
+"pictures/Testbilder/Gurken_01.jpg",
+"pictures/Testbilder/Gurken_01.jpg",
+"pictures/Testbilder/Gurken_01.jpg",
+"pictures/Testbilder/Gurken_01.jpg",
+"pictures/Testbilder/Gurken_01.jpg",
+"pictures/Testbilder/Gurken_01.jpg", // Zeige 8 Bilder als Beispiel
+"pictures/Testbilder/Gurken_01.jpg"
+};
+
+private bool showLogout = false;
+
+public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
+
+private void ToggleLogoutMenu() => showLogout = !showLogout;
+private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
+
+private void ReportUser()
+{
+// Logik zum Melden des Benutzers
+Console.WriteLine($"Benutzer {Username} gemeldet.");
+showLogout = false;
+}
+
+private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
+private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
+private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
+private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+}

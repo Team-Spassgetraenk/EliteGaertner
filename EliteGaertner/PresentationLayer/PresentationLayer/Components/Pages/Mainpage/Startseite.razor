@@ -14,6 +14,9 @@
             <span class="icon-label">Rangliste</span>
         </div>
 
+        @* ENTFERNT: Mittlerer Titel, um die MatchesTest-Struktur zu kopieren *@
+        <h1 class="page-title">EliteGärtner.</h1>
+
 
         <div class="menu-icon-container">
             <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
@@ -157,10 +160,7 @@
 
     <footer class="bottom-nav">
         <div class="nav-item active" @onclick="GoToMatches">
-            <div class="nav-icon-wrapper">
-                <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
-                <div class="small-red-dot"></div>
-            </div>
+            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
             <span>Matches</span>
         </div>
 
@@ -272,8 +272,7 @@ private void LikeProfile() => Console.WriteLine("1");
     }
 
     .background-style {
-        /* Hier lade ich mein schönes Hintergrundbild und setze die Comic-Schrift */
-        background-image: url('pictures/IconBackground.jpeg');
+        background-image: url('pictures/LightIconBackground.jpeg');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -289,12 +288,20 @@ private void LikeProfile() => Console.WriteLine("1");
         justify-content: space-between;
         align-items: center;
         padding: 10px 15px;
-        /* Gebe dem Header einen dicken Comic-Rand nach unten */
         border-bottom: 3px solid #000;
         background-color: #fff;
         z-index: 10;
         box-shadow: 0 4px 0 0 #000;
     }
+
+    /* Mittlerer Titel wird beibehalten, aber der Layout-Flow ist jetzt wie in MatchesTest ohne Titel */
+    .page-title {
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: bold;
+        color: black;
+    }
+
 
     /* Icon Wrapper im Header soll vertikal sein (Rangliste Icon über Text) */
     .icon-wrapper {
@@ -304,6 +311,13 @@ private void LikeProfile() => Console.WriteLine("1");
         font-weight: bold;
         font-size: 12px;
         cursor: pointer;
+        /* Übernahme des Hover-Effekts */
+        transition: transform 0.2s;
+    }
+
+    /* Übernahme des Hover-Effekts */
+    .icon-wrapper:hover {
+        transform: scale(1.05);
     }
 
     .icon-wrapper img {
@@ -316,7 +330,6 @@ private void LikeProfile() => Console.WriteLine("1");
 
     .menu-icon {
         font-size: 30px;
-        font-weight: bold;
         line-height: 1;
         color: #000;
     }
@@ -611,11 +624,12 @@ private void LikeProfile() => Console.WriteLine("1");
     .bottom-nav {
         display: flex;
         justify-content: space-around;
-        padding: 10px 0;
+        padding: 10px 0 20px 0;
+        background: white;
         border-top: 3px solid #000;
-        background-color: #fff;
         z-index: 10;
         box-shadow: 0 -4px 0 0 #000;
+        flex-shrink: 0;
     }
 
     .nav-item {
@@ -623,9 +637,25 @@ private void LikeProfile() => Console.WriteLine("1");
         flex-direction: column;
         align-items: center;
         cursor: pointer;
-        font-size: 12px;
-        font-weight: bold;
-        position: relative;
+        font-size: 0.9rem;
+        width: 80px;
+        text-align: center;
+        color: black;
+        transition: transform 0.2s;
+        /* ENTFERNT: opacity: 0.6; */
+        opacity: 1; /* Immer volle Sichtbarkeit wie in MatchesTest */
+        font-weight: bold; /* Übernommen von MatchesTest */
+    }
+
+    .nav-item.active {
+        /* ENTFERNT: wird nicht mehr benutzt, aber Regel bleibt, falls es später wieder aktiviert wird */
+        opacity: 1;
+    }
+
+    .nav-item:hover {
+        transform: scale(1.05);
+        /* ENTFERNT: opacity: 0.85; */
+        opacity: 1; /* Volle Opazität beibehalten */
     }
 
     .nav-icon-wrapper {
@@ -635,17 +665,7 @@ private void LikeProfile() => Console.WriteLine("1");
         display: inline-block;
     }
 
-    .small-red-dot {
-        position: absolute;
-        top: -2px;
-        right: -10px;
-        background-color: #D62828;
-        border-radius: 50%;
-        width: 10px;
-        height: 10px;
-        border: 1px solid #000;
-        z-index: 5;
-    }
+    /* ENTFERNT: Der .small-red-dot Stil wird nicht mehr benötigt, da das Element aus dem HTML entfernt wurde */
 
     /* --- Modal für unangemessene Inhalte melden --- */
     .report-modal-overlay {
