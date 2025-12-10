@@ -2,79 +2,91 @@
 @rendermode InteractiveServer
 @inject NavigationManager Nav
 
-<style>
-    /* Hintergrundbild */
-    .login-bg {
-        background-image: url('pictures/FarmBackground.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        height: 100vh;
-        width: 100%;
-    }
-    
-    .login-right {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        height: 100%;
-        padding-right: 50px;
-    }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
-<div class="login-bg">
-    <div class="login-right">
+<div class="register-page-container">
+    <div class="login-center">
 
-    <!-- Login-Karte -->
-    <div class="card shadow p-4" style="width: 400px; border-radius: 15px; background: rgba(255, 255, 255, 0.9);">
+        <div class="register-card">
 
-        
-        <!--Logo und Titel -->
-        <div class="text-center mb-4">
-            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" style="width:80px;"/>
-            <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
-        </div>
-        
-        <!--Name Inputfeld -->
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input class="form-control" placeholder="" @bind="sirname"/>
-        </div>
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
+            </div>
+            
+            <h3 class="register-title">Neuen Account erstellen</h3>
 
-        <!--Vorname Inputfeld -->
-        <div class="mb-4">
-            <label class="form-label">Vorname</label>
-            <input class="form-control" placeholder="" @bind="prename"/>
-        </div>
-        
-        <!--Email Inputfeld -->
-        <div class="mb-4">
-            <label class="form-label">Email</label>
-            <input class="form-control" placeholder="" @bind="email"/>
-        </div>
-        
-        <!--Benutzername Inputfeld -->
-        <div class="mb-4">
-            <label class="form-label">Benutzername</label>
-            <input class="form-control" placeholder="@@" @bind="username"/>
-        </div>
+            <div class="two-column-grid">
+                
+                <div class="input-column">
+                    <div class="input-group">
+                        <label for="sirname-input">Name</label>
+                        <input id="sirname-input" class="app-input" placeholder="Nachname eingeben" @bind="sirname" @bind:event="oninput" />
+                    </div>
 
-        <!--Passwort Inputfeld -->
-        <div class="mb-4">
-            <label class="form-label">Passwort</label>
-            <input class="form-control" type="password" placeholder="" @bind="password"/>
-        </div>
-        
-        <!-- Registrieren Button -->
-        <button class="btn w-100 mb-3" style="background-color:#8011d1; color:white;" @onclick="Registrieren">
-            Registrieren
-        </button>
+                    <div class="input-group">
+                        <label for="prename-input">Vorname</label>
+                        <input id="prename-input" class="app-input" placeholder="Vorname eingeben" @bind="prename" @bind:event="oninput" />
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="email-input">Email</label>
+                        <input id="email-input" class="app-input" placeholder="Email eingeben" @bind="email" @bind:event="oninput" />
+                    </div>
+                </div>
 
-        <!-- Anmelden-Link -->
-        <p class="text-center text-muted mb-0">Ich habe bereits einen Account?</p>
-        <p class="text-center">
-            <a href="/ " style="color:#8011d1; font-weight:bold;">Jetzt Anmelden</a>
-        </p>
+                <div class="input-column">
+                    <div class="input-group">
+                        <label for="username-input">Benutzername</label>
+                        <input id="username-input" class="app-input" placeholder="Benutzername eingeben" @bind="username" @bind:event="oninput" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password-input">Passwort</label>
+                        <input id="password-input" 
+                               class="app-input" 
+                               type="password" 
+                               placeholder="Passwort eingeben" 
+                               @bind="password" @bind:event="oninput" />
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="password-confirm-input">Passwort bestätigen</label>
+                        <input id="password-confirm-input" 
+                               class="app-input @(PasswordMismatch ? "input-error" : "")" 
+                               type="password" 
+                               placeholder="Passwort wiederholen" 
+                               @bind="passwordConfirm" @bind:event="oninput" />
+                    </div>
+                </div>
+            </div>
+            
+            <button class="app-button primary-button mt-3" 
+                    @onclick="Registrieren" 
+                    disabled="@(!RegisterEnabled)">
+                Registrieren
+            </button>
+
+            @if (!RegisterEnabled)
+            {
+                <p class="disabled-hint">
+                    @(
+                        (
+                            !string.IsNullOrWhiteSpace(password) && 
+                            !string.IsNullOrWhiteSpace(passwordConfirm) && 
+                            PasswordMismatch
+                        ) 
+                        ? "⚠️ Die Passwörter stimmen nicht überein." 
+                        : "Bitte alle Felder ausfüllen."
+                    )
+                </p>
+            }
+
+            <div class="register-text">
+                <p>Ich habe bereits einen Account?</p>
+                <a href="/" class="register-link">Jetzt Anmelden</a>
+            </div>
+
         </div>
     </div>
 </div>
@@ -85,10 +97,207 @@
     string email = "";
     string username = "";
     string password = "";
+    string passwordConfirm = "";
+
+    // Hilfseigenschaft: Prüft nur den Passwort-Fehler (falls beide gefüllt sind)
+    private bool PasswordMismatch => 
+        !string.IsNullOrWhiteSpace(password) && 
+        !string.IsNullOrWhiteSpace(passwordConfirm) && 
+        (password != passwordConfirm);
+
+
+    // Prüft alle Felder plus Passwort-Abgleich
+    private bool RegisterEnabled => 
+        !string.IsNullOrWhiteSpace(sirname) &&
+        !string.IsNullOrWhiteSpace(prename) &&
+        !string.IsNullOrWhiteSpace(email) &&
+        !string.IsNullOrWhiteSpace(username) &&
+        !string.IsNullOrWhiteSpace(password) &&
+        !string.IsNullOrWhiteSpace(passwordConfirm) &&
+        !PasswordMismatch; // Muss FALSE sein
 
     void Registrieren()
     {
-        Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
-        Console.WriteLine($"Eingegeben: {email} / {password} / {username} / {sirname} / {prename}");
+        if (RegisterEnabled)
+        {
+            Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
+            Console.WriteLine($"Registrierung erfolgreich für: {email}");
+        }
     }
 }
+
+<style>
+    /* ... (Ihre bestehenden Styles) ... */
+    
+    /* Füge einen optischen Hinweis bei Fehlern hinzu */
+    .input-error {
+        border-color: red !important;
+        box-shadow: 4px 4px 0 0 red !important;
+    }
+    
+    /* Der restliche Style-Block bleibt unverändert */
+
+    /* --- Seiten- und Hintergrundlayout --- */
+    .register-page-container {
+        background-image: url('pictures/IconBackground.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100vh;
+        width: 100%;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+    }
+
+    .login-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    /* --- Registrierungs-Karte --- */
+    .register-card {
+        width: 95%;
+        max-width: 850px; 
+        background: rgba(255, 255, 255, 0.95);
+        border: 3px solid #000;
+        border-radius: 15px;
+        box-shadow: 6px 6px 0 0 #000;
+        padding: 30px;
+        margin: 20px 20px;
+    }
+    
+    .register-title {
+        font-weight: bold;
+        font-size: 1.8rem;
+        color: #000;
+        margin-bottom: 20px;
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+    }
+
+    /* --- Zweispaltiges Grid-Layout (Immer aktiv) --- */
+    .two-column-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; 
+        gap: 30px;
+    }
+    
+    /* --- Allgemeine Sketch-Elemente --- */
+
+    .logo-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .app-logo {
+        width: 80px;
+    }
+
+    .app-title {
+        font-weight: bold;
+        font-size: 2.5rem;
+        color: #000;
+        margin-top: 5px;
+        line-height: 1;
+    }
+    
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #000;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .app-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 1.2rem;
+        border: 3px solid #000;
+        border-radius: 5px;
+        box-shadow: 2px 2px 0 0 #000;
+        box-sizing: border-box;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+        transition: box-shadow 0.1s, border-color 0.1s;
+    }
+
+    .app-input:focus {
+        outline: none;
+        border-color: #8B45B3;
+        box-shadow: 4px 4px 0 0 #8B45B3;
+    }
+
+    /* --- Button --- */
+    .app-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        border: 3px solid #000;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 4px 4px 0 0 #000;
+        transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+    }
+
+    .primary-button {
+        background-color: #8B45B3;
+        color: white;
+    }
+
+    .app-button:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 0 #000;
+    }
+
+    /* Stil für DEAKTIVIERTEN Button */
+    .app-button:disabled {
+        background-color: #ccc; 
+        color: #999; 
+        border-color: #999; 
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 2px 2px 0 0 #999;
+    }
+
+    /* Hinweis-Text, wenn Button deaktiviert ist */
+    .disabled-hint {
+        text-align: center;
+        color: #999;
+        font-size: 1rem;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-style: italic;
+    }
+
+    /* --- Anmelde-Link --- */
+    .register-text {
+        text-align: center;
+        font-size: 1.1rem;
+        margin-top: 20px;
+    }
+
+    .register-text p {
+        margin: 0 0 5px 0;
+        color: #000;
+    }
+
+    .register-link {
+        color: #8B45B3;
+        font-weight: bold;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        transition: opacity 0.2s;
+    }
+
+    .register-link:hover {
+        opacity: 0.8;
+    }
+</style>

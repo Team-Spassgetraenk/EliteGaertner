@@ -1,9 +1,8 @@
-@page "/registrierung/interessen"
+@page "/präferenzeinstellungen"
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
-@* WICHTIG: Beide Schriftarten laden, da Patrick Hand für den allgemeinen Text und Playfair Display für den EliteGärtner-Titel verwendet wird *@
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 
@@ -14,11 +13,11 @@
 
             <div class="logo-container">
                 <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
-                @* Style entfernt und über die CSS-Klasse elitegaertner-title definiert *@
+                @* über die CSS-Klasse elitegaertner-title definiert *@
                 <h2 class="elitegaertner-title mt-2">EliteGärtner.</h2>
             </div>
             
-            <h3 class="register-title">Wähle dein Interessensprofil</h3>
+            <h3 class="register-title">Präferenzeinstellungen</h3>
             
             <h4 class="tag-headline">Gemüse</h4>
             <div class="tag-grid">
@@ -98,7 +97,7 @@
     void Speichern()
     {
         Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", RegistrationState.SelectedTags));
-        Nav.NavigateTo("/registrierung/kontaktdaten", forceLoad: true);
+        Nav.NavigateTo("/startseite", forceLoad: true);
     }
 }
 

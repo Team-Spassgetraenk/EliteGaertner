@@ -2,60 +2,44 @@
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
-<style>
-    /* Hintergrundbild */
-    .login-bg {
-        background-image: url('pictures/FarmBackground.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        height: 100vh;
-        width: 100%;
-    }
-    
-    .login-center {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        height: 100%;
-        padding-right: 50px;
-    }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
-<div class="login-bg">
+<div class="login-page-container">
     <div class="login-center">
+        
 
-        <!-- Login-Karte -->
-        <div class="card shadow p-4" style="width: 400px; border-radius: 15px; background: rgba(255, 255, 255, 0.9);">
+        <div class="login-card">
 
-            <!-- Logo und Titel -->
-            <div class="text-center mb-4">
-                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" style="width:80px;" />
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo"/>
                 <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
             </div>
 
-            <!-- Email Input -->
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input class="form-control" placeholder="Email eingeben..." @bind="email" />
+            <div class="input-group">
+                <label for="email-input">Email</label>
+                <input id="email-input" class="app-input" placeholder="Email eingeben..." @bind="email" @bind:event="oninput"/>
             </div>
 
-            <!-- Passwort Input -->
-            <div class="mb-4">
-                <label class="form-label">Passwort</label>
-                <input class="form-control" type="password" placeholder="Passwort eingeben..." @bind="password" />
+            <div class="input-group">
+                <label for="password-input">Passwort</label>
+                <input id="password-input" class="app-input" type="password" placeholder="Passwort eingeben..." @bind="password" @bind:event="oninput"/>
             </div>
 
-            <!-- Anmelde Button -->
-            <button class="btn w-100 mb-3" style="background-color:#8011d1; color:white;" @onclick="Login">
+            <button class="app-button primary-button"
+                    @onclick="Login"
+                    disabled="@(!LoginEnabled)">
                 Anmelden
             </button>
 
-            <!-- Registrierungslink -->
-            <p class="text-center text-muted mb-0">Ich habe noch keinen Account?</p>
-            <p class="text-center">
-                <a href="/registertest" style="color:#8011d1; font-weight:bold;">Jetzt registrieren</a>
-            </p>
+            @if (!LoginEnabled)
+            {
+                <p class="disabled-hint">Bitte zuerst E-Mail und Passwort eingeben.</p>
+            }
+
+            <div class="register-text">
+                <p>Ich habe noch keinen Account?</p>
+                <a href="/registertest" class="register-link">Jetzt registrieren</a>
+            </div>
 
         </div>
 
@@ -66,9 +50,165 @@
     string email = "";
     string password = "";
 
+    // Berechnete Eigenschaft, die überprüft, ob beide Felder gefüllt sind
+    private bool LoginEnabled => !string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password);
+
     void Login()
     {
-        Nav.NavigateTo("/MainpageTest", forceLoad: true);
-        Console.WriteLine($"Eingegeben: {email} / {password}");
+        // Diese Prüfung stellt sicher, dass LoginEnabled true ist, bevor navigiert wird
+        if (LoginEnabled)
+        {
+            Nav.NavigateTo("/MainpageTest", forceLoad: true);
+            Console.WriteLine($"Eingegeben: {email} / {password}");
+        }
     }
 }
+
+<style>
+    /* --- Seiten- und Hintergrundlayout --- */
+    .login-page-container {
+        background-image: url('pictures/IconBackground.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100vh;
+        width: 100%;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+    }
+
+    .login-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    /* --- Login-Karte (Sketch-Design) --- */
+    .login-card {
+        width: 90%;
+        max-width: 400px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 3px solid #000;
+        border-radius: 15px;
+        box-shadow: 6px 6px 0 0 #000;
+        padding: 30px;
+        margin: 20px;
+    }
+
+    .logo-container {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .app-logo {
+        width: 80px;
+    }
+
+    .app-title {
+        font-weight: bold;
+        font-size: 2.5rem;
+        color: #000;
+        margin-top: 5px;
+        line-height: 1;
+    }
+
+    /* --- Input-Felder --- */
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #000;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .app-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 1.2rem;
+        border: 3px solid #000;
+        border-radius: 5px;
+        box-shadow: 2px 2px 0 0 #000;
+        box-sizing: border-box;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+        transition: box-shadow 0.1s, border-color 0.1s;
+    }
+
+    .app-input:focus {
+        outline: none;
+        border-color: #8B45B3;
+        box-shadow: 4px 4px 0 0 #8B45B3;
+    }
+
+    /* --- Button --- */
+    .app-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        border: 3px solid #000;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        box-shadow: 4px 4px 0 0 #000;
+        transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+    }
+
+    .primary-button {
+        background-color: #8B45B3;
+        color: white;
+    }
+
+    .app-button:active {
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 0 #000;
+    }
+
+    /* Stil für DEAKTIVIERTEN Button */
+    .app-button:disabled {
+        background-color: #ccc; 
+        color: #999; 
+        border-color: #999; 
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 2px 2px 0 0 #999;
+    }
+
+    /* Hinweis-Text, wenn Button deaktiviert ist */
+    .disabled-hint {
+        text-align: center;
+        color: #999;
+        font-size: 1rem;
+        margin-bottom: 15px;
+        font-style: italic;
+    }
+
+    /* --- Registrierungslink --- */
+    .register-text {
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .register-text p {
+        margin: 0 0 5px 0;
+        color: #000;
+    }
+
+    .register-link {
+        color: #8B45B3;
+        font-weight: bold;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        transition: opacity 0.2s;
+    }
+
+    .register-link:hover {
+        opacity: 0.8;
+    }
+    
+</style>

@@ -1,274 +1,313 @@
-@page "/Startseite"
+@page "/startseite"
 @using Microsoft.AspNetCore.Components.Web
 @inject NavigationManager Nav
 @rendermode InteractiveServer
 
-<div class="page-container">
-    
-    <div class="header-bar">
-        <div class="rangliste">
-            <div class="rangliste-icon">
-                <img src="pictures/Rangliste.png" alt="Rangliste" height="40" /> 
-                <span style="font-size: 24px;">Rangliste</span>
-                <div class="bar-chart"></div>
-            </div>
-            <p>Rangliste</p>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+
+<div class="page-container background-style">
+    <header class="top-bar">
+
+        <div class="icon-wrapper left" @onclick="GoToRanks">
+            <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
+            <span class="icon-label">Rangliste</span>
         </div>
+
+
         <div class="menu-icon-container">
-            <span class="menu-icon" @onclick="ToggleLogoutMenu">&#x2261;</span>
+            <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
         </div>
-    </div>
+    </header>
 
     @if (showLogout)
     {
-        <div class="logout-menu">
-            <p @onclick="NavigateToLogout">Logout &lt;</p>
-        </div>
+    <div class="logout-menu">
+        <p @onclick="NavigateToLogout">Logout &lt;</p>
+    </div>
     }
 
     <div class="tinder-card-area">
         @if (isProfileVisible)
         {
-            <div class="tinder-card">
-                <div class="card-image-placeholder">
-                    <img src="pictures/Testbilder/Gurken_01.jpg" alt="Erntebild" class="harvest-image" />
-                </div>
+        <div class="tinder-wrapper-card">
 
-                <div class="info-box">
-                    <div class="details">
-                        <p><strong>Gurken</strong></p>
-                        <p>Breite - cm</p>
-                        <p>Länge - cm</p>
-                        <p>Gewicht - kg</p>
-                    </div>
-                    <div class="comment">
-                        Hier könnte ein Kommentar zur Ernte stehen.
-                        <p class="username">@user_name1</p>
-                    </div>
-                </div>
+            @* Mein Gedanke: Bild und Info-Spalte nebeneinander *@
+            <div class="main-content-flex">
 
-                <div class="rating-icons">
-                    <div class="rating-icon flag-icon" @onclick="FlagProfile">
-                        <span style="font-size: 20px;">🚩</span>
-                        <div class="notification-dot">1</div>
-                    </div>
-                    <div class="rating-icon dislike-icon" @onclick="DislikeProfile">
-                        <span style="font-size: 24px;">❌</span>
-                    </div>
-                    <div class="rating-icon like-icon" @onclick="LikeProfile">
-                        <span style="font-size: 24px;">💚</span>
-                    </div>
-                    <div class="rating-icon settings-icon" @onclick="NavigateToPreferences">
-                        <span style="font-size: 20px;">⚙️</span>
-                    </div>
-                </div>
-
-            </div>
-        }
-        else
-        {
-            <p style="font-size: 18px; font-weight: bold; text-align: center;">
-                Profil wurde gemeldet und ausgeblendet.
-            </p>
-        }
-        
-        @if (showReportModal)
-        {
-            <div class="report-modal-overlay">
-                <div class="report-modal">
-                    
-                    <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
-                    
-                    <div class="report-reason">
-                        <input type="checkbox" id="abstossende" @onchange="@(e => UpdateReportReason("abstossende Inhalte", e))" checked="@(selectedReportReason == "abstossende Inhalte")" />
-                        <label for="abstossende">abstossende Inhalte</label>
-                    </div>
-                    
-                    <div class="report-reason">
-                        <input type="checkbox" id="sexuelle" @onchange="@(e => UpdateReportReason("sexuelle Inhalte", e))" checked="@(selectedReportReason == "sexuelle Inhalte")" />
-                        <label for="sexuelle">sexuelle Inhalte</label>
-                    </div>
-                    
-                    <div class="report-reason">
-                        <input type="checkbox" id="gewaltvolle" @onchange="@(e => UpdateReportReason("gewaltvolle Inhalte", e))" checked="@(selectedReportReason == "gewaltvolle Inhalte")" />
-                        <label for="gewaltvolle">gewaltvolle Inhalte</label>
-                    </div>
-                    
-                    <div class="report-reason">
-                        <input type="checkbox" id="catfishing" @onchange="@(e => UpdateReportReason("Catfishing", e))" checked="@(selectedReportReason == "Catfishing")" />
-                        <label for="catfishing">Catfishing</label>
-                    </div>
-                    
-                    <div class="report-reason">
-                        <input type="checkbox" id="spam" @onchange="@(e => UpdateReportReason("Spam", e))" checked="@(selectedReportReason == "Spam")" />
-                        <label for="spam">Spam</label>
+                @* --- 1. Linke Spalte: Bild mit kombinierter Username/Tag-Leiste --- *@
+                <div class="tinder-card">
+                    <div class="card-image-placeholder">
+                        <img src="pictures/Testbilder/Gurken_01.jpg" alt="Erntebild" class="harvest-image" />
                     </div>
 
-                    <div class="modal-actions">
-                        <button class="report-button" @onclick="ReportProfile">Melden</button>
-                        <div class="close-modal-icon" @onclick="CloseReportModal">
-                            <span style="font-size: 20px;">❌</span>
+                    @* NEU: Kombiniertes Feld für anklickbaren Username und Tag (Oben links/rechts) *@
+                    <div class="username-tag-combo">
+                        @* ANKLICKBARER USERNAME *@
+                        <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
+                            <span class="username-label">@user_name1</span>
+                        </a>
+
+                        <div class="tag-label">
+                            <span>Gurken 🥒</span>
                         </div>
                     </div>
                 </div>
+
+                @* 2. Rechte Spalte: Parameter (gestapelt), Kommentar und Buttons *@
+                <div class="right-info-stack">
+
+                    @* Parameter Felder (Gewicht & Größe) - JETZT VERTIKAL MIT ICONS *@
+                    <div class="parameter-wrapper-vertical">
+                        <div class="white-comic-box">
+                            <div class="param-icon-circle">
+                                <span>⚖️</span>
+                            </div>
+                            <div class="param-content-wrapper">
+                                <p class="param-title">Gewicht</p>
+                                <p class="param-value">300 g</p>
+                            </div>
+                        </div>
+                        <div class="white-comic-box">
+                            <div class="param-icon-circle">
+                                <span>📏</span>
+                            </div>
+                            <div class="param-content-wrapper">
+                                <p class="param-title">Größe</p>
+                                <p class="param-value">25 cm</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Beschreibung *@
+                    <div class="comment-box white-comic-box">
+                        <p class="comment-label">Erntebeschreibung</p>
+                        <p class="comment-text">Hier könnte ein Kommentar zur Ernte stehen, der maximal 150 Zeichen umfasst und alle relevanten Infos kurz, präzise und übersichtlich vermittelt...</p>
+                    </div>
+
+                    @* Bewertungs-Icons *@
+                    <div class="rating-icons-in-stack">
+                        <div class="rating-icon flag-icon" @onclick="FlagProfile">
+                            <span style="font-size: 20px;">🚩</span>
+                        </div>
+                        <div class="rating-icon dislike-icon" @onclick="DislikeProfile">
+                            <span style="font-size: 24px;">❌</span>
+                        </div>
+                        <div class="rating-icon like-icon" @onclick="LikeProfile">
+                            <span style="font-size: 24px;">💚</span>
+                        </div>
+                        <div class="rating-icon settings-icon" @onclick="NavigateToPreferences">
+                            <img src="pictures/EinstellungenIcon.png" alt="Matches" height="27" />
+                        </div>
+                    </div>
+                </div>
+            </div> @* Ende main-content-flex *@
+        </div>
+        }
+        else
+        {
+        <p style="font-size: 18px; font-weight: bold; text-align: center;">
+            Profil wurde gemeldet und ausgeblendet.
+        </p>
+        }
+
+        @if (showReportModal)
+        {
+        <div class="report-modal-overlay">
+            <div class="report-modal">
+
+                <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
+
+                <div class="report-reason">
+                    <input type="checkbox" id="abstossende" @onchange="@(e => UpdateReportReason("abstossende Inhalte", e))" checked="@(selectedReportReason == "abstossende Inhalte")" />
+                    <label for="abstossende">abstossende Inhalte</label>
+                </div>
+
+                <div class="report-reason">
+                    <input type="checkbox" id="sexuelle" @onchange="@(e => UpdateReportReason("sexuelle Inhalte", e))" checked="@(selectedReportReason == "sexuelle Inhalte")" />
+                    <label for="sexuelle">sexuelle Inhalte</label>
+                </div>
+
+                <div class="report-reason">
+                    <input type="checkbox" id="gewaltvolle" @onchange="@(e => UpdateReportReason("gewaltvolle Inhalte", e))" checked="@(selectedReportReason == "gewaltvolle Inhalte")" />
+                    <label for="gewaltvolle">gewaltvolle Inhalte</label>
+                </div>
+
+                <div class="report-reason">
+                    <input type="checkbox" id="catfishing" @onchange="@(e => UpdateReportReason("Catfishing", e))" checked="@(selectedReportReason == "Catfishing")" />
+                    <label for="catfishing">Catfishing</label>
+                </div>
+
+                <div class="report-reason">
+                    <input type="checkbox" id="spam" @onchange="@(e => UpdateReportReason("Spam", e))" checked="@(selectedReportReason == "Spam")" />
+                    <label for="spam">Spam</label>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="report-button" @onclick="ReportProfile">Melden</button>
+                    <div class="close-modal-icon" @onclick="CloseReportModal">
+                        <span style="font-size: 10px;">❌</span>
+                    </div>
+                </div>
             </div>
+        </div>
         }
 
     </div>
 
     <footer class="bottom-nav">
         <div class="nav-item active" @onclick="GoToMatches">
-            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" /> 
+            <div class="nav-icon-wrapper">
+                <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
+                <div class="small-red-dot"></div>
+            </div>
             <span>Matches</span>
         </div>
-        
+
         <div class="nav-item" @onclick="GoToMainpage">
-            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" /> 
+            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
             <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
         </div>
-        
+
         <div class="nav-item" @onclick="GoToProfile">
-            <img src="pictures/Profil_04.png" alt="Profile" height="40" /> 
+            <img src="pictures/Profil_04.png" alt="Profile" height="40" />
             <span>Profil</span>
         </div>
     </footer>
 </div>
 
 @code {
-    private bool showLogout = false;
-    private bool showReportModal = false; // NEU: Steuert die Sichtbarkeit der Meldemaske
-    private bool isProfileVisible = true; // NEU: Steuert die Sichtbarkeit der Karte (Profil)
-    private string selectedReportReason = ""; 
-    private string user_name1 = "@user_name1";
+private bool showLogout = false;
+private bool showReportModal = false;
+private bool isProfileVisible = true;
+private string selectedReportReason = "";
+private string user_name1 = "@user_name1";
 
-    
-    private void ToggleLogoutMenu()
-    {
-        showLogout = !showLogout;
-    }
+// NEU: Methode, um den Usernamen für die URL vorzubereiten (ohne '@')
+private string GetUsernameUrl() => user_name1.TrimStart('@');
 
-    private void NavigateToLogout()
-    {
-        // Logik für Logout
-    }
-
-    private void NavigateToPreferences()
-    {
-        Nav.NavigateTo("/praeferenzeinstellungen", forceLoad: true);
-    }
-
-    private void GoToMatches()
-    {
-        Nav.NavigateTo("/MatchesTest", forceLoad: true);
-    }
-
-    private void GoToMainpage()
-    {
-        Nav.NavigateTo("/startseite", forceLoad: true);
-    }
-
-    private void GoToProfile()
-    {
-        Nav.NavigateTo("/ProfilTest", forceLoad: true);
-    }
-
-    // NEU: Methode zum Anzeigen der Meldemaske
-    private void FlagProfile()
-    {
-        showReportModal = true;
-        Console.WriteLine("Meldemaske geöffnet");
-    }
-
-    // NEU: Methode zum Schließen der Meldemaske
-    private void CloseReportModal()
-    {
-        showReportModal = false;
-        Console.WriteLine("Meldemaske geschlossen");
-    }
-
-    // NEU: Methode zur Aktualisierung des ausgewählten Meldegrunds
-    private void UpdateReportReason(string reason, ChangeEventArgs e)
-    {
-        if ((bool)e.Value)
-        {
-            // Setzt den ausgewählten Grund und deaktiviert alle anderen
-            selectedReportReason = reason;
-        }
-        else if (selectedReportReason == reason)
-        {
-            // Wenn der aktuell ausgewählte Grund abgewählt wird, wähle keinen aus
-            selectedReportReason = string.Empty;
-        }
-    }
-
-    // NEU: Methode zum Melden des Profils (Use-Case 2.7)
-    private void ReportProfile()
-    {
-        if (!string.IsNullOrEmpty(selectedReportReason))
-        {
-            Console.WriteLine($"Profil gemeldet. Grund: {selectedReportReason}");
-            // Logik: Profil wird dem User nicht mehr angezeigt.
-            isProfileVisible = false; // Das Profil ausblenden
-            showReportModal = false;  // Maske schließen
-
-            // Hier müsste die Logik für das Laden des nächsten Profils folgen.
-        }
-        else
-        {
-            Console.WriteLine("Bitte wählen Sie einen Meldegrund.");
-        }
-    }
-
-    // Dummy-Methoden für Bewertungen
-    private void DislikeProfile() => Console.WriteLine("Dislike");
-    private void LikeProfile() => Console.WriteLine("Like");
-    
+private void ToggleLogoutMenu()
+{
+showLogout = !showLogout;
 }
 
+private void NavigateToLogout()
+{
+Nav.NavigateTo("/", forceLoad: true);
+}
 
+private void NavigateToPreferences()
+{
+Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
+}
 
+private void GoToRanks()
+{
+Nav.NavigateTo("/RanglisteTest", forceLoad: true);
+}
+private void GoToMatches()
+{
+Nav.NavigateTo("/MatchesTest", forceLoad: true);
+}
+
+private void GoToMainpage()
+{
+Nav.NavigateTo("/startseite", forceLoad: true);
+}
+
+private void GoToProfile()
+{
+Nav.NavigateTo("/ProfilTest", forceLoad: true);
+}
+
+private void FlagProfile()
+{
+showReportModal = true;
+}
+
+private void CloseReportModal()
+{
+showReportModal = false;
+}
+
+private void UpdateReportReason(string reason, ChangeEventArgs e)
+{
+if ((bool)e.Value)
+{
+selectedReportReason = reason;
+}
+else if (selectedReportReason == reason)
+{
+selectedReportReason = string.Empty;
+}
+}
+
+private void ReportProfile()
+{
+if (!string.IsNullOrEmpty(selectedReportReason))
+{
+Console.WriteLine($"Profil gemeldet. Grund: {selectedReportReason}");
+isProfileVisible = false;
+showReportModal = false;
+}
+else
+{
+Console.WriteLine("Bitte wählen Sie einen Meldegrund.");
+}
+}
+
+private void DislikeProfile() => Console.WriteLine("0");
+private void LikeProfile() => Console.WriteLine("1");
+
+}
 <style>
-    /* Definiere die Hauptfarben */
-    :root {
-        /* Ähnlich dem Lilaton der Aubergine */
-        --main-purple: #8B45B3;
-        --dislike-red: #D62828;
-        --like-green: #4CAF50;
-        --border-color: #000;
-    }
+    /* Meine Farbcodes: Schwarz (#000), Lila (#8B45B3), Rot (#D62828), Grün (#4CAF50) */
 
-    /* Allgemeine Layout-Stile */
     .page-container {
         display: flex;
         flex-direction: column;
         height: 100vh;
-        background-color: #f7f7f7; /* Leichter Hintergrund */
         position: relative;
-        font-family: Arial, sans-serif; /* Basis-Schriftart */
         overflow: hidden;
     }
 
+    .background-style {
+        /* Hier lade ich mein schönes Hintergrundbild und setze die Comic-Schrift */
+        background-image: url('pictures/IconBackground.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 100%;
+        min-height: 100vh;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+        padding-top: 1px;
+    }
+
     /* --- Header-Bar (Rangliste und Menü) --- */
-    .header-bar {
+    .top-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 10px 15px;
-        border-bottom: 1px solid #ccc;
+        /* Gebe dem Header einen dicken Comic-Rand nach unten */
+        border-bottom: 3px solid #000;
         background-color: #fff;
         z-index: 10;
+        box-shadow: 0 4px 0 0 #000;
     }
 
-    .rangliste {
+    /* Icon Wrapper im Header soll vertikal sein (Rangliste Icon über Text) */
+    .icon-wrapper {
         display: flex;
+        flex-direction: column;
         align-items: center;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 12px;
+        cursor: pointer;
     }
 
-    .rangliste-icon {
-        margin-right: 5px;
-        /* Dies ist ein Platzhalter für das eigentliche Icon-Design */
+    .icon-wrapper img {
+        margin-bottom: 2px;
     }
 
     .menu-icon-container {
@@ -279,19 +318,20 @@
         font-size: 30px;
         font-weight: bold;
         line-height: 1;
-        color: var(--border-color);
+        color: #000;
     }
 
     /* --- Logout-Menü (Dropdown) --- */
     .logout-menu {
         position: absolute;
-        top: 50px; /* An die Header-Bar anpassen */
+        top: 60px;
         right: 15px;
         width: 150px;
         background-color: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        /* Mache das Menü auch zur kleinen Comic-Karte */
+        border: 3px solid #000;
+        border-radius: 8px;
+        box-shadow: 3px 3px 0 0 #000;
         z-index: 20;
         padding: 5px 0;
     }
@@ -318,24 +358,49 @@
         position: relative;
     }
 
-    .tinder-card {
+    .tinder-wrapper-card {
         width: 100%;
-        max-width: 400px; /* Maximale Breite für das "Smartphone"-Layout */
-        height: 80vh; /* Relative Höhe zur Ansichtshöhe */
+        max-width: 700px;
+        height: 90vh;
         max-height: 600px;
-        border: 3px solid var(--border-color);
-        border-radius: 10px;
+
+        background-color: #ffffff;
+        border: 3px solid #000;
+        border-radius: 15px;
+        box-shadow: 5px 5px 0 0 #000;
+
+        position: relative;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Flex-Container für Bild und Info-Stack (nebeneinander) */
+    .main-content-flex {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        gap: 20px;
+    }
+
+
+    /* Linke Spalte: Bildkarte */
+    .tinder-card {
+        flex: 1.5;
+        border: 3px solid #000;
+        border-radius: 8px;
         background-color: #fff;
-        box-shadow: 5px 5px 0 0 var(--border-color); /* Sketch-Effekt */
+        box-shadow: 3px 3px 0 0 #000;
         position: relative;
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        height: 100%;
     }
 
     .card-image-placeholder {
         width: 100%;
-        /* Berechnet die Höhe, damit der untere Bereich Platz für Icons und Infos hat */
         flex-grow: 1;
         background-color: #eee;
         overflow: hidden;
@@ -344,112 +409,213 @@
     .harvest-image {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Stellt sicher, dass das Bild den Container ausfüllt */
+        object-fit: cover;
     }
 
-    /* --- Info-Box (Gurken-Details) --- */
-    .info-box {
+    /* --- Kombinierte Username/Tag-Box unten im Bild --- */
+    .username-tag-combo {
         position: absolute;
-        bottom: 20px; /* Über den Rating-Icons */
-        left: 20px;
-        right: 20px;
-        background-color: rgb(176, 66, 255); /* Transparente braune/rötliche Farbe */
-        color: white;
+        bottom: 26px;
+        left: 15px;
+        right: 15px;
+
+        /* Flexbox für Username links, Tag rechts */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ffffff;
+        color: #000000;
+        padding: 8px 10px;
+        border-radius: 5px;
+        border: 2px solid #000000;
+        box-shadow: 2px 2px 0 0 #000;
+        font-size: 24px;
+        z-index: 5;
+        line-height: 1;
+    }
+
+    .username-link {
+        color: #000;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .username-label {
+        margin: 0;
+    }
+
+    .tag-label span {
+        color: #000000;
+        padding: 5px 5px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+
+    /* --- Rechte Spalte: Info-Stack --- */
+    .right-info-stack {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        height: 100%;
+        border: 3px solid #000;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.95);
+        box-shadow: 3px 3px 0 0 #000;
+        padding: 15px;
+    }
+
+    /* Allgemeine Boxen für Parameter und Kommentar */
+    .white-comic-box {
+        background-color: #fff;
+        color: #000;
         padding: 10px;
         border-radius: 8px;
-        border: 1px solid var(--border-color);
-        box-shadow: 2px 2px 0 0 var(--border-color);
+        border: 3px solid #000;
+        box-shadow: 3px 3px 0 0 #000;
+
+        /* WICHTIG: Display: flex nur für Parameterboxen einstellen */
+        /* Standardmäßig keine Flex-Einstellung, wird in .parameter-wrapper-vertical überschrieben, wenn es ein direktes Kind ist. */
+    }
+
+    /* NEU: Icon-Kreis links */
+    .param-icon-circle {
+        /* Abmessungen */
+        width: 45px; /* Etwas größer gemacht */
+        height: 45px;
+        min-width: 45px;
+
+        /* Comic-Styling */
+        border-radius: 50%;
+        border: 3px solid #000;
+        background-color: #eee;
+        box-shadow: 1px 1px 0 0 #000;
+
+        /* Zentrierung des Emojis */
         display: flex;
-        font-size: 14px;
+        justify-content: center;
+        align-items: center;
+
+        font-size: 24px; /* Icon etwas größer */
+        margin-right: 15px; /* Abstand zum Inhalt vergrößert */
     }
 
-    .details {
-        flex: 1;
-        padding-right: 10px;
-        border-right: 1px solid white;
+    /* NEU: Wrapper für Titel und Wert */
+    .param-content-wrapper {
+        flex-grow: 1;
+        padding-left: 0; /* Kein zusätzliches Padding hier */
     }
 
-    .comment {
-        flex: 2;
-        padding-left: 10px;
+    /* Wrapper für die Parameter-Boxen */
+    .parameter-wrapper-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 0 0 auto;
     }
 
-    .username {
-        font-style: italic;
+    /* Spezifische Flex-Einstellung für die Parameter-Boxen, da sie nun die Icons enthalten */
+    .parameter-wrapper-vertical .white-comic-box {
+        width: 100%;
+        padding: 8px 10px; /* Padding angepasst */
+        display: flex; /* Flex-Einstellung hier, damit .comment-box nicht betroffen ist */
+        align-items: center;
+    }
+
+    .param-title {
         font-weight: bold;
-        margin-top: 5px;
+        margin: 0;
+        font-size: 22px; /* Schriftgröße erhöht */
+        line-height: 1.2;
     }
 
-    /* --- Bewertungs-Icons (Mitte-Unten) --- */
-    .rating-icons {
-        position: absolute;
-        bottom: -25px;
-        left: 50%;
-        transform: translateX(-50%);
+    .param-value {
+        font-size: 24px; /* Schriftgröße erhöht */
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    /* Kommentar Box */
+    .comment-box {
+        flex: 1;
+        overflow-y: auto;
+        /* WICHTIG: Die Display-Eigenschaft wird nicht auf 'flex' gesetzt, 
+           da sie in .white-comic-box nicht mehr global definiert ist.
+           Das Standard-Block-Layout wird beibehalten. */
+    }
+
+    .comment-label {
+        font-weight: bold;
+        margin-top: 0;
+        margin-bottom: 5px;
+        color: #000000;
+        font-size: 26px; /* Schriftgröße erhöht */
+    }
+
+    .comment-text {
+        font-size: 20px; /* Schriftgröße erhöht */
+        margin-bottom: 0;
+    }
+
+
+    /* --- Bewertungs-Icons (Innerhalb des rechten Stacks) --- */
+    .rating-icons-in-stack {
+        margin-top: auto;
         display: flex;
+        justify-content: center;
         gap: 15px;
-        background-color: #fff;
-        padding: 10px;
-        border-radius: 50px;
-        z-index: 5;
+        padding-top: 15px;
+        border-top: 2px dashed #000;
     }
 
+    /* Die Icon-Styles bleiben gleich wie zuvor */
     .rating-icon {
-        width: 40px;
-        height: 40px;
+        width: 55px;
+        height: 55px;
         border-radius: 50%;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        border: 2px solid var(--border-color);
+        border: 3px solid #000;
         position: relative;
-        box-shadow: 2px 2px 0 0 var(--border-color);
+        box-shadow: 3px 3px 0 0 #000;
         transition: transform 0.1s ease;
     }
 
     .rating-icon:active {
-        transform: translate(-50%, 0) scale(0.95);
-        box-shadow: 1px 1px 0 0 var(--border-color);
+        /* Der "Gedrückt"-Effekt für Comic-Buttons */
+        transform: translate(3px, 3px) scale(0.95);
+        box-shadow: 0 0 0 0 #000;
     }
 
     .dislike-icon {
-        background-color: var(--dislike-red);
+        background-color: #D62828;
+        font-size: 28px !important;
     }
 
     .like-icon {
-        background-color: var(--like-green);
+        background-color: #4CAF50;
+        font-size: 28px !important;
     }
 
     .flag-icon, .settings-icon {
         background-color: #fff;
     }
 
-    .notification-dot {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background-color: var(--dislike-red);
-        color: white;
-        font-size: 10px;
-        font-weight: bold;
-        border-radius: 50%;
-        width: 15px;
-        height: 15px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 1px solid var(--border-color);
-    }
 
     /* --- Bottom Nav (Unten) --- */
     .bottom-nav {
         display: flex;
         justify-content: space-around;
         padding: 10px 0;
-        border-top: 3px solid var(--border-color);
+        border-top: 3px solid #000;
         background-color: #fff;
         z-index: 10;
+        box-shadow: 0 -4px 0 0 #000;
     }
 
     .nav-item {
@@ -459,45 +625,26 @@
         cursor: pointer;
         font-size: 12px;
         font-weight: bold;
+        position: relative;
     }
 
     .nav-icon-wrapper {
         position: relative;
+        height: 40px;
+        width: 40px;
+        display: inline-block;
     }
 
-    .nav-icon {
-        width: 50px; /* Größe der Icons anpassen */
-        height: 50px;
-        /* Optional: Icons wie in der Vorlage darstellen (Sketch-Look) */
+    .small-red-dot {
+        position: absolute;
+        top: -2px;
+        right: -10px;
+        background-color: #D62828;
         border-radius: 50%;
-        border: 2px solid var(--border-color);
-        box-shadow: 2px 2px 0 0 var(--border-color);
-    }
-
-    /* Spezieller Stil für EliteGärtner (Aubergine) */
-    .nav-item:nth-child(2) .nav-icon {
-        background-color: var(--main-purple);
-        /* Hier ist das Bild der Aubergine (elitegaertner_icon.png) */
-    }
-
-    /* Spezieller Stil für Matches (Gurkenhände) */
-    .nav-item:nth-child(1) .nav-icon {
-        /* Hier ist das Bild der Gurkenhände (matches_icon.png) */
-        background-color: #fff;
-    }
-
-    /* Spezieller Stil für Profil (Gärtner) */
-    .nav-item:nth-child(3) .nav-icon {
-        /* Hier ist das Bild des Gärtners (profil_icon.png) */
-        background-color: #fff;
-    }
-
-    .small-dot {
-        top: 0;
-        right: 0;
         width: 10px;
         height: 10px;
-        font-size: 7px;
+        border: 1px solid #000;
+        z-index: 5;
     }
 
     /* --- Modal für unangemessene Inhalte melden --- */
@@ -510,8 +657,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: rgba(0, 0, 0, 0.1); /* Leicht transparentes Overlay */
-        z-index: 50; /* Über allen anderen Elementen */
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 50;
     }
 
     .report-modal {
@@ -519,9 +666,9 @@
         max-width: 300px;
         background-color: #fff;
         padding: 20px;
-        border: 3px solid var(--border-color);
+        border: 3px solid #000;
         border-radius: 10px;
-        box-shadow: 5px 5px 0 0 var(--border-color); /* Sketch-Effekt */
+        box-shadow: 5px 5px 0 0 #000;
         position: relative;
     }
 
@@ -546,32 +693,32 @@
     }
 
     .report-button {
-        background-color: var(--dislike-red);
+        background-color: #D62828;
         color: white;
-        border: 2px solid var(--border-color);
-        border-radius: 5px;
+        border: 3px solid #000;
+        border-radius: 8px;
         padding: 8px 15px;
         font-weight: bold;
         cursor: pointer;
-        box-shadow: 2px 2px 0 0 var(--border-color);
+        box-shadow: 3px 3px 0 0 #000;
         transition: transform 0.1s ease;
     }
 
     .report-button:active {
-        transform: translate(1px, 1px);
-        box-shadow: 1px 1px 0 0 var(--border-color);
+        transform: translate(3px, 3px);
+        box-shadow: 0 0 0 0 #000;
     }
-    
+
     .close-modal-icon {
         background-color: #fff;
-        border: 2px solid var(--border-color);
+        border: 3px solid #000;
         border-radius: 50%;
-        width: 30px;
-        height: 30px;
+        width: 35px;
+        height: 35px;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        box-shadow: 2px 2px 0 0 var(--border-color);
+        box-shadow: 3px 3px 0 0 #000;
     }
 </style>

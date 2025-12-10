@@ -91,12 +91,12 @@
     
     private void GoToMainpage()
     {
-        Nav.NavigateTo("/", forceLoad: true);
+        Nav.NavigateTo("/startseite", forceLoad: true);
     }
     
     private void GoToProfile()
     {
-        Nav.NavigateTo("/ProfileTest", forceLoad: true);
+        Nav.NavigateTo("/ProfilTest", forceLoad: true);
     }
 }
 
@@ -236,5 +236,10 @@
     .nav-icon {
         font-size: 2rem; 
         margin-bottom: 5px;
+    }
+
+    .nav-item:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s;
     }
 </style>
