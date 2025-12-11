@@ -35,7 +35,7 @@
         {
         <div class="tinder-wrapper-card">
 
-            @* Mein Gedanke: Bild und Info-Spalte nebeneinander *@
+            @* Bild und Info-Spalte nebeneinander *@
             <div class="main-content-flex">
 
                 @* --- 1. Linke Spalte: Bild mit kombinierter Username/Tag-Leiste --- *@
@@ -44,7 +44,7 @@
                         <img src="pictures/Testbilder/Gurken_01.jpg" alt="Erntebild" class="harvest-image" />
                     </div>
 
-                    @* NEU: Kombiniertes Feld für anklickbaren Username und Tag (Oben links/rechts) *@
+                    @* Kombiniertes Feld für anklickbaren Username und Tag (Oben links/rechts) *@
                     <div class="username-tag-combo">
                         @* ANKLICKBARER USERNAME *@
                         <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
@@ -76,8 +76,17 @@
                                 <span>📏</span>
                             </div>
                             <div class="param-content-wrapper">
-                                <p class="param-title">Größe</p>
+                                <p class="param-title">Länge</p>
                                 <p class="param-value">25 cm</p>
+                            </div>
+                        </div>
+                        <div class="white-comic-box">
+                            <div class="param-icon-circle">
+                                <span>📐</span>
+                            </div>
+                            <div class="param-content-wrapper">
+                                <p class="param-title">Breite</p>
+                                <p class="param-value">67 cm</p>
                             </div>
                         </div>
                     </div>
@@ -440,8 +449,8 @@ private void LikeProfile() => Console.WriteLine("1");
         color: #000000;
         padding: 8px 10px;
         border-radius: 5px;
-        border: 2px solid #000000;
-        box-shadow: 2px 2px 0 0 #000;
+        border: 3px solid #000000;
+        box-shadow: 3px 3px 0 0 #000;
         font-size: 24px;
         z-index: 5;
         line-height: 1;
@@ -493,12 +502,11 @@ private void LikeProfile() => Console.WriteLine("1");
         /* Standardmäßig keine Flex-Einstellung, wird in .parameter-wrapper-vertical überschrieben, wenn es ein direktes Kind ist. */
     }
 
-    /* NEU: Icon-Kreis links */
+    /* Icon-Kreis links */
     .param-icon-circle {
-        /* Abmessungen */
-        width: 45px; /* Etwas größer gemacht */
-        height: 45px;
-        min-width: 45px;
+        width: 35px;
+        height: 35px;
+        min-width: 35px;
 
         /* Comic-Styling */
         border-radius: 50%;
@@ -511,14 +519,13 @@ private void LikeProfile() => Console.WriteLine("1");
         justify-content: center;
         align-items: center;
 
-        font-size: 24px; /* Icon etwas größer */
+        font-size: 19px;
         margin-right: 15px; /* Abstand zum Inhalt vergrößert */
     }
 
     /* NEU: Wrapper für Titel und Wert */
     .param-content-wrapper {
         flex-grow: 1;
-        padding-left: 0; /* Kein zusätzliches Padding hier */
     }
 
     /* Wrapper für die Parameter-Boxen */
@@ -540,12 +547,12 @@ private void LikeProfile() => Console.WriteLine("1");
     .param-title {
         font-weight: bold;
         margin: 0;
-        font-size: 22px; /* Schriftgröße erhöht */
+        font-size: 19px;
         line-height: 1.2;
     }
 
     .param-value {
-        font-size: 24px; /* Schriftgröße erhöht */
+        font-size: 21px;
         font-weight: 800;
         margin: 0;
         line-height: 1.2;
@@ -565,11 +572,11 @@ private void LikeProfile() => Console.WriteLine("1");
         margin-top: 0;
         margin-bottom: 5px;
         color: #000000;
-        font-size: 26px; /* Schriftgröße erhöht */
+        font-size: 23px;
     }
 
     .comment-text {
-        font-size: 20px; /* Schriftgröße erhöht */
+        font-size: 17px;
         margin-bottom: 0;
     }
 
