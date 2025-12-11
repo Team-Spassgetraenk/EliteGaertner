@@ -20,6 +20,8 @@ public interface IMatchManager
     //Diese Methode ist für die 
     public void CreateMatch(ProfileDto targetProfile);
 
+    public void AddSuggestions();
+
 
     //Diese Methode erstellt für den Match Manager ein User Suggestion List.
     public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(ProfileDto contentReceiver,
@@ -31,8 +33,10 @@ public interface IMatchManager
 
     
     public List<ProfileDto> ShowMatches();
-    
-    
+
+    public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList();
+
+
 
 
 }
