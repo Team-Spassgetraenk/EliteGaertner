@@ -8,11 +8,11 @@ public interface IHarvestDbs
 {
 
     //Gib mir die Harvestuploads des Users zurück.
-    public IList<HarvestUploadDto> GetHarvestUploadRepo(int userId);
+    public IList<HarvestUploadDto> GetHarvestUploadRepo(ProfileDto contentReceiver);
     
     //Erstell mir eine Repository an HarvestUploadDtos die zum dem Interessensprofil
     //des Users passen. Die Menge der DTOs wird vom preloadCount bestimmt.
-    public IList<HarvestUploadDto> GetHarvestUploadRepo(int userId, List<string> preferences, int preloadCount);
+    public IList<HarvestUploadDto> GetHarvestUploadRepo(ProfileDto contentReceiver, List<string> preferences, int preloadCount);
     
     
 

@@ -11,9 +11,8 @@ public class MatchManager : IMatchManager
     private readonly PreferenceDto _preferenceDto;
     private readonly int _preloadCount;
     private Dictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
-
-    //Maybe ProfilMgmDto löschen? Für was brauchen wir das?
-    //Könnten einfach mit einem ProfileDto arbeiten.
+    
+    
     public MatchManager(ProfileDto contentReceiver, int preloadCount)
     {
 
@@ -82,16 +81,13 @@ public class MatchManager : IMatchManager
             AddSuggestions();
     }
 
-    public void VisitUserProfile(int userId)
+    public void VisitUserProfile(ProfileDto targetProfile)
     {
-        IProfileDbs profileDbs = new ManagementDbs();
+        
+        //Wir müssen auf die Datenbank zugreifen, um uns die passenden HarvestUploads zu holen.
         IHarvestDbs harvestDbs = new ManagementDbs();
-
-        ProfileDto profile;
-        List<HarvestUploadDto> harvestUploads;
-        
-        
-
+        //Das Interface gibt eine Liste der HarvestUploads zurück.
+        var harvestUploads = harvestDbs.GetHarvestUploadRepo(targetProfile.UserId);
     }
     
     
@@ -99,19 +95,14 @@ public class MatchManager : IMatchManager
     {
         //Initialisiere die passende Datenbankschnittstelle.
         //Datenbank gibt die passenden erfolgreichen Matches zurück.
-        IMatchesDbs matchesDbs = new ManagementDbs();
-        var successfulMatches = matchesDbs.GetSuccessfulMatches(targetProfile);
-
-
+        
         
     }
     
-    
-    
-
-    public List<ProfileDto> ShowMatches(int userId)
+    public List<ProfileDto> ShowMatches()
     {
-        
+        IMatchesDbs matchesDbs = new ManagementDbs();
+        return matchesDbs.GetSuccessfulMatches(_contentReceiver);
     }
 
 }

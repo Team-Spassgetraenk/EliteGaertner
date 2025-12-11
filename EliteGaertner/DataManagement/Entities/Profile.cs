@@ -13,4 +13,5 @@ public class Profile
     public bool ShareMail { get; set; }
     public bool SharePhoneNumber { get; set; }
     public DateTime UserCreated { get; set; }
+    public string ProfilePicture { get; set; }
 }

@@ -27,10 +27,10 @@ public interface IMatchManager
     
     
 
-    public void VisitUserProfile(int userId);
+    public void VisitUserProfile(ProfileDto targetProfile);
 
     
-    public List<ProfileDto> ShowMatches(int userId);
+    public List<ProfileDto> ShowMatches();
     
     
 

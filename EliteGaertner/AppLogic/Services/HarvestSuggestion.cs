@@ -17,9 +17,8 @@ public class HarvestSuggestion : IHarvestSuggestion
     public HarvestSuggestion(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
     {
         _harvestSuggestionsList = new List<HarvestUploadDto>();
-        //Das muss glaub ich in die PROGRAM.CS
         IHarvestDbs harvestRepo = new ManagementDbs();
-        _harvestSuggestionsList.AddRange(harvestRepo.GetHarvestUploadRepo(userId, preferences, preloadCount));
+        _harvestSuggestionsList.AddRange(harvestRepo.GetHarvestUploadRepo(contentReceiver, preferences, preloadCount));
     }
     
     public List<HarvestUploadDto> GetHarvestSuggestionList()

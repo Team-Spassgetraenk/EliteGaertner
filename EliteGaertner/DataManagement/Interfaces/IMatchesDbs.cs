@@ -7,7 +7,7 @@ public interface IMatchesDbs
 
     public MatchDto GetMatchInfo(ProfileDto contentReceiver, ProfileDto targetProfile);
 
-    public List<MatchDto> GetSuccessfulMatches(ProfileDto contentReceiver);
+    public List<ProfileDto> GetSuccessfulMatches(ProfileDto contentReceiver);
 
     public void SaveMatchInfo(MatchDto matchDto);
     
