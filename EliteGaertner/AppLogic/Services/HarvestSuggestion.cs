@@ -9,10 +9,8 @@ namespace AppLogic.Services;
 
 public class HarvestSuggestion : IHarvestSuggestion
 {
-
     
     private readonly List<HarvestUploadDto> _harvestSuggestionsList;
-    
    
     public HarvestSuggestion(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
     {

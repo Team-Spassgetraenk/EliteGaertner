@@ -1,6 +1,6 @@
 namespace DataManagement.Entities;
 
-public class Preferences
+public class ProfilePreferences
 {
     public int TagId { get; set; }
     public int ProfileId { get; set; }

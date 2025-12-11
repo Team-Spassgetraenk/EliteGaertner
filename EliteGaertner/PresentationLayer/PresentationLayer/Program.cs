@@ -1,6 +1,17 @@
 using PresentationLayer.Components;
+using DataManagement;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//ConnectionString und Initialisierung für DbContext
+var connectionString = builder.Configuration.GetConnectionString("Default")
+                       ?? "Host=localhost;Port=5432;Database=elitegaertner;Username=postgres;Password=postgres";
+
+builder.Services.AddDbContext<EliteGaertnerDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

@@ -90,7 +90,7 @@ public class MatchManager : IMatchManager
         //Wir müssen auf die Datenbank zugreifen, um uns die passenden HarvestUploads zu holen.
         IHarvestDbs harvestDbs = new ManagementDbs();
         //Das Interface gibt eine Liste der HarvestUploads zurück.
-        var harvestUploads = harvestDbs.GetHarvestUploadRepo(targetProfile.UserId);
+        var harvestUploads = harvestDbs.GetHarvestUploadRepo(targetProfile);
     }
     
     
