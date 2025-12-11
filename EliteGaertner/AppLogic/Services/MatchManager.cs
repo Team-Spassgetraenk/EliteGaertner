@@ -10,7 +10,7 @@ public class MatchManager : IMatchManager
     private readonly ProfileDto _contentReceiver;
     private readonly PreferenceDto _preferenceDto;
     private readonly int _preloadCount;
-    private Dictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
+    private readonly Dictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
     
     
     public MatchManager(ProfileDto contentReceiver, int preloadCount)
@@ -30,7 +30,7 @@ public class MatchManager : IMatchManager
         return userSuggestion.GetUserSuggestionList(contentReceiver.UserId);
     }
 
-    private void AddSuggestions()
+    public void AddSuggestions()
     {
         //Gib eine neue Liste an Suggestions zurück.
         var newSuggestions = CreateUserSuggestionList(_contentReceiver, _preferenceDto.Tags, _preloadCount);
@@ -40,6 +40,9 @@ public class MatchManager : IMatchManager
             if (!_userSuggestionList.ContainsKey(sug.Key))
                 _userSuggestionList.Add(sug.Key, sug.Value);
     }
+
+    public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList()
+        => _userSuggestionList;
 
     public void RateUser(ProfileDto targetProfile, bool value)
     {
