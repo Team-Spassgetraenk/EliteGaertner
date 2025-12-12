@@ -721,32 +721,32 @@ WHERE p1.UserName = 'GurkenGuru'
 -- =============================
 
 -- 1–4: Vier verschiedene User melden dasselbe Bild von TomatenTiger
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Sieht aus wie ein Stockfoto.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Sieht aus wie ein Stockfoto.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
 WHERE p.UserName = 'TomatenTiger'
     LIMIT 1;
 
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Beschreibung passt nicht zum Bild.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Beschreibung passt nicht zum Bild.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
 WHERE p.UserName = 'TomatenTiger'
     LIMIT 1;
 
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Verdacht auf Fake-Upload.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Verdacht auf Fake-Upload.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
 WHERE p.UserName = 'TomatenTiger'
     LIMIT 1;
 
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Mehrfach hochgeladenes Bild.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Mehrfach hochgeladenes Bild.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -754,8 +754,8 @@ WHERE p.UserName = 'TomatenTiger'
     LIMIT 1;
 
 -- 5: GurkenGuru meldet einen Kürbis-Upload vom KürbisKönig
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Zu dunkel aufgenommen, schwer erkennbar.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Zu dunkel aufgenommen, schwer erkennbar.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -763,8 +763,8 @@ WHERE p.UserName = 'KürbisKönig'
     LIMIT 1;
 
 -- 6: ZwiebelZauberin meldet einen Melonen-Upload von MelonenMaster
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Kategorie wirkt unpassend für das Bild.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Kategorie wirkt unpassend für das Bild.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -772,8 +772,8 @@ WHERE p.UserName = 'MelonenMaster'
     LIMIT 1;
 
 -- 7: RadieschenRocker meldet einen Paprika-Upload von PaprikaPiratin
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Text enthält unpassende Formulierungen.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Text enthält unpassende Formulierungen.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -781,8 +781,8 @@ WHERE p.UserName = 'PaprikaPiratin'
     LIMIT 1;
 
 -- 8: BrokkoliBoss meldet einen Kartoffel-Upload von KartoffelKnight
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Bildqualität ist zu niedrig.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Bildqualität ist zu niedrig.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -790,8 +790,8 @@ WHERE p.UserName = 'KartoffelKnight'
     LIMIT 1;
 
 -- 9: MaisMagier meldet einen Trauben-Upload von TraubenTaktiker
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Vermutlich nicht selbst angebaut.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Vermutlich nicht selbst angebaut.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -799,8 +799,8 @@ WHERE p.UserName = 'TraubenTaktiker'
     LIMIT 1;
 
 -- 10: BeerenBoss meldet einen Brokkoli-Upload von BrokkoliBoss
-INSERT INTO REPORT (Reason, UploadId)
-SELECT 'Kein Obst, gehört eher in Gemüse-Kategorie.' AS Reason,
+INSERT INTO REPORT (Reason, ReportDate, UploadId)
+SELECT 'Kein Obst, gehört eher in Gemüse-Kategorie.' AS Reason, NOW() AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
          JOIN PROFILE p ON p.ProfileId = h.ProfileId
