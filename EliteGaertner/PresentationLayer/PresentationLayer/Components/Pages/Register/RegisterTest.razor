@@ -1,6 +1,9 @@
 ﻿@page "/registertest"
 @rendermode InteractiveServer
 @inject NavigationManager Nav
+@using Contracts.Data_Transfer_Objects
+@using AppLogic.Interfaces
+@inject IProfileMgm ProfileMgm
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -120,8 +123,31 @@
     {
         if (RegisterEnabled)
         {
-            Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
-            Console.WriteLine($"Registrierung erfolgreich für: {email}");
+            var profileDto = new ProfileDto
+            {
+                UserId = 1,  // TODO Vorerst fest, später aus AuthStateProvider
+                UserName = username,
+                FirstName = prename,
+                LastName = sirname,
+                EMail = email,
+                PasswordHash = "", // TODO AuthStateProvider erstellen und Password handling
+                phoneNumber = "",  // kommt später
+                profileText = "",
+                ShareMail = false,
+                SharePhoneNumber = false,
+                UserCreated = DateTime.UtcNow
+            };
+
+            bool success = ProfileMgm.UpdateProfile(profileDto);
+            if (success)
+            {
+                Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
+                Console.WriteLine($"Profil aktualisiert für: {email}");
+            }
+            else
+            {
+                Console.WriteLine($"Profil konnte nicht gespeichert werden für: {email}");
+            }
         }
     }
 }

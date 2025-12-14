@@ -1,6 +1,13 @@
 @page "/ernte-hochladen"
 @rendermode InteractiveServer
 @inject NavigationManager Nav
+@using AppLogic.Interfaces
+@using Contracts.Data_Transfer_Objects
+@inject IUploadService UploadService
+@inject IWebHostEnvironment Env
+@using Microsoft.AspNetCore.Components.Forms
+
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -133,30 +140,38 @@
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
     {
         var file = e.File;
-        if (file != null)
+        if (file == null) return;
+
+        try
         {
-            try
+            var maxFileSize = 5 * 1024 * 1024;
+            if (file.Size > maxFileSize)
             {
-                var maxFileSize = 5 * 1024 * 1024;
-                if (file.Size > maxFileSize)
-                {
-                    Console.WriteLine("Die Datei ist zu groß.");
-                    return;
-                }
-                
-                var stream = file.OpenReadStream(maxFileSize);
-                
-                using var memoryStream = new MemoryStream();
-                await stream.CopyToAsync(memoryStream);
-                var base64String = Convert.ToBase64String(memoryStream.ToArray());
-                
-                HochgeladenesBild = $"data:{file.ContentType};base64,{base64String}";
-                
+                Console.WriteLine("Die Datei ist zu groß.");
+                return;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Fehler beim Hochladen der Datei: {ex.Message}");
-            }
+        
+            //tempUploads-Ordner erstellen (falls nicht vorhanden)
+            var uploadsDir = Path.Combine(Env.WebRootPath, "tempUploads");
+            Directory.CreateDirectory(uploadsDir);
+        
+            //UUID-Dateiname generieren + Extension behalten
+            var extension = Path.GetExtension(file.Name);
+            var fileName = $"{Guid.NewGuid().ToString("N")}{extension}";
+            var filePath = Path.Combine(uploadsDir, fileName);
+        
+            // Datei in Ordner speichern
+            using var stream = file.OpenReadStream(maxFileSize);
+            using var fileStream = new FileStream(filePath, FileMode.Create);
+            await stream.CopyToAsync(fileStream);
+            
+            HochgeladenesBild = $"/tempUploads/{fileName}";
+        
+            Console.WriteLine($"Bild gespeichert: {filePath}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Hochladen: {ex.Message}");
         }
     }
 
@@ -164,15 +179,44 @@
     {
         if (string.IsNullOrEmpty(SelectedTag) || string.IsNullOrEmpty(HochgeladenesBild)) return;
 
-        Console.WriteLine($"Veröffentlicht: {SelectedTag}, Bildgröße: {HochgeladenesBild.Length}");
+        // TODO: echten UserId z.B. aus Auth/Context holen
+        int userId = 123;
 
-        Nav.NavigateTo("/ProfilTest", forceLoad: true);
+        float weightGram = (Gewicht ?? 0);
+        float lengthCm = Groesse ?? 0;
+        float widthCm = 0f;
+
+        var dto = new HarvestUploadDto
+        {
+            UploadId = 0, //Von Upload Service
+            ImageUrl = HochgeladenesBild!, // aktuell Data-URL; später URL aus Storage
+            Description = Kommentar,
+            WeightGram = weightGram,
+            WidthCm = widthCm,
+            LengthCm = lengthCm,
+            UploadDate = DateTime.UtcNow,
+            ProfileId = userId
+        };
+
+        bool success = UploadService.CreateUpload(dto);
+
+        if (success)
+        {
+            Console.WriteLine($"Veröffentlicht: {SelectedTag}, Bildgröße: {HochgeladenesBild.Length}");
+            Nav.NavigateTo("/ProfilTest", forceLoad: true);
+        }
+        else
+        {
+            Console.WriteLine("Upload fehlgeschlagen.");
+        }
     }
+}
+
 }
 
 
 <style>
-    
+
     .register-page-container {
         background-image: url('pictures/LightIconBackground.jpeg');
         background-size: cover;

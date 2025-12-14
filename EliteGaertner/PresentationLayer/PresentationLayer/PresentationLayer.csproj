@@ -7,7 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\AppLogic\AppLogic.csproj" />
       <ProjectReference Include="..\..\Contracts\Contracts.csproj" />
+      <ProjectReference Include="..\..\DataManagement\DataManagement.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -15,6 +17,15 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\tempUploads\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Components.Forms" Version="9.0.11" />
+      <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.3.0" />
     </ItemGroup>
 
 </Project>

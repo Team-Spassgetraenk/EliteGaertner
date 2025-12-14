@@ -8,5 +8,5 @@ public interface IProfileMgm
 
     bool UpdateProfile(ProfileDto profile);
 
-    bool SetContactVisibility(int userId, ContactVisibilityDto visibility);
+    bool SetContactVisibility(ContactVisibilityDto contactVisibility);
 }
