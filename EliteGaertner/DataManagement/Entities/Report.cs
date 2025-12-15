@@ -1,9 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+
 namespace DataManagement.Entities;
 
-public class Report
+public partial class Report
 {
-    public int ReportId { get; set; }
-    public string Reason { get; set; }
-    public DateTime ReportDate { get; set; }
-    public int UploadId { get; set; }
+    public int Reportid { get; set; }
+
+    public string Reason { get; set; } = null!;
+
+    public DateTime Reportdate { get; set; }
+
+    public int Uploadid { get; set; }
+
+    public virtual Harvestupload Upload { get; set; } = null!;
 }

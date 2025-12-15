@@ -1,10 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+
 namespace DataManagement.Entities;
 
-public class Rating
+public partial class Rating
 {
-    public int ContentCreatorId { get; set; }
-    public int ContentReceiverId { get; set; }
-    public bool ProfileRating { get; set; }
-    public DateTime RatingDate { get; set; }
-    public DateTime MatchActiveDate { get; set; }
+    public int Contentcreatorid { get; set; }
+
+    public int Contentreceiverid { get; set; }
+
+    public bool Profilerating { get; set; }
+
+    public DateTime Ratingdate { get; set; }
+
+    public virtual Profile Contentcreator { get; set; } = null!;
+
+    public virtual Profile Contentreceiver { get; set; } = null!;
 }
