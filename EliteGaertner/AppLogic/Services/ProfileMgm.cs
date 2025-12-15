@@ -12,11 +12,13 @@ public class ProfileMgm : IProfileMgm
 
     public bool UpdateProfile(ProfileDto profile)
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Profildaten geändert");
+        return true;
     }
 
-    public bool SetContactVisibility(int userId, ContactVisibilityDto visibility)
+    public bool SetContactVisibility(ContactVisibilityDto dto)
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Kontaktdaten geändert");
+        return true;
     }
 }

@@ -1,6 +1,8 @@
 @page "/registrierung/kontaktdaten"
+@using AppLogic.Interfaces
 @inject NavigationManager Nav
-@inject UserRegistrationState RegistrationState
+@using Contracts.Data_Transfer_Objects
+@inject IProfileMgm ProfileMgm
 @rendermode InteractiveServer
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -71,6 +73,7 @@
 </div>
 
 @code {
+    int userID = 123;
     string email = "";
     string telephone = "";
     bool shareEmail = false;
@@ -95,16 +98,25 @@
     {
         if (FormValid)
         {
-            // Speichern im Service
-            RegistrationState.Email = email;
-            RegistrationState.Telephone = telephone;
-            RegistrationState.ShareEmail = shareEmail;
-            RegistrationState.ShareTelephone = shareTelephone;
+            var contactDto = new ContactVisibilityDto
+            {
+                UserId = 123, // Fester UserId (später dynamisch)
+                EMail = email,
+                phoneNumber = telephone,
+                ShareMail = shareEmail,
+                SharePhoneNumber = shareTelephone
+            };
 
-            // Weiterleitung zur Profilerstellungs-Seite
-            Nav.NavigateTo("/registrierung/profilerstellung", forceLoad: true);
+            // Direkt ans Interface weitergeben
+            bool success = ProfileMgm.SetContactVisibility(contactDto);
+
+            if (success)
+            {
+                Nav.NavigateTo("/registrierung/profilerstellung", forceLoad: true);
+            }
         }
     }
+
 }
 
 <style>

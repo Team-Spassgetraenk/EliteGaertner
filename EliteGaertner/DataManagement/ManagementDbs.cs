@@ -4,7 +4,7 @@ using DataManagement.Interfaces;
 
 namespace DataManagement;
 
-public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileDbs
+public class ManagementDbs //: IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileDbs
 {
     public IList<HarvestUploadDto> GetHarvestUploadRepo(ProfileDto contentReceiver)
     {

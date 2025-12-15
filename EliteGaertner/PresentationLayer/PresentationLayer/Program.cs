@@ -1,6 +1,9 @@
 using PresentationLayer.Components;
 using DataManagement;
 using Microsoft.EntityFrameworkCore;
+using AppLogic.Interfaces;
+using AppLogic.Services;
+using PresentationLayer.Components.Pages.Register;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,12 @@ builder.Services.AddRazorComponents()
 
 // Registrierungsstatus **vor Build registrieren**
 builder.Services.AddSingleton<UserRegistrationState>();
+
+// UploadService registrieren
+builder.Services.AddScoped<IUploadService, UploadServiceImpl>();
+
+// ProfileMgm registrieren
+builder.Services.AddScoped<IProfileMgm, ProfileMgm>();
 
 var app = builder.Build();
 
