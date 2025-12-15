@@ -4,7 +4,6 @@ namespace Contracts.Data_Transfer_Objects;
 
 public record MatchDto
 {
-    public int MatchId { get; init; }
     public ProfileDto ContentReceiver { get; init; }
     public bool ContentReceiverValue { get; init; }
     public ProfileDto TargetProfile { get; init; }

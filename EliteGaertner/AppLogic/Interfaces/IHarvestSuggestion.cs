@@ -2,7 +2,7 @@ using Contracts.Data_Transfer_Objects;
 
 namespace AppLogic.Interfaces;
 
-
+//NOCH NICHT FERTIG
 
 //Das Interface ist für die HarvestSuggestionManagement Klasse zuständig.
 //Sie beschreibt, welche Anforderungen an den Zugriff der einzelnen

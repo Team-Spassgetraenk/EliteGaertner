@@ -18,4 +18,9 @@
         <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\AppLogic\AppLogic.csproj" />
+      <ProjectReference Include="..\DataManagement\DataManagement.csproj" />
+    </ItemGroup>
+
 </Project>

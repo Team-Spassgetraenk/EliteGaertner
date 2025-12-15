@@ -2,5 +2,7 @@ namespace Contracts.Data_Transfer_Objects;
 
 public record PreferenceDto
 {
-    public List<string> Tags { get; init; }
+    public int TagId { get; set; }
+    public int Profileid { get; set; }
+    public DateTime DateUpdated { get; set; }
 }

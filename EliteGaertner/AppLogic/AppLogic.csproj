@@ -12,7 +12,6 @@
       <ProjectReference Include="..\DataManagement\DataManagement.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Remove="Services\HarvestSuggestion.cs" />
         <Compile Remove="Services\MatchManager.cs" />
         <Compile Remove="Services\UserSuggestion.cs" />
     </ItemGroup>

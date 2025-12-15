@@ -2,7 +2,7 @@
 
 public record ProfileDto
 {
-    public int UserId { get; init; }
+    public int ProfileId { get; init; }
     public string UserName { get; init; }
     public string FirstName { get; init; }
     public string LastName { get; init; }
@@ -13,4 +13,7 @@ public record ProfileDto
     public bool ShareMail { get; init; }
     public bool SharePhoneNumber { get; init; }
     public DateTime UserCreated { get; init; }
+    public List <HarvestUploadDto> HarvestUploads { get; init; }
+    public List <PreferenceDto> PreferenceDtos { get; init; }
+    //HIER FEHLT VIELLEICHT NOCH DAS RATING FELD
 }

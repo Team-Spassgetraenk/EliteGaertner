@@ -2,6 +2,8 @@
 -- seed.sql – Testdaten für EliteGärtner (20 User)
 -- ===============================================
 
+\connect elitegaertner_test    
+    
 -- =============================
 -- TAGS
 -- =============================

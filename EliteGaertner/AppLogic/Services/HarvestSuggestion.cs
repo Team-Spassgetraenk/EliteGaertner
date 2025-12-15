@@ -1,7 +1,7 @@
 using Contracts.Data_Transfer_Objects;
 using AppLogic.Interfaces;
-using DataManagement.Interfaces;
 using DataManagement;
+using DataManagement.Interfaces;
 
 
 namespace AppLogic.Services;
@@ -9,14 +9,23 @@ namespace AppLogic.Services;
 
 public class HarvestSuggestion : IHarvestSuggestion
 {
-    
-    private readonly List<HarvestUploadDto> _harvestSuggestionsList;
+    //Initialisierung der Liste und der Datenbankverbindung bei Erstellung des Objektes
+    private readonly List<HarvestUploadDto> _harvestSuggestionsList = new();
+    private readonly IHarvestDbs _harvestRepo;
    
-    public HarvestSuggestion(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
+    public HarvestSuggestion(IHarvestDbs harvestRepo, ProfileDto contentReceiver, int preloadCount)
     {
-        _harvestSuggestionsList = new List<HarvestUploadDto>();
-        IHarvestDbs harvestRepo = new ManagementDbs();
-        _harvestSuggestionsList.AddRange(harvestRepo.GetHarvestUploadRepo(contentReceiver, preferences, preloadCount));
+        _harvestRepo = harvestRepo;
+        
+        //Aufbereitung der ProfileId und der dazugehörigen TagIds
+        var profileId = contentReceiver.ProfileId;
+        var tagIds = contentReceiver.PreferenceDtos
+            .Select(p => p.TagId)
+            .Distinct()
+            .ToList();
+        
+        //Übergabe der ProfileId und dem dazugehörigen Interessensprofil/TagIds an die Datenbank.
+        _harvestSuggestionsList.AddRange(_harvestRepo.GetHarvestUploadRepo(profileId, tagIds, preloadCount));
     }
     
     public List<HarvestUploadDto> GetHarvestSuggestionList()
