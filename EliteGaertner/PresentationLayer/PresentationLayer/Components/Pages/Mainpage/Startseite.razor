@@ -13,8 +13,7 @@
             <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
             <span class="icon-label">Rangliste</span>
         </div>
-
-        @* ENTFERNT: Mittlerer Titel, um die MatchesTest-Struktur zu kopieren *@
+        
         <h1 class="page-title">EliteGärtner.</h1>
 
 
@@ -23,10 +22,37 @@
         </div>
     </header>
 
+    @* --- NEUES KOMBINIERTES LOGOUT & ADMIN MENÜ --- *@
     @if (showLogout)
     {
-    <div class="logout-menu">
-        <p @onclick="NavigateToLogout">Logout &lt;</p>
+    <div class="logout-menu admin-menu-ext">
+        @* Roter Logout Button *@
+        <p class="logout-link" @onclick="NavigateToLogout">Logout ➜]</p>
+        
+        <div class="admin-nav-section">
+            <div class="admin-header" @onclick="ToggleAdminNav">
+                <span>🛠 Admin-Navigation</span>
+                <span style="font-size: 12px;">@(showAdminNav ? " ▲" : " ▼")</span>
+            </div>
+            
+            @if (showAdminNav)
+            {
+                <div class="admin-scroll-area">
+                    <div class="admin-link" @onclick='() => NavTo("/")'>Login</div>
+                    <div class="admin-link" @onclick='() => NavTo("/registrierung")'>Registrierung</div>
+                    <div class="admin-link" @onclick='() => NavTo("/registrierung/interessen")'>Interessen</div>
+                    <div class="admin-link" @onclick='() => NavTo("/registrierung/profilerstellung")'>Profilerstellung</div>
+                    <div class="admin-link" @onclick='() => NavTo("/ernte-hochladen")'>Ernte Upload</div>
+                    <div class="admin-link" @onclick='() => NavTo("/profiltest")'>Profil (Eigen)</div>
+                    <div class="admin-link" @onclick='() => NavTo("/profil/profilverwaltung")'>Verwaltung</div>
+                    <div class="admin-link" @onclick='() => NavTo("/profil/fremder-user")'>Profil (Fremd)</div>
+                    <div class="admin-link" @onclick='() => NavTo("/startseite")'>Startseite</div>
+                    <div class="admin-link" @onclick='() => NavTo("/präferenzeinstellungen")'>Präferenzen</div>
+                    <div class="admin-link" @onclick='() => NavTo("/ranglistetest")'>Rangliste</div>
+                    <div class="admin-link" @onclick='() => NavTo("/matchestest")'>Matches</div>
+                </div>
+            }
+        </div>
     </div>
     }
 
@@ -60,7 +86,7 @@
                 @* 2. Rechte Spalte: Parameter (gestapelt), Kommentar und Buttons *@
                 <div class="right-info-stack">
 
-                    @* Parameter Felder (Gewicht & Größe) - JETZT VERTIKAL MIT ICONS *@
+                    @* Parameter Felder (Gewicht & Größe) *@
                     <div class="parameter-wrapper-vertical">
                         <div class="white-comic-box">
                             <div class="param-icon-circle">
@@ -113,7 +139,7 @@
                         </div>
                     </div>
                 </div>
-            </div> @* Ende main-content-flex *@
+            </div>
         </div>
         }
         else
@@ -187,91 +213,56 @@
 
 @code {
 private bool showLogout = false;
+private bool showAdminNav = false; 
 private bool showReportModal = false;
 private bool isProfileVisible = true;
 private string selectedReportReason = "";
 private string user_name1 = "@user_name1";
 
-// NEU: Methode, um den Usernamen für die URL vorzubereiten (ohne '@')
-private string GetUsernameUrl() => user_name1.TrimStart('@');
-
 private void ToggleLogoutMenu()
 {
-showLogout = !showLogout;
+    showLogout = !showLogout;
+    if (!showLogout) showAdminNav = false;
 }
 
-private void NavigateToLogout()
+private void ToggleAdminNav() => showAdminNav = !showAdminNav;
+
+private void NavTo(string path)
 {
-Nav.NavigateTo("/", forceLoad: true);
+    showLogout = false;
+    Nav.NavigateTo(path, forceLoad: true);
 }
 
-private void NavigateToPreferences()
-{
-Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
-}
-
-private void GoToRanks()
-{
-Nav.NavigateTo("/RanglisteTest", forceLoad: true);
-}
-private void GoToMatches()
-{
-Nav.NavigateTo("/MatchesTest", forceLoad: true);
-}
-
-private void GoToMainpage()
-{
-Nav.NavigateTo("/startseite", forceLoad: true);
-}
-
-private void GoToProfile()
-{
-Nav.NavigateTo("/ProfilTest", forceLoad: true);
-}
-
-private void FlagProfile()
-{
-showReportModal = true;
-}
-
-private void CloseReportModal()
-{
-showReportModal = false;
-}
+private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
+private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
+private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
+private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
+private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
+private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+private void FlagProfile() => showReportModal = true;
+private void CloseReportModal() => showReportModal = false;
 
 private void UpdateReportReason(string reason, ChangeEventArgs e)
 {
-if ((bool)e.Value)
-{
-selectedReportReason = reason;
-}
-else if (selectedReportReason == reason)
-{
-selectedReportReason = string.Empty;
-}
+    if ((bool)e.Value) selectedReportReason = reason;
+    else if (selectedReportReason == reason) selectedReportReason = string.Empty;
 }
 
 private void ReportProfile()
 {
-if (!string.IsNullOrEmpty(selectedReportReason))
-{
-Console.WriteLine($"Profil gemeldet. Grund: {selectedReportReason}");
-isProfileVisible = false;
-showReportModal = false;
-}
-else
-{
-Console.WriteLine("Bitte wählen Sie einen Meldegrund.");
-}
+    if (!string.IsNullOrEmpty(selectedReportReason))
+    {
+        isProfileVisible = false;
+        showReportModal = false;
+    }
 }
 
 private void DislikeProfile() => Console.WriteLine("0");
 private void LikeProfile() => Console.WriteLine("1");
-
+private string GetUsernameUrl() => user_name1.TrimStart('@');
 }
-<style>
-    /* Meine Farbcodes: Schwarz (#000), Lila (#8B45B3), Rot (#D62828), Grün (#4CAF50) */
 
+<style>
     .page-container {
         display: flex;
         flex-direction: column;
@@ -291,7 +282,6 @@ private void LikeProfile() => Console.WriteLine("1");
         padding-top: 1px;
     }
 
-    /* --- Header-Bar (Rangliste und Menü) --- */
     .top-bar {
         display: flex;
         justify-content: space-between;
@@ -303,7 +293,6 @@ private void LikeProfile() => Console.WriteLine("1");
         box-shadow: 0 4px 0 0 #000;
     }
 
-    /* Mittlerer Titel wird beibehalten, aber der Layout-Flow ist jetzt wie in MatchesTest ohne Titel */
     .page-title {
         font-size: 1.8rem;
         margin: 0;
@@ -311,8 +300,6 @@ private void LikeProfile() => Console.WriteLine("1");
         color: black;
     }
 
-
-    /* Icon Wrapper im Header soll vertikal sein (Rangliste Icon über Text) */
     .icon-wrapper {
         display: flex;
         flex-direction: column;
@@ -320,57 +307,77 @@ private void LikeProfile() => Console.WriteLine("1");
         font-weight: bold;
         font-size: 12px;
         cursor: pointer;
-        /* Übernahme des Hover-Effekts */
         transition: transform 0.2s;
     }
 
-    /* Übernahme des Hover-Effekts */
-    .icon-wrapper:hover {
-        transform: scale(1.05);
-    }
-
-    .icon-wrapper img {
-        margin-bottom: 2px;
-    }
-
-    .menu-icon-container {
-        cursor: pointer;
-    }
-
-    .menu-icon {
-        font-size: 30px;
-        line-height: 1;
-        color: #000;
-    }
+    .icon-wrapper:hover { transform: scale(1.05); }
+    .icon-wrapper img { margin-bottom: 2px; }
+    .menu-icon-container { cursor: pointer; }
+    .menu-icon { font-size: 30px; line-height: 1; color: #000; }
 
     /* --- Logout-Menü (Dropdown) --- */
     .logout-menu {
         position: absolute;
         top: 60px;
         right: 15px;
-        width: 150px;
+        width: 180px; 
         background-color: #fff;
-        /* Mache das Menü auch zur kleinen Comic-Karte */
         border: 3px solid #000;
         border-radius: 8px;
         box-shadow: 3px 3px 0 0 #000;
         z-index: 20;
-        padding: 5px 0;
+        padding: 0;
+        overflow: hidden;
     }
 
-    .logout-menu p {
-        padding: 5px 10px;
+    /* Logout Styling: Hellroter Hintergrund, rote Schrift */
+    .logout-link {
+        padding: 8px 10px;
         margin: 0;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 18px;
         text-align: right;
+        border-bottom: 2px solid #000;
+        background-color: #fff0f0; 
+        color: #D62828; 
+        font-weight: bold;
     }
 
-    .logout-menu p:hover {
-        background-color: #eee;
+    .logout-link:hover {
+        background-color: #ffdada;
     }
 
-    /* --- Haupt-Karten-Bereich --- */
+    .admin-header {
+        background-color: #f0f0f0;
+        padding: 8px 10px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #000;
+    }
+
+    .admin-scroll-area {
+        max-height: 200px;
+        overflow-y: auto;
+        background-color: #fff;
+    }
+
+    .admin-link {
+        padding: 6px 10px;
+        font-size: 14px;
+        border-bottom: 1px solid #ddd;
+        cursor: pointer;
+    }
+
+    .admin-link:hover {
+        background-color: #8B45B3;
+        color: white;
+    }
+
+    /* --- Restliche Tinder-Card Styles (Unverändert) --- */
     .tinder-card-area {
         flex-grow: 1;
         display: flex;
@@ -385,12 +392,10 @@ private void LikeProfile() => Console.WriteLine("1");
         max-width: 700px;
         height: 90vh;
         max-height: 600px;
-
         background-color: #ffffff;
         border: 3px solid #000;
         border-radius: 15px;
         box-shadow: 5px 5px 0 0 #000;
-
         position: relative;
         padding: 20px;
         display: flex;
@@ -398,16 +403,8 @@ private void LikeProfile() => Console.WriteLine("1");
         align-items: center;
     }
 
-    /* Flex-Container für Bild und Info-Stack (nebeneinander) */
-    .main-content-flex {
-        display: flex;
-        width: 100%;
-        height: 100%;
-        gap: 20px;
-    }
+    .main-content-flex { display: flex; width: 100%; height: 100%; gap: 20px; }
 
-
-    /* Linke Spalte: Bildkarte */
     .tinder-card {
         flex: 1.5;
         border: 3px solid #000;
@@ -421,27 +418,14 @@ private void LikeProfile() => Console.WriteLine("1");
         height: 100%;
     }
 
-    .card-image-placeholder {
-        width: 100%;
-        flex-grow: 1;
-        background-color: #eee;
-        overflow: hidden;
-    }
+    .card-image-placeholder { width: 100%; flex-grow: 1; background-color: #eee; overflow: hidden; }
+    .harvest-image { width: 100%; height: 100%; object-fit: cover; }
 
-    .harvest-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* --- Kombinierte Username/Tag-Box unten im Bild --- */
     .username-tag-combo {
         position: absolute;
         bottom: 26px;
         left: 15px;
         right: 15px;
-
-        /* Flexbox für Username links, Tag rechts */
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -456,26 +440,9 @@ private void LikeProfile() => Console.WriteLine("1");
         line-height: 1;
     }
 
-    .username-link {
-        color: #000;
-        text-decoration: none;
-        font-weight: bold;
-        cursor: pointer;
-    }
+    .username-link { color: #000; text-decoration: none; font-weight: bold; cursor: pointer; }
+    .tag-label span { color: #000000; padding: 5px 5px; font-weight: bold; white-space: nowrap; }
 
-    .username-label {
-        margin: 0;
-    }
-
-    .tag-label span {
-        color: #000000;
-        padding: 5px 5px;
-        font-weight: bold;
-        white-space: nowrap;
-    }
-
-
-    /* --- Rechte Spalte: Info-Stack --- */
     .right-info-stack {
         flex: 1;
         display: flex;
@@ -489,7 +456,6 @@ private void LikeProfile() => Console.WriteLine("1");
         padding: 15px;
     }
 
-    /* Allgemeine Boxen für Parameter und Kommentar */
     .white-comic-box {
         background-color: #fff;
         color: #000;
@@ -497,91 +463,26 @@ private void LikeProfile() => Console.WriteLine("1");
         border-radius: 8px;
         border: 3px solid #000;
         box-shadow: 3px 3px 0 0 #000;
-
-        /* WICHTIG: Display: flex nur für Parameterboxen einstellen */
-        /* Standardmäßig keine Flex-Einstellung, wird in .parameter-wrapper-vertical überschrieben, wenn es ein direktes Kind ist. */
     }
 
-    /* Icon-Kreis links */
     .param-icon-circle {
-        width: 35px;
-        height: 35px;
-        min-width: 35px;
-
-        /* Comic-Styling */
-        border-radius: 50%;
-        border: 3px solid #000;
-        background-color: #eee;
-        box-shadow: 1px 1px 0 0 #000;
-
-        /* Zentrierung des Emojis */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        font-size: 19px;
-        margin-right: 15px; /* Abstand zum Inhalt vergrößert */
+        width: 35px; height: 35px; min-width: 35px;
+        border-radius: 50%; border: 3px solid #000;
+        background-color: #eee; box-shadow: 1px 1px 0 0 #000;
+        display: flex; justify-content: center; align-items: center;
+        font-size: 19px; margin-right: 15px;
     }
 
-    /* NEU: Wrapper für Titel und Wert */
-    .param-content-wrapper {
-        flex-grow: 1;
-    }
+    .param-content-wrapper { flex-grow: 1; }
+    .parameter-wrapper-vertical { display: flex; flex-direction: column; gap: 10px; flex: 0 0 auto; }
+    .parameter-wrapper-vertical .white-comic-box { width: 100%; padding: 8px 10px; display: flex; align-items: center; }
+    .param-title { font-weight: bold; margin: 0; font-size: 19px; line-height: 1.2; }
+    .param-value { font-size: 21px; font-weight: 800; margin: 0; line-height: 1.2; }
 
-    /* Wrapper für die Parameter-Boxen */
-    .parameter-wrapper-vertical {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        flex: 0 0 auto;
-    }
+    .comment-box { flex: 1; overflow-y: auto; }
+    .comment-label { font-weight: bold; margin-top: 0; margin-bottom: 5px; color: #000000; font-size: 23px; }
+    .comment-text { font-size: 17px; margin-bottom: 0; }
 
-    /* Spezifische Flex-Einstellung für die Parameter-Boxen, da sie nun die Icons enthalten */
-    .parameter-wrapper-vertical .white-comic-box {
-        width: 100%;
-        padding: 8px 10px; /* Padding angepasst */
-        display: flex; /* Flex-Einstellung hier, damit .comment-box nicht betroffen ist */
-        align-items: center;
-    }
-
-    .param-title {
-        font-weight: bold;
-        margin: 0;
-        font-size: 19px;
-        line-height: 1.2;
-    }
-
-    .param-value {
-        font-size: 21px;
-        font-weight: 800;
-        margin: 0;
-        line-height: 1.2;
-    }
-
-    /* Kommentar Box */
-    .comment-box {
-        flex: 1;
-        overflow-y: auto;
-        /* WICHTIG: Die Display-Eigenschaft wird nicht auf 'flex' gesetzt, 
-           da sie in .white-comic-box nicht mehr global definiert ist.
-           Das Standard-Block-Layout wird beibehalten. */
-    }
-
-    .comment-label {
-        font-weight: bold;
-        margin-top: 0;
-        margin-bottom: 5px;
-        color: #000000;
-        font-size: 23px;
-    }
-
-    .comment-text {
-        font-size: 17px;
-        margin-bottom: 0;
-    }
-
-
-    /* --- Bewertungs-Icons (Innerhalb des rechten Stacks) --- */
     .rating-icons-in-stack {
         margin-top: auto;
         display: flex;
@@ -591,43 +492,19 @@ private void LikeProfile() => Console.WriteLine("1");
         border-top: 2px dashed #000;
     }
 
-    /* Die Icon-Styles bleiben gleich wie zuvor */
     .rating-icon {
-        width: 55px;
-        height: 55px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        border: 3px solid #000;
-        position: relative;
-        box-shadow: 3px 3px 0 0 #000;
+        width: 55px; height: 55px; border-radius: 50%;
+        display: flex; justify-content: center; align-items: center;
+        cursor: pointer; border: 3px solid #000;
+        position: relative; box-shadow: 3px 3px 0 0 #000;
         transition: transform 0.1s ease;
     }
 
-    .rating-icon:active {
-        /* Der "Gedrückt"-Effekt für Comic-Buttons */
-        transform: translate(3px, 3px) scale(0.95);
-        box-shadow: 0 0 0 0 #000;
-    }
+    .rating-icon:active { transform: translate(3px, 3px) scale(0.95); box-shadow: 0 0 0 0 #000; }
+    .dislike-icon { background-color: #D62828; font-size: 28px !important; }
+    .like-icon { background-color: #4CAF50; font-size: 28px !important; }
+    .flag-icon, .settings-icon { background-color: #fff; }
 
-    .dislike-icon {
-        background-color: #D62828;
-        font-size: 28px !important;
-    }
-
-    .like-icon {
-        background-color: #4CAF50;
-        font-size: 28px !important;
-    }
-
-    .flag-icon, .settings-icon {
-        background-color: #fff;
-    }
-
-
-    /* --- Bottom Nav (Unten) --- */
     .bottom-nav {
         display: flex;
         justify-content: space-around;
@@ -640,112 +517,28 @@ private void LikeProfile() => Console.WriteLine("1");
     }
 
     .nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        cursor: pointer;
-        font-size: 0.9rem;
-        width: 80px;
-        text-align: center;
-        color: black;
-        transition: transform 0.2s;
-        /* ENTFERNT: opacity: 0.6; */
-        opacity: 1; /* Immer volle Sichtbarkeit wie in MatchesTest */
-        font-weight: bold; /* Übernommen von MatchesTest */
+        display: flex; flex-direction: column; align-items: center;
+        cursor: pointer; font-size: 0.9rem; width: 80px;
+        text-align: center; color: black; transition: transform 0.2s;
+        opacity: 1; font-weight: bold;
     }
 
-    .nav-item.active {
-        /* ENTFERNT: wird nicht mehr benutzt, aber Regel bleibt, falls es später wieder aktiviert wird */
-        opacity: 1;
-    }
+    .nav-item:hover { transform: scale(1.05); }
 
-    .nav-item:hover {
-        transform: scale(1.05);
-        /* ENTFERNT: opacity: 0.85; */
-        opacity: 1; /* Volle Opazität beibehalten */
-    }
-
-    .nav-icon-wrapper {
-        position: relative;
-        height: 40px;
-        width: 40px;
-        display: inline-block;
-    }
-
-    /* ENTFERNT: Der .small-red-dot Stil wird nicht mehr benötigt, da das Element aus dem HTML entfernt wurde */
-
-    /* --- Modal für unangemessene Inhalte melden --- */
     .report-modal-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 50;
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        display: flex; justify-content: center; align-items: center;
+        background-color: rgba(0, 0, 0, 0.5); z-index: 50;
     }
 
     .report-modal {
-        width: 80%;
-        max-width: 300px;
-        background-color: #fff;
-        padding: 20px;
-        border: 3px solid #000;
-        border-radius: 10px;
-        box-shadow: 5px 5px 0 0 #000;
-        position: relative;
-    }
-
-    .report-reason {
-        display: flex;
-        align-items: center;
-        margin-bottom: 8px;
-        font-size: 14px;
-    }
-
-    .report-reason input[type="checkbox"] {
-        margin-right: 10px;
-        width: 15px;
-        height: 15px;
-    }
-
-    .modal-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 15px;
+        width: 80%; max-width: 300px; background-color: #fff; padding: 20px;
+        border: 3px solid #000; border-radius: 10px; box-shadow: 5px 5px 0 0 #000;
     }
 
     .report-button {
-        background-color: #D62828;
-        color: white;
-        border: 3px solid #000;
-        border-radius: 8px;
-        padding: 8px 15px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 3px 3px 0 0 #000;
-        transition: transform 0.1s ease;
-    }
-
-    .report-button:active {
-        transform: translate(3px, 3px);
-        box-shadow: 0 0 0 0 #000;
-    }
-
-    .close-modal-icon {
-        background-color: #fff;
-        border: 3px solid #000;
-        border-radius: 50%;
-        width: 35px;
-        height: 35px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        box-shadow: 3px 3px 0 0 #000;
+        background-color: #D62828; color: white; border: 3px solid #000;
+        border-radius: 8px; padding: 8px 15px; font-weight: bold;
+        cursor: pointer; box-shadow: 3px 3px 0 0 #000;
     }
 </style>
