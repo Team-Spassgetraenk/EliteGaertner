@@ -1,0 +1,757 @@
+@page "/registrierung"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+@inject UserRegistrationState RegistrationState
+@using System.Text.RegularExpressions
+@using Microsoft.AspNetCore.Components
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<div class="register-page-container">
+    <div class="login-center">
+
+        <div class="register-card">
+
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
+            </div>
+
+            <h3 class="register-title">Neuen Account erstellen</h3>
+
+            <div class="two-column-grid">
+
+                <div class="input-column">
+                    <div class="input-group">
+                        <label for="sirname-input">Nachname</label>
+                        <input id="sirname-input" class="app-input" placeholder="Nachname eingeben" @bind="sirname" @bind:event="oninput" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="prename-input">Vorname</label>
+                        <input id="prename-input" class="app-input" placeholder="Vorname eingeben" @bind="prename" @bind:event="oninput" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="username-input">Benutzername</label>
+                        <input id="username-input" class="app-input" placeholder="Benutzername eingeben" @bind="username" @bind:event="oninput" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="telephone-input">Telefonnummer</label>
+
+                        <div class="phone-input-container">
+                            <select class="country-code-select" @bind="SelectedCountryCode" @bind:event="onchange">
+                                @foreach (var country in CountryCodes)
+                                {
+                                <option value="@country.Code">
+                                    @country.Flag @country.Code
+                                </option>
+                                }
+                            </select>
+
+                            <input id="telephone-input"
+                                   class="app-input phone-number-input"
+                                   placeholder="✆"
+                                   type="text"
+                                   @bind="TelephoneNumberLocal"
+                                   @bind:event="oninput" />
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-0"> @* mb-0 am letzten Element der linken Spalte ist gut für die Optik *@
+                        <label for="email-input">Email</label>
+                        <input id="email-input"
+                               class="app-input @(!string.IsNullOrWhiteSpace(email) && !EmailValid ? "input-error" : "")"
+                               placeholder="Email eingeben"
+                               @bind="email" @bind:event="oninput"/>
+
+                        @if (!string.IsNullOrWhiteSpace(email) && !EmailValid)
+                        {
+                        <p class="inline-error error-text">⚠️ Die eingegebene Email-Adresse ist ungültig.</p>
+                        }
+                    </div>
+
+                </div>
+
+                <div class="input-column">
+
+                    <div class="password-section">
+
+                        <div class="input-group">
+                            <label for="password-input">Passwort</label>
+                            <input id="password-input"
+                                   class="app-input @(!IsPasswordStrong && !string.IsNullOrWhiteSpace(password) ? "input-error" : "")"
+                                   type="password"
+                                   placeholder="Passwort eingeben"
+                                   @bind="password" @bind:event="oninput"/>
+
+                            <div class="password-requirements mt-2">
+                                <h5 class="req-title">Passwortanforderungen:</h5>
+                                <ul>
+                                    <li class="@(HasMinimumLength ? "passed" : "")">
+                                        @GetRequirementIcon(HasMinimumLength) Mindestens 8 Zeichen Länge.
+                                    </li>
+                                    <li class="@(HasUppercase ? "passed" : "")">
+                                        @GetRequirementIcon(HasUppercase) Mindestens einen Großbuchstaben.
+                                    </li>
+                                    <li class="@(HasLowercase ? "passed" : "")">
+                                        @GetRequirementIcon(HasLowercase) Mindestens einen Kleinbuchstaben.
+                                    </li>
+                                    <li class="@(HasDigit ? "passed" : "")">
+                                        @GetRequirementIcon(HasDigit) Mindestens eine Ziffer (0-9).
+                                    </li>
+                                    <li class="@(HasSpecialChar ? "passed" : "")">
+                                        @GetRequirementIcon(HasSpecialChar) Mindestens ein Sonderzeichen (@GetSpecialChars()).
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="input-group mb-0"> @* mb-0 am letzten Element in der Sektion *@
+                            <label for="password-confirm-input">Passwort bestätigen</label>
+                            <input id="password-confirm-input"
+                                   class="app-input @(PasswordMismatch ? "input-error" : "")"
+                                   type="password"
+                                   placeholder="Passwort wiederholen"
+                                   @bind="passwordConfirm" @bind:event="oninput" />
+
+                            @if (PasswordMismatch)
+                            {
+                            <p class="inline-error error-text">⚠️ Die Passwörter stimmen nicht überein.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-share-section mt-4">
+                <h4 class="share-title">Kontaktdaten freigeben</h4>
+                <p class="share-description">Wähle, welche Kontaktdaten du mit gematchten Gärtnern teilen möchtest.</p>
+
+                <div class="share-options-grid">
+                    <div class="form-check-group">
+                        <div class="form-check-custom">
+                            <input class="app-check-input" type="checkbox" id="shareEmail" @bind="shareEmail" @bind:event="onchange" />
+                            <label class="app-check-label" for="shareEmail">
+                                Email
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-check-group">
+                        <div class="form-check-custom">
+                            <input class="app-check-input" type="checkbox" id="shareTel" @bind="shareTelephone" @bind:event="onchange" />
+                            <label class="app-check-label" for="shareTel">
+                                Telefonnummer
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="app-button primary-button mt-4"
+                    @onclick="Registrieren"
+                    disabled="@(!RegisterEnabled)">
+                Registrieren
+            </button>
+
+            @if (!RegisterEnabled)
+            {
+            <p class="disabled-hint">
+                @(
+                (
+                !RequiredFieldsFilled
+                ? "Bitte alle Registrierungsfelder ausfüllen."
+                : (PasswordMismatch
+                ? "⚠️ Die Passwörter stimmen nicht überein."
+                : (!IsPasswordStrong
+                ? "⚠️ Das Passwort erfüllt nicht alle Sicherheitsanforderungen."
+                : (!ContactShareSelected
+                ? "Bitte mindestens eine Kontaktmethode zur Freigabe auswählen."
+                : ""
+                )
+                )
+                )
+                )
+                )
+            </p>
+            }
+
+            <div class="register-text">
+                <p>Ich habe bereits einen Account?</p>
+                <a href="/" class="register-link">Jetzt Anmelden</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+
+// Modell für die Ländervorwahlen
+public class CountryCode
+{
+public string Name { get; set; }
+public string Code { get; set; }
+public string Flag { get; set; }
+}
+
+// Eingabefeld-Variablen (Data Binding)
+string sirname = "";
+string prename = "";
+string email = "";
+string username = "";
+string password = "";
+string passwordConfirm = "";
+
+public string SelectedCountryCode { get; set; } = "+49";
+
+// KORREKTUR: Property für Telefonnummer mit eingebauter Filterlogik
+private string _telephoneNumberLocal = "";
+public string TelephoneNumberLocal
+{
+get => _telephoneNumberLocal;
+set
+{
+if (!string.IsNullOrWhiteSpace(value))
+{
+// Regex: Entferne alle Zeichen, die KEINE Ziffer (\D) sind.
+_telephoneNumberLocal = Regex.Replace(value, @"\D", "");
+}
+else
+{
+_telephoneNumberLocal = "";
+}
+}
+}
+
+// Checkbox-Zustände der Freigabe-Optionen
+bool shareEmail = false;
+bool shareTelephone = false;
+
+// Liste der Ländercodes
+private List<CountryCode> CountryCodes = new List<CountryCode>
+{
+new CountryCode { Name = "Deutschland", Code = "+49", Flag = "🇩🇪" },
+new CountryCode { Name = "Österreich", Code = "+43", Flag = "🇦🇹" },
+new CountryCode { Name = "Schweiz", Code = "+41", Flag = "🇨🇭" },
+new CountryCode { Name = "Vereinigtes Königreich", Code = "+44", Flag = "🇬🇧" },
+new CountryCode { Name = "Vereinigte Staaten (USA)", Code = "+1", Flag = "🇺🇸" },
+new CountryCode { Name = "Kanada", Code = "+1", Flag = "🇨🇦" },
+new CountryCode { Name = "Belgien", Code = "+32", Flag = "🇧🇪" },
+new CountryCode { Name = "Bulgarien", Code = "+359", Flag = "🇧🇬" },
+new CountryCode { Name = "Dänemark", Code = "+45", Flag = "🇩🇰" },
+new CountryCode { Name = "Estland", Code = "+372", Flag = "🇪🇪" },
+new CountryCode { Name = "Finnland", Code = "+358", Flag = "🇫🇮" },
+new CountryCode { Name = "Frankreich", Code = "+33", Flag = "🇫🇷" },
+new CountryCode { Name = "Griechenland", Code = "+30", Flag = "🇬🇷" },
+new CountryCode { Name = "Irland", Code = "+353", Flag = "🇮🇪" },
+new CountryCode { Name = "Italien", Code = "+39", Flag = "🇮🇹" },
+new CountryCode { Name = "Kroatien", Code = "+385", Flag = "🇭🇷" },
+new CountryCode { Name = "Lettland", Code = "+371", Flag = "🇱🇻" },
+new CountryCode { Name = "Litauen", Code = "+370", Flag = "🇱🇹" },
+new CountryCode { Name = "Luxemburg", Code = "+352", Flag = "🇱🇺" },
+new CountryCode { Name = "Malta", Code = "+356", Flag = "🇲🇹" },
+new CountryCode { Name = "Niederlande", Code = "+31", Flag = "🇳🇱" },
+new CountryCode { Name = "Polen", Code = "+48", Flag = "🇵🇱" },
+new CountryCode { Name = "Portugal", Code = "+351", Flag = "🇵🇹" },
+new CountryCode { Name = "Rumänien", Code = "+40", Flag = "🇷🇴" },
+new CountryCode { Name = "Schweden", Code = "+46", Flag = "🇸🇪" },
+new CountryCode { Name = "Slowakei", Code = "+421", Flag = "🇸🇰" },
+new CountryCode { Name = "Slowenien", Code = "+386", Flag = "🇸🇮" },
+new CountryCode { Name = "Spanien", Code = "+34", Flag = "🇪🇸" },
+new CountryCode { Name = "Tschechien", Code = "+420", Flag = "🇨🇿" },
+new CountryCode { Name = "Ungarn", Code = "+36", Flag = "🇭🇺" },
+new CountryCode { Name = "Zypern", Code = "+357", Flag = "🇨🇾" },
+new CountryCode { Name = "Andorra", Code = "+376", Flag = "🇦🇩" },
+new CountryCode { Name = "Island", Code = "+354", Flag = "🇮🇸" },
+new CountryCode { Name = "Norwegen", Code = "+47", Flag = "🇳🇴" },
+new CountryCode { Name = "Türkei", Code = "+90", Flag = "🇹🇷" },
+new CountryCode { Name = "Australien", Code = "+61", Flag = "🇦🇺" },
+new CountryCode { Name = "Neuseeland", Code = "+64", Flag = "🇳🇿" },
+new CountryCode { Name = "Japan", Code = "+81", Flag = "🇯🇵" },
+new CountryCode { Name = "China", Code = "+86", Flag = "🇨🇳" },
+new CountryCode { Name = "Mexiko", Code = "+52", Flag = "🇲🇽" },
+new CountryCode { Name = "Brasilien", Code = "+55", Flag = "🇧🇷" },
+};
+
+// Public Property zur Speicherung in der Datenbank (Zusammengesetzte Nummer)
+public string FullTelephoneNumber =>
+$"{SelectedCountryCode.Replace("+", "")}{TelephoneNumberLocal}";
+
+
+// ======================================
+// 1. PASSWORD VALIDIERUNG 
+// ======================================
+
+private bool HasMinimumLength => password.Length >= 8;
+private bool HasUppercase => Regex.IsMatch(password, @"[A-Z]");
+private bool HasLowercase => Regex.IsMatch(password, @"[a-z]");
+private bool HasDigit => Regex.IsMatch(password, @"[0-9]");
+private bool HasSpecialChar => Regex.IsMatch(password, @"[#?!@$%^&*-]");
+private bool IsPasswordStrong =>
+HasMinimumLength && HasUppercase && HasLowercase && HasDigit && HasSpecialChar;
+private MarkupString GetRequirementIcon(bool passed) =>
+passed ? (MarkupString)"<span class=\"check-icon\">✔</span>" : (MarkupString)"<span class=\"fail-icon\">✗</span>";
+private string GetSpecialChars() => "#?!@$%^&*-";
+
+
+// ======================================
+// 2. GESAMT VALIDIERUNG
+// ======================================
+
+private bool PasswordMismatch =>
+!string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(passwordConfirm) && (password != passwordConfirm);
+private bool EmailValid => string.IsNullOrWhiteSpace(email) || IsValidEmail(email);
+private bool IsTelephoneNumberValid => !string.IsNullOrWhiteSpace(TelephoneNumberLocal);
+private bool RequiredFieldsFilled =>
+!string.IsNullOrWhiteSpace(sirname) && !string.IsNullOrWhiteSpace(prename) &&
+!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(username) &&
+IsTelephoneNumberValid && !string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(passwordConfirm);
+private bool ContactShareSelected => shareEmail || shareTelephone;
+private bool RegisterEnabled =>
+RequiredFieldsFilled && !PasswordMismatch && ContactShareSelected && EmailValid && IsPasswordStrong;
+
+// Methode: Registrierung und Weiterleitung
+void Registrieren()
+{
+if (RegisterEnabled)
+{
+Console.WriteLine($"Registrierung erfolgreich für: {email}");
+Console.WriteLine($"Volle Telefonnummer zur Speicherung: {FullTelephoneNumber}");
+Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
+}
+}
+
+// Statische Methode: Email-Validierung (Regex)
+public static bool IsValidEmail(string email)
+{
+if (string.IsNullOrWhiteSpace(email))
+return true;
+string pattern = @"^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|" + @"([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)" + @"@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$";
+try
+{
+var regex = new Regex(pattern, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
+return regex.IsMatch(email);
+}
+catch (RegexParseException)
+{
+return false;
+}
+catch (RegexMatchTimeoutException)
+{
+return false;
+}
+}
+}
+
+<style>
+    /* Globale Styles: Sketch-Design */
+    .register-page-container {
+        /* Hintergrund */
+        background-image: url('pictures/LightIconBackground.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100vh;
+        width: 100%;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+    }
+
+    .login-center {
+        /* Zentrierungs-Helper */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .register-card {
+        /* Karten-Styling */
+        width: 95%;
+        max-width: 850px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 3px solid #000;
+        border-radius: 15px;
+        box-shadow: 6px 6px 0 0 #000;
+        padding: 30px;
+        margin: 20px 20px;
+    }
+
+    .register-title {
+        /* Haupt-Überschrift */
+        font-weight: bold;
+        font-size: 1.8rem;
+        color: #000;
+        margin-bottom: 20px;
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+    }
+
+    .two-column-grid {
+        /* KORREKTUR: Umstellung auf Flexbox für vertikale Zentrierung und Trennlinie */
+        display: flex;
+        gap: 30px;
+        position: relative;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* Vertikale Trennlinie */
+    .two-column-grid::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%; /* Position in der Mitte */
+        width: 1px;
+        border-left: 2px #ccc;
+        transform: translateX(-50%); /* Zentrierung der Linie */
+    }
+
+    /* Flex-Einstellungen für die Spalten */
+    .input-column {
+        flex: 1; /* Gleiche Breite für beide Spalten */
+        display: flex;
+        flex-direction: column; /* Elemente in der Spalte bleiben vertikal */
+        justify-content: center; /* Zentriert den Inhalt (Passwort-Sektion) vertikal */
+    }
+
+    .logo-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .app-logo {
+        width: 80px;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    /* Letzte Eingabegruppe der linken Spalte */
+    .input-column:first-child .input-group:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .input-group label {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #000;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    /* Sketch-Input-Feld-Styling (Basis) */
+    .app-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 1.2rem;
+        border: 3px solid #000;
+        border-radius: 5px;
+        box-shadow: 2px 2px 0 0 #000;
+        box-sizing: border-box;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+        transition: box-shadow 0.1s, border-color 0.1s;
+    }
+
+    .app-input:focus {
+        /* Fokus-Highlight */
+        outline: none;
+        border-color: #8B45B3;
+        box-shadow: 4px 4px 0 0 #8B45B3;
+    }
+
+    .phone-input-container {
+        display: flex;
+        width: 100%;
+        border: 3px solid #000;
+        border-radius: 5px;
+        box-shadow: 2px 2px 0 0 #000;
+        box-sizing: border-box;
+        transition: box-shadow 0.1s, border-color 0.1s;
+        overflow: hidden;
+    }
+
+    .phone-input-container:focus-within {
+        /* Fokus-Highlight des Containers, wie bei app-input:focus */
+        border-color: #8B45B3;
+        box-shadow: 4px 4px 0 0 #8B45B3;
+    }
+
+    .country-code-select {
+        /* Dropdown-Feld für die Vorwahl */
+        padding: 10px;
+        font-size: 1.2rem;
+        border: none;
+        border-right: 2px solid #000; /* Trennlinie zum Input */
+        background-color: #f0f0f0;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+        cursor: pointer;
+        outline: none;
+        flex-shrink: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .phone-number-input {
+        /* Die lokale Nummer */
+        border: none !important;
+        box-shadow: none !important;
+        flex-grow: 1;
+        padding-left: 10px;
+        font-size: 1.2rem;
+    }
+
+    /* Passwort visueller abgetrennt */
+    .password-section {
+        padding: 15px;
+        border: 3px dashed #000000;
+        border-radius: 10px;
+
+        /* Ränder entfernt, da Zentrierung über input-column erfolgt */
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    /* Anpassung der letzten Input-Group in der Password-Sektion */
+    .password-section .input-group:last-of-type {
+        margin-bottom: 0 !important;
+    }
+
+    /* INLINE-FEHLERMELDUNGEN (E-Mail, Passwort-Mismatch) */
+    .inline-error {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: 5px;
+        margin-bottom: 0px;
+        font-style: italic;
+        text-align: left;
+    }
+
+    .input-error {
+        /* Visualisierung bei Eingabefehlern */
+        border-color: red !important;
+        box-shadow: 4px 4px 0 0 red !important;
+    }
+
+    /* Passwortanforderungen */
+    .password-requirements {
+        margin-top: 7px;
+        padding: 7px;
+        border: 2px dashed #ccc;
+        border-radius: 5px;
+        background-color: #fafafa;
+    }
+
+    .req-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #444;
+    }
+
+    .password-requirements ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .password-requirements li {
+        margin-bottom: 3px;
+        transition: color 0.3s;
+    }
+
+    .password-requirements li.passed {
+        color: #4CAF50;
+        font-weight: bold;
+    }
+
+    .check-icon, .fail-icon {
+        display: inline-block;
+        width: 15px;
+        text-align: center;
+        margin-right: 5px;
+        font-size: 1rem;
+    }
+
+    .check-icon {
+        color: #4CAF50;
+    }
+
+    .fail-icon {
+        color: #F44336;
+    }
+
+    .app-button {
+        /* Button-Basis-Styling */
+        width: 100%;
+        padding: 12px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        border: 3px solid #000;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 4px 4px 0 0 #000;
+        transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+    }
+
+    .primary-button {
+        /* Button-farbe */
+        background-color: #8B45B3;
+        color: white;
+    }
+
+    .app-button:active {
+        /* Klick-Effekt-Simulation */
+        transform: translate(4px, 4px);
+        box-shadow: 0 0 0 0 #000;
+    }
+
+    .app-button:disabled {
+        /* Stil für deaktivierten Button */
+        background-color: #ccc;
+        color: #999;
+        border-color: #999;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 2px 2px 0 0 #999;
+    }
+
+    .disabled-hint {
+        /* Hinweis-Text-Styling */
+        text-align: center;
+        color: #999;
+        font-size: 1rem;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-style: italic;
+    }
+
+    .register-text {
+        /* Link-Text-Container */
+        text-align: center;
+        font-size: 1.1rem;
+        margin-top: 20px;
+    }
+
+    .register-text p {
+        margin: 0 0 5px 0;
+        color: #000;
+    }
+
+    .register-link {
+        /* Anmelde-Link-Styling */
+        color: #8B45B3;
+        font-weight: bold;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        transition: opacity 0.2s;
+    }
+
+    .register-link:hover {
+        opacity: 0.8;
+    }
+
+    /* Kontaktdaten-Freigabe Sektion Styles */
+    .contact-share-section {
+        margin-top: 10px;
+        padding: 20px;
+        border: 3px solid #000;
+        border-radius: 10px;
+        box-shadow: 4px 4px 0 0 #000;
+        background-color: rgba(255, 255, 255, 0.85);
+    }
+
+    .share-title {
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: #000;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+
+    .share-description {
+        text-align: center;
+        font-size: 1rem;
+        margin-bottom: 15px;
+        font-style: italic;
+        border-bottom: 2px dashed #ccc;
+        padding-bottom: 10px;
+    }
+
+    .share-options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    /* Checkbox Custom Styles */
+    .form-check-group {
+        padding: 10px;
+        border: 2px solid #000;
+        border-radius: 8px;
+        box-shadow: 1px 1px 0 0 #000;
+        background-color: rgba(240, 240, 240, 0.9);
+    }
+
+    .form-check-custom {
+        display: flex;
+        align-items: center;
+    }
+
+    .app-check-input {
+        /* Verstecken des nativen Inputs */
+        opacity: 0;
+        position: absolute;
+    }
+
+    .app-check-label {
+        /* Custom Checkbox Label */
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #000;
+        display: block;
+        padding-left: 30px;
+        cursor: pointer;
+        position: relative;
+        line-height: 20px;
+    }
+
+    .app-check-label::before {
+        /* Checkbox-Kasten */
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0px;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #000;
+        border-radius: 4px;
+        background-color: #f0f0f0;
+        transition: all 0.1s;
+    }
+
+    .app-check-input:checked + .app-check-label::before {
+        /* Hintergrund bei ausgewählt */
+        background-color: #8B45B3;
+        border-color: #000;
+    }
+
+    .app-check-input:checked + .app-check-label::after {
+        /* Kontaktdaten-freigegeben Häkchen */
+        content: '✔';
+        position: absolute;
+        left: 3px;
+        top: -3px;
+        font-size: 18px;
+        line-height: 1;
+        color: white;
+        font-family: Arial, sans-serif;
+    }
+</style>

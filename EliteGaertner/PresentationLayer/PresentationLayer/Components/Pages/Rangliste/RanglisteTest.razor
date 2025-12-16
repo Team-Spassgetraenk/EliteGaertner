@@ -3,22 +3,29 @@
 @inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=600&display=swap" rel="stylesheet">
 
-<div class="mobile-container">
+
+<div class="page-container background-style">
     
     <header class="top-bar">
-        <div class="page-title-spacer"></div>
+        
+        @* NEU: Titelausrichtung für Rangliste (Kein Link links) *@
+        <div class="icon-wrapper left"></div> @* Abstandshalter für Symmetrie *@
 
-        <div class="icon-wrapper right menu-wrapper">
-            <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
-            @if (showLogout)
-            {
-                <div class="logout-menu">
-                    <p @onclick="NavigateToLogout">Logout &lt;</p>
-                </div>
-            }
+        <h1 class="page-title">Ranglisten</h1>
+
+        <div class="menu-icon-container">
+            <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
         </div>
     </header>
+
+    @if (showLogout)
+    {
+    <div class="logout-menu">
+        <p @onclick="NavigateToLogout">Logout ➜]</p>
+    </div>
+    }
 
     <div class="scroll-content rangliste-content">
         
@@ -29,7 +36,7 @@
         
         @if (showCategoryMenu)
         {
-            <div class="category-dropdown-menu">
+            <div class="category-dropdown-menu comic-box-dropdown">
                 @foreach (var cat in Categories)
                 {
                     <div class="dropdown-item" @onclick="() => SelectCategory(cat)">
@@ -39,7 +46,7 @@
             </div>
         }
 
-        <div class="rangliste-card">
+        <div class="rangliste-card comic-box-card">
             <div class="trophy-icon">
                 <img src="pictures/Rangliste.png" alt="Rangliste" height="80" /> 
             </div>
@@ -61,7 +68,7 @@
         <div class="nav-item" @onclick="GoToMatches">
             <img src="pictures/MatchesIcon.png" alt="Matches" height="40" /> 
             <span>Matches</span>
-            <div class="notification-dot small-dot">3</div>
+            @* Roter Punkt (notification-dot) entfernt *@
         </div>
         
         <div class="nav-item" @onclick="GoToMainpage">
@@ -129,11 +136,9 @@
 
     protected override void OnInitialized()
     {
-        // Setze die Standardkategorie beim Start
         CurrentCategory = Categories.First();
     }
     
-    // Hilfsfunktionen für CSS-Klassen und Anzeige
     private string GetRankCssClass(int rank)
     {
         if (rank == 1) return "rank-1";
@@ -201,7 +206,7 @@
         --default-rank-text: var(--border-color);
     }
 
-    .mobile-container {
+    .page-container {
         font-family: 'Patrick Hand', cursive, sans-serif;
         display: flex;
         flex-direction: column;
@@ -211,48 +216,68 @@
         overflow: hidden;
     }
 
-    /* --- Top Bar (Header & Logout) --- */
+    .background-style {
+        background-image: url('pictures/LightIconBackground.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        width: 100%;
+        min-height: 100vh;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+        padding-top: 1px;
+    }
+
+    /* --- TOP BAR (Aus Startseite/MatchesTest übernommen) --- */
     .top-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 10px 15px;
-        background: white;
-        z-index: 20;
-        border-bottom: 2px solid #ccc;
+        border-bottom: 3px solid var(--border-color);
+        background-color: #fff;
+        z-index: 10;
+        box-shadow: 0 4px 0 0 var(--border-color);
+        flex-shrink: 0;
     }
 
-    .page-title-spacer {
-        width: 60px;
+    .page-title {
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: bold;
+        color: var(--border-color);
+        flex-grow: 1;
+        text-align: center;
     }
 
     .icon-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        width: 60px; /* Für Symmetrie mit dem Menü-Container */
+    }
+
+    .menu-icon-container {
         cursor: pointer;
-        width: 60px;
+        width: 60px; /* Für Symmetrie mit dem Icon-Wrapper links */
+        display: flex;
+        justify-content: flex-end;
     }
 
-    .hamburger-icon {
-        font-size: 2rem;
+    .menu-icon {
+        font-size: 30px;
+        line-height: 1;
+        color: var(--border-color);
     }
-
-    .menu-wrapper {
-        position: relative;
-        align-items: flex-end;
-    }
-
+    
+    /* --- Logout-Menü (Comic-Stil aus Startseite übernommen) --- */
     .logout-menu {
         position: absolute;
-        top: 50px;
-        right: 0px;
+        top: 60px;
+        right: 15px;
         width: 150px;
         background-color: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        z-index: 30;
+        /* Comic-Karte Stil */
+        border: 3px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 3px 3px 0 0 var(--border-color);
+        z-index: 20;
         padding: 5px 0;
     }
 
@@ -262,6 +287,10 @@
         cursor: pointer;
         font-size: 16px;
         text-align: right;
+    }
+
+    .logout-menu p:hover {
+        background-color: #eee;
     }
 
     /* --- Ranglisten Inhalt und Kategorie-Auswahl --- */
@@ -288,23 +317,28 @@
 
     .category-dropdown-menu {
         position: absolute;
-        top: 50px;
+        top: 85px; /* Angepasst an den neuen Header-Stil */
         left: 50%;
         transform: translateX(-50%);
         width: 250px;
         background-color: #fff;
+        z-index: 25;
+        text-align: center;
+        padding: 0;
+    }
+
+    /* Neue Comic-Box-Klassen für Dropdown und Ranglisten-Karte */
+    .comic-box-dropdown {
         border: 3px solid var(--border-color);
         border-radius: 10px;
         box-shadow: 4px 4px 0 0 var(--border-color);
-        z-index: 25;
-        text-align: center;
     }
 
     .dropdown-item {
         padding: 10px 15px;
         font-size: 1.3rem;
         cursor: pointer;
-        border-bottom: 1px solid #eee;
+        border-bottom: 2px solid var(--border-color);
     }
 
     .dropdown-item:last-child {
@@ -319,7 +353,7 @@
     /* --- Haupt-Ranglisten-Karte --- */
     .rangliste-card {
         width: 100%;
-        max-width: 450px; /* Vergrößerte Karte */
+        max-width: 450px; 
         margin: 0 auto;
         border: 3px solid var(--border-color);
         border-radius: 10px;
@@ -369,67 +403,52 @@
     .rank-1 {
         background-color: var(--rank-1-color);
         color: white;
-        font-size: 1.1em; /* etwas größer als default */
+        border-color: #000;
+        box-shadow: 4px 4px 0 0 var(--border-color);
     }
-
-    .rank-1 .rank-number, .rank-1 .username-display {
-        font-size: 2.0rem;
-    }
-
-    /* Stil für Platz #2: Mittlerer Ton, mittlere Schrift */
+    
+    /* Stil für Platz #2 */
     .rank-2 {
         background-color: var(--rank-2-color);
-        color: white;
-        font-size: 1.05em;
+        color: var(--border-color);
+        border-color: #000;
+        box-shadow: 3px 3px 0 0 var(--border-color);
     }
-
-    .rank-2 .rank-number, .rank-2 .username-display {
-        font-size: 1.9rem;
-    }
-
-    /* Stil für Platz #3: Hellster Ton, kleinste Top-3-Schrift */
+    
+    /* Stil für Platz #3 */
     .rank-3 {
         background-color: var(--rank-3-color);
         color: var(--border-color);
+        border-color: #000;
+        box-shadow: 2px 2px 0 0 var(--border-color);
     }
 
-    .rank-3 .rank-number, .rank-3 .username-display {
-        font-size: 1.8rem;
-    }
-
-    /* Stil für Platz #4 und höher (Standard-Grau) */
-    .default-rank {
-        background-color: var(--default-gray);
-        color: var(--default-rank-text);
-        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
-    }
-
-    .default-rank .rank-number, .default-rank .username-display {
-        font-size: 1.5rem;
-    }
-
-    /* Stil für den aktuellen Benutzer ("Ich") */
+    /* Stil für den aktuellen Benutzer */
     .current-user-rank {
-        background-color: var(--main-purple);
-        color: white;
-        border: 3px solid var(--border-color);
-        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
-        font-size: 1.1em;
+        background-color: #fff;
+        color: var(--main-purple);
+        border: 3px dashed var(--main-purple);
+        box-shadow: 0 0 0 3px #000, 3px 3px 0 0 #000;
     }
 
-    .current-user-rank .rank-number, .current-user-rank .username-display {
-        font-size: 2.0rem;
+    /* Standard-Rang-Stil */
+    .default-rank {
+        background-color: #f5f5f5;
+        color: var(--default-rank-text);
+        border-color: var(--default-gray);
     }
 
 
-    /* --- Bottom Nav (Übernahme) --- */
+    /* --- Bottom Nav (Aus Startseite übernommen) --- */
     .bottom-nav {
         display: flex;
         justify-content: space-around;
-        align-items: flex-end;
         padding: 10px 0 20px 0;
         background: white;
-        border-top: 1px solid #eee;
+        border-top: 3px solid var(--border-color);
+        z-index: 10;
+        box-shadow: 0 -4px 0 0 var(--border-color);
+        flex-shrink: 0;
     }
 
     .nav-item {
@@ -440,31 +459,22 @@
         font-size: 0.9rem;
         width: 80px;
         text-align: center;
-        color: black;
-        position: relative;
+        color: var(--border-color);
+        transition: transform 0.2s;
+        opacity: 1; 
+        font-weight: bold; 
     }
 
-    .notification-dot {
-        position: absolute;
-        top: -5px;
-        right: 15px;
-        background-color: #D62828;
-        color: white;
-        font-size: 10px;
-        font-weight: bold;
-        border-radius: 50%;
-        width: 15px;
-        height: 15px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 1px solid var(--border-color);
+    .nav-item:hover {
+        transform: scale(1.05);
+        opacity: 1; 
     }
-    .small-dot {
-        top: 0;
-        right: 15px;
-        width: 10px;
-        height: 10px;
-        font-size: 7px;
+
+    /* NEU: EliteGärtner-Titel Font für Bottom Nav */
+    .elitegaertner-title {
+        font-family: 'Playfair Display', serif;
+        font-weight: 600;
+        line-height: 1.2;
     }
+    
 </style>

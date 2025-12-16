@@ -23,40 +23,45 @@
             </div>
 
             <h3 class="register-title">Deine Ernte veröffentlichen</h3>
-            
+
             <div class="form-layout">
 
+                @* --- LINKA SPALTE: Bild und Upload-Button (Vertikal zentriert zur rechten Spalte) --- *@
                 <div class="left-column">
+                    @* --- Flexibler Bild-Container (Passt sich der Bildgröße an) --- *@
                     <div class="ernte-image-container">
-                        @if (HochgeladenesBild == null)
+                        @if (string.IsNullOrEmpty(HochgeladenesBild))
                         {
-                            <div class="image-placeholder">
-                                <span>Lade ein Bild deiner Ernte hoch</span>
-                                <span class="bi bi-camera" style="font-size: 3rem;"></span>
-                            </div>
+                        @* **Platzhalter-Bild** (Hier ein statisches Bild zur besseren Visualisierung) *@
+                        <img src="pictures/PlatzhalterBild.jpg" alt="Bild-Platzhalter" class="ernte-image placeholder-img" />
+                        <div class="placeholder-text-overlay">
+                            <span class="bi bi-camera" style="font-size: 3rem;"></span>
+                        </div>
                         }
                         else
                         {
-                            <img src="@HochgeladenesBild" alt="Erntebild" class="ernte-image" />
+                        @* Flexibles hochgeladenes Bild *@
+                        <img src="@HochgeladenesBild" alt="Erntebild" class="ernte-image" />
                         }
                     </div>
 
                     <InputFile id="file-upload" OnChange="HandleFileSelection" hidden />
                     <label for="file-upload" class="app-button secondary-button upload-button">
-                        <span class="bi bi-upload"></span> Bild hochladen
+                        <span class="bi bi-upload"></span> Erntebild hochladen
                     </label>
 
                 </div>
 
+                @* --- RECHTE SPALTE: Tags und Parameter --- *@
                 <div class="right-column">
                     <h4 class="tag-headline">Gemüse</h4>
                     <div class="tag-grid">
                         @foreach (var tag in GemueseTags)
                         {
-                            <div class="tag app-tag @(SelectedTag == tag.Name ? "selected" : "")"
-                                 @onclick="() => ToggleTag(tag.Name)">
-                                <span>@tag.Emoji</span> <span>@tag.Name</span>
-                            </div>
+                        <div class="tag app-tag @(SelectedTag == tag.Name ? "selected" : "")"
+                             @onclick="() => ToggleTag(tag.Name)">
+                            <span>@tag.Emoji</span> <span>@tag.Name</span>
+                        </div>
                         }
                     </div>
 
@@ -64,29 +69,35 @@
                     <div class="tag-grid">
                         @foreach (var tag in ObstTags)
                         {
-                            <div class="tag app-tag @(SelectedTag == tag.Name ? "selected" : "")"
-                                 @onclick="() => ToggleTag(tag.Name)">
-                                <span>@tag.Emoji</span> <span>@tag.Name</span>
-                            </div>
+                        <div class="tag app-tag @(SelectedTag == tag.Name ? "selected" : "")"
+                             @onclick="() => ToggleTag(tag.Name)">
+                            <span>@tag.Emoji</span> <span>@tag.Name</span>
+                        </div>
                         }
                     </div>
 
                     <div class="parameter-row">
+                        @* Eingabefelder werden durch CSS-Regeln auf max-width begrenzt *@
                         <div class="input-group">
                             <label class="input-label">Gewicht (in g)</label>
                             <input type="number" class="app-input" @bind="Gewicht" placeholder="z.B. 300" />
                         </div>
 
                         <div class="input-group">
-                            <label class="input-label">Größe (in cm)</label>
-                            <input type="number" class="app-input" @bind="Groesse" placeholder="z.B. 25" />
+                            <label class="input-label">Länge (in cm)</label>
+                            <input type="number" class="app-input" @bind="Laenge" placeholder="z.b. 67" />
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Breite (in cm)</label>
+                            <input type="number" class="app-input" @bind="Breite" placeholder="z.B. 25" />
                         </div>
                     </div>
-                    
+
                     <h4 class="tag-headline">Kommentar</h4>
                     <div class="input-group">
                         <textarea class="app-input" maxlength="150" @bind="Kommentar"
-                                      placeholder="Beschreibe kurz deine Ernte..."></textarea>
+                                  placeholder="Beschreibe kurz deine Ernte..."></textarea>
                         <div class="char-counter">@Kommentar.Length / 150</div>
                     </div>
                 </div>
@@ -97,10 +108,10 @@
                     @onclick="Veröffentlichen">
                 Ernte veröffentlichen
             </button>
-            
+
             @if (string.IsNullOrEmpty(SelectedTag) || string.IsNullOrEmpty(HochgeladenesBild))
             {
-                <p class="disabled-hint">Bitte lade zuerst ein Bild hoch und wähle ein Tag aus.</p>
+            <p class="disabled-hint">Bitte lade zuerst ein Bild hoch und wähle ein Tag aus.</p>
             }
         </div>
     </div>
@@ -127,15 +138,16 @@
         new("Kirschen", "🍒"), new("Erdbeeren", "🍓"), new("Trauben", "🍇")
     };
 
-    string? SelectedTag = null; 
-    int? Groesse { get; set; }
-    int? Gewicht { get; set; }
-    string Kommentar { get; set; } = "";
-    
-    void ToggleTag(string tag)
-    {
-        SelectedTag = (SelectedTag == tag) ? null : tag;
-    }
+string? SelectedTag = null;
+int? Gewicht { get; set; }
+int? Laenge { get; set; }
+int? Breite { get; set; }
+string Kommentar { get; set; } = "";
+
+void ToggleTag(string tag)
+{
+SelectedTag = (SelectedTag == tag) ? null : tag;
+}
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
     {
@@ -183,8 +195,8 @@
         int userId = 123;
 
         float weightGram = (Gewicht ?? 0);
-        float lengthCm = Groesse ?? 0;
-        float widthCm = 0f;
+        float lengthCm = Laenge ?? 0;
+        float widthCm = Breite ?? 0;
 
         var dto = new HarvestUploadDto
         {
@@ -212,11 +224,9 @@
     }
 }
 
-}
-
 
 <style>
-
+    
     .register-page-container {
         background-image: url('pictures/LightIconBackground.jpeg');
         background-size: cover;
@@ -232,13 +242,13 @@
     .login-center {
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
         width: 100%;
     }
 
     .register-card {
         width: 90%;
-        max-width: 600px;
+        max-width: 760px;
         background: rgba(255, 255, 255, 0.95);
         border: 3px solid #000;
         border-radius: 15px;
@@ -287,11 +297,12 @@
         margin-bottom: 10px;
     }
 
+    /* --- Form Layout: Zentriert Linke Spalte --- */
     .form-layout {
         display: flex;
         gap: 30px;
         margin-bottom: 20px;
-        align-items: center; /* Vertikale Zentrierung der Bild-Spalten */
+        align-items: center; /* Zentriert die linke Spalte (Bild) vertikal zur rechten Spalte */
     }
 
     .left-column {
@@ -299,12 +310,14 @@
         max-width: 40%;
         display: flex;
         flex-direction: column;
+        flex-shrink: 0;
     }
 
     .right-column {
         flex: 1;
     }
-    
+
+    /* --- BILD-CONTAINER: Flexibel --- */
     .ernte-image-container {
         border: 3px solid #000;
         box-shadow: 4px 4px 0 0 #000;
@@ -312,27 +325,36 @@
         border-radius: 8px;
         overflow: hidden;
         margin-bottom: 10px;
-        min-height: 250px;
+        position: relative;
     }
 
-    .image-placeholder {
+    .placeholder-text-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 100%;
-        min-height: 250px;
         color: #666;
         font-size: 1.1rem;
+        background-color: rgba(238, 238, 238, 0.5);
     }
 
     .ernte-image {
         width: 100%;
-        height: 100%;
+        height: auto;
         max-height: 400px;
-        object-fit: cover;
         display: block;
     }
+
+    .placeholder-img {
+        width: 100%;
+        height: auto;
+    }
+
 
     .upload-button {
         text-align: center;
@@ -341,14 +363,14 @@
     }
 
     .secondary-button {
-        background-color: #ccc;
-        color: #000;
+        background-color: #8B45B3;
+        color: #ffffff;
     }
 
     .secondary-button:active {
-        background-color: #bbb;
+        background-color: #7a3a99;
     }
-    
+
     .tag-grid {
         display: flex;
         flex-wrap: wrap;
@@ -395,7 +417,7 @@
         transform: none;
         box-shadow: 4px 4px 0 0 #000;
     }
-    
+
     .input-group {
         margin-bottom: 15px;
         display: flex;
@@ -418,6 +440,7 @@
         font-family: 'Patrick Hand', cursive, sans-serif;
     }
 
+    /* --- Parameter-Reihe Korrektur --- */
     .parameter-row {
         display: flex;
         gap: 20px;
@@ -429,9 +452,15 @@
         margin-bottom: 0;
     }
 
+    /* maximale Breite der Input-Felder in der Parameter-Reihe */
+    .parameter-row .input-group .app-input {
+        max-width: 175px;
+    }
+
     textarea.app-input {
         height: 100px;
         resize: vertical;
+        max-width: 100%; /* Textarea soll volle Breite der Spalte nutzen */
     }
 
     .char-counter {

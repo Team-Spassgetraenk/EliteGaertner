@@ -1,116 +1,434 @@
 @page "/profil/profilverwaltung"
 @inject NavigationManager Nav
 @rendermode InteractiveServer
-
-
-@* REIN CHAT-GPT CODE!!!!!!!!!!!!!!!!!!!! *@
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <div class="page-container background-style">
-    
+
     @* --- TOP BAR: Titel und Menü --- *@
     <header class="top-bar">
 
-        @* Ranglisten-Icon (links) - Bleibt leer, um das Layout zu erhalten *@
         <div class="icon-wrapper">
             <span class="icon-label"></span>
         </div>
 
-        @* Titel *@
         <h1 class="page-title">Profil verwalten</h1>
 
-        @* Hamburger Menü (rechts) *@
         <div class="header-right-action menu-wrapper">
             <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
             @if (showLogout)
             {
-                <div class="logout-menu comic-box">
-                    <p @onclick="NavigateToLogout">Logout &lt;</p>
-                </div>
+            <div class="logout-menu comic-box">
+                <p @onclick="NavigateToLogout">Logout ➜]</p>
+            </div>
             }
         </div>
     </header>
 
     <div class="scroll-content">
-        
-        @* --- Box für Kontaktdaten/Passwort --- *@
-        <div class="management-box comic-box">
-            
-            @* Passwort *@
-            <div class="input-group">
-                <label>Passwort</label>
-                <div class="input-wrapper">
-                    <input type="password" value="123bier" readonly />
-                    <span class="edit-icon" @onclick="ChangePassword">⚙️</span>
+
+        @* --- PROFILBILD-KARUSSELL & BIOGRAFIE --- *@
+        <div class="management-box comic-box profile-info-box">
+
+            <h3 class="box-title">Profilbild & Biografie</h3>
+
+            <h4 class="tag-headline">Wähle dein Profilbild</h4>
+
+            <div class="profile-carousel-hybrid">
+
+                @* Pfeil Links *@
+                <button class="arrow-nav-button secondary-button"
+                        @onclick="SelectPreviousProfile">
+                    <i class="bi bi-caret-left-fill"></i>
+                </button>
+
+                @* Vorschau Links (Vorgänger-Bild)*@
+                <div class="profile-preview-container-hybrid">
+                    <img src="@($"pictures/Profilbilder/{GetProfileName(CurrentIndex - 1)}")"
+                         alt="Vorschau"
+                         class="profile-image-preview" />
                 </div>
-                <button class="action-button password-change-button" @onclick="ChangePassword">Passwort ändern</button>
+
+                @* Zentrales, ausgewähltes Bild*@
+                <div class="profile-main-image-container-hybrid selected-outline-hybrid">
+                    <img src="@($"pictures/Profilbilder/{SelectedProfile}")"
+                         alt="Aktuelles Profilbild"
+                         class="profile-image-large" />
+                </div>
+
+                @* Vorschau Rechts (Nachfolger-Bild)*@
+                <div class="profile-preview-container-hybrid">
+                    <img src="@($"pictures/Profilbilder/{GetProfileName(CurrentIndex + 1)}")"
+                         alt="Vorschau"
+                         class="profile-image-preview" />
+                </div>
+
+                @* Pfeil Rechts *@
+                <button class="arrow-nav-button secondary-button"
+                        @onclick="SelectNextProfile">
+                    <i class="bi bi-caret-right-fill"></i>
+                </button>
+
             </div>
-            
-            @* E-Mail *@
+
+            @* Strukturierte Biografie Sektion *@
             <div class="input-group">
-                <label>Email</label>
-                <div class="input-wrapper">
-                    <input type="email" value="max.mustermann@gmail.com" readonly />
-                    <span class="edit-icon" @onclick="EditEmail">⚙️</span>
-                </div>
-            </div>
-            
-            @* Telefonnummer *@
-            <div class="input-group">
-                <label>Telefonnummer</label>
-                <div class="input-wrapper">
-                    <input type="tel" value="+49 174 123456789" readonly />
-                    <span class="edit-icon" @onclick="EditPhone">⚙️</span>
-                </div>
+                <label class="input-label" for="bio-input">Biographie:</label>
+                <textarea id="bio-input"
+                          class="app-input-comic"
+                          @bind="bioText"
+                          placeholder="Erzähle kurz, wer du bist und was du anbaust..."
+                          maxlength="150"></textarea>
+                <div class="char-counter">@bioText.Length / 150</div>
             </div>
         </div>
 
-        @* --- Trennlinie (Basierend auf Abbildung 9) --- *@
+        @* --- Trennlinie --- *@
         <div class="divider"></div>
 
-        @* --- Box für Biografie und Fotos --- *@
-        <div class="management-box comic-box">
-            
-            @* Biografie *@
-            <div class="input-group">
-                <label>Biographie...</label>
-                <div class="bio-wrapper">
-                    <p>@bioText</p>
-                    <button class="action-button edit-bio-button" @onclick="EditBio">bearbeiten ⚙️</button>
-                </div>
+        @* --- UNVERÄNDERBARE DATEN: Nachname, Vorname, Benutzername --- *@
+        <div class="management-box comic-box info-box">
+            <h3 class="box-title">Basis-Informationen (nicht änderbar)</h3>
+
+            <div class="info-item">
+                <label>Nachname:</label>
+                <p>@sirname</p>
             </div>
 
-            @* --- Meine Fotos Gallerie --- *@
-            <h3 class="gallery-title">Meine Fotos</h3>
-            <div class="harvest-grid">
-                
-                @foreach (var imgPath in uploadedImages)
+            <div class="info-item">
+                <label>Vorname:</label>
+                <p>@prename</p>
+            </div>
+
+            <div class="info-item">
+                <label>Benutzername:</label>
+                <p>@username</p>
+            </div>
+        </div>
+
+        @* --- Trennlinie --- *@
+        <div class="divider"></div>
+
+        @* --- EDITIERBARE KONTAKTDATEN: Email & Telefonnummer --- *@
+        <div class="management-box comic-box contact-box">
+            <h3 class="box-title">Kontaktdaten bearbeiten</h3>
+
+            @* E-Mail *@
+            <div class="input-group">
+                <label for="email-input">Email</label>
+                <input id="email-input"
+                       class="app-input @(!EmailValid ? "input-error" : "")"
+                       type="email"
+                       @bind="email"
+                       @bind:event="oninput" />
+                @if (!EmailValid)
                 {
-                    <div class="grid-item comic-grid-item">
-                        <img src="@imgPath" alt="Erntebild" class="harvest-photo" />
-                        <div class="delete-overlay" @onclick="() => DeletePhoto(imgPath)">
-                            <span class="delete-icon">✖</span>
-                        </div>
-                    </div>
+                <p class="inline-error error-text">⚠️ Ungültige Email-Adresse.</p>
                 }
-                
-                @* Platzhalter zum Vergleich mit Abbildung 9 *@
-                <div class="grid-item comic-grid-item delete-placeholder">
-                    <span class="delete-icon-text">Foto löschen</span>
+            </div>
+
+            @* Telefonnummer *@
+            <div class="input-group">
+                <label for="phone-input">Telefonnummer</label>
+                <input id="phone-input"
+                       class="app-input"
+                       type="tel"
+                       placeholder="+49123456789"
+                       @bind="fullTelephoneNumber"
+                       @bind:event="oninput" />
+            </div>
+
+            @* Kontaktfreigabe Checkboxen *@
+            <h4 class="share-title">Kontaktdaten freigeben</h4>
+            <div class="share-options-grid">
+                <div class="form-check-group">
+                    <div class="form-check-custom">
+                        <input class="app-check-input" type="checkbox" id="shareEmail" @bind="shareEmail" @bind:event="onchange" />
+                        <label class="app-check-label" for="shareEmail">Email freigeben</label>
+                    </div>
+                </div>
+
+                <div class="form-check-group">
+                    <div class="form-check-custom">
+                        <input class="app-check-input" type="checkbox" id="shareTel" @bind="shareTelephone" @bind:event="onchange" />
+                        <label class="app-check-label" for="shareTel">Telefon freigeben</label>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        @* --- Änderungen Speichern Button --- *@
-        <button class="save-button" @onclick="SaveChanges">Änderungen speichern</button>
-        
+
+        @* --- PASSWORT ÄNDERN --- *@
+        <div class="management-box comic-box password-box">
+            <h3 class="box-title">Passwort ändern</h3>
+
+            @* Neues Passwort *@
+            <div class="input-group">
+                <label>Neues Passwort</label>
+                <input class="app-input @(!string.IsNullOrWhiteSpace(newPassword) && !IsPasswordStrong ? "input-error" : "")"
+                       type="password"
+                       @bind="newPassword"
+                       @bind:event="oninput"
+                       placeholder="Neues Passwort" />
+            </div>
+
+            @* Passwort Anforderungen *@
+            @if (!string.IsNullOrWhiteSpace(newPassword))
+            {
+            <div class="password-requirements">
+                <h5 class="req-title">Anforderungen:</h5>
+                <ul>
+                    <li class="@(HasMinimumLength ? "passed" : "")">
+                        @GetRequirementIcon(HasMinimumLength) Mindestens 8 Zeichen.
+                    </li>
+                    <li class="@(HasUppercase ? "passed" : "")">
+                        @GetRequirementIcon(HasUppercase) Großbuchstaben.
+                    </li>
+                    <li class="@(HasLowercase ? "passed" : "")">
+                        @GetRequirementIcon(HasLowercase) Kleinbuchstaben.
+                    </li>
+                    <li class="@(HasDigit ? "passed" : "")">
+                        @GetRequirementIcon(HasDigit) Ziffer (0-9).
+                    </li>
+                    <li class="@(HasSpecialChar ? "passed" : "")">
+                        @GetRequirementIcon(HasSpecialChar) Sonderzeichen (@GetSpecialChars()).
+                    </li>
+                </ul>
+            </div>
+            }
+
+            @* Neues Passwort bestätigen *@
+            <div class="input-group confirm-password-group">
+                <label>Passwort bestätigen</label>
+                <input class="app-input @(PasswordMismatch ? "input-error" : "")"
+                       type="password"
+                       @bind="confirmNewPassword"
+                       @bind:event="oninput"
+                       placeholder="Passwort wiederholen" />
+
+                @if (PasswordMismatch)
+                {
+                <p class="inline-error error-text">⚠️ Die Passwörter stimmen nicht überein.</p>
+                }
+            </div>
+        </div>
+
+        @* --- Trennlinie --- *@
+        <div class="divider"></div>
+
+        @* --- FOTOS GALERIE --- *@
+        <div class="management-box comic-box">
+            <h3 class="box-title">Meine Fotos</h3>
+
+            <div class="harvest-grid">
+
+                @for (int i = 0; i < uploadedImages.Count; i++)
+                {
+                var imgPath = uploadedImages[i];
+                var index = i;
+
+                <div class="grid-item comic-grid-item" @onmouseover="() => SetHoveredIndex(index)" @onmouseout="ResetHoveredIndex">
+                    <img src="@imgPath" alt="Erntebild" class="harvest-photo" />
+
+                    @* Lösch-Mechanismus mit Popup *@
+                    <div class="delete-overlay" @onclick="() => ToggleDeletePopup(index)">
+                        <span class="delete-icon" style="color: #FFFFFF">✖</span>
+                    </div>
+
+                    @if (showDeletePopupIndex == index)
+                    {
+                    <div class="delete-popup comic-box" @onclick="() => DeletePhoto(imgPath)">
+                        Bild löschen
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+
+        @* --- Änderungen Speichern Button (Lila) --- *@
+        <button class="save-button purple-button"
+                @onclick="SaveChanges"
+                disabled="@(!CanSaveChanges)">
+            Änderungen speichern
+        </button>
+
+        @if (!CanSaveChanges)
+        {
+        <p class="disabled-hint save-hint">
+            @(EmailValid ? "" : "⚠️ Ungültige E-Mail-Adresse. ")
+            @(!PasswordChangeValid ? "⚠️ Bitte korrigieren Sie die Passwortfelder." : "")
+        </p>
+        }
+
     </div>
 
-    @* --- Bottom Nav (Leer, da nicht Teil dieser Seite, aber Container für Layout) --- *@
-    <footer class="bottom-nav">
-        </footer>
+    @* --- Bottom Nav --- *@
+    <footer class="bottom-nav"></footer>
 </div>
+
+@code {
+// --- Statische (nicht änderbare) Benutzerdaten ---
+string sirname = "Mustermann";
+string prename = "Max";
+string username = "MaxiGärtner";
+
+// --- Bearbeitbare Felder ---
+string email = "max.mustermann@gmail.com";
+string fullTelephoneNumber = "+49174123456789";
+bool shareEmail = true;
+bool shareTelephone = false;
+
+// --- Passwort Felder ---
+string newPassword = "";
+string confirmNewPassword = "";
+
+// --- Bio und Bilder ---
+private string bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit 2020.";
+private List<string> uploadedImages = new List<string>
+{
+"pictures/Testbilder/Gurken_01.jpg",
+"pictures/Testbilder/Tomaten_01.jpg",
+"pictures/Testbilder/harvest_3.jpg",
+"pictures/Testbilder/harvest_4.jpg",
+"pictures/Testbilder/harvest_5.jpg",
+"pictures/Testbilder/harvest_6.jpg"
+};
+
+// --- Profilbild Karussell Logik ---
+private List<string> AvailableProfiles = new()
+{
+"Profilbild_01.png", "Profilbild_02.png", "Profilbild_03.png", "Profilbild_04.png",
+"Profilbild_05.png", "Profilbild_06.png", "Profilbild_07.png", "Profilbild_08.png",
+"Profilbild_09.png", "Profilbild_10.png", "Profilbild_11.png", "Profilbild_12.png",
+"Profilbild_13.png", "Profilbild_14.png", "Profilbild_15.png", "Profilbild_16.png",
+"Profilbild_17.png", "Profilbild_18.png", "Profilbild_19.png", "Profilbild_20.png",
+"Profilbild_21.png", "Profilbild_22.png", "Profilbild_23.png", "Profilbild_24.png",
+"Profilbild_25.png", "Profilbild_26.png", "Profilbild_27.png", "Profilbild_28.png"
+};
+
+private string SelectedProfile { get; set; }
+private int CurrentIndex { get; set; } = 0;
+
+// UI/Steuerungsfelder
+private bool showLogout = false;
+private int? showDeletePopupIndex = null;
+private int? hoveredIndex = null;
+
+protected override void OnInitialized()
+{
+// Simuliertes Laden des gespeicherten Profilbildes
+CurrentIndex = 4; // Index von "Profilbild_05.png"
+SelectedProfile = AvailableProfiles[CurrentIndex];
+}
+
+private string GetProfileName(int index)
+{
+int count = AvailableProfiles.Count;
+int effectiveIndex = (index % count + count) % count;
+return AvailableProfiles[effectiveIndex];
+}
+
+private void SelectNextProfile()
+{
+CurrentIndex = (CurrentIndex + 1) % AvailableProfiles.Count;
+SelectedProfile = AvailableProfiles[CurrentIndex];
+}
+
+private void SelectPreviousProfile()
+{
+CurrentIndex = (CurrentIndex - 1 + AvailableProfiles.Count) % AvailableProfiles.Count;
+SelectedProfile = AvailableProfiles[CurrentIndex];
+}
+
+// ======================================
+// 1. VALIDIERUNG & LOGIK (C#)
+// ======================================
+
+private bool EmailValid => string.IsNullOrWhiteSpace(email) || IsValidEmail(email);
+public static bool IsValidEmail(string email)
+{
+if (string.IsNullOrWhiteSpace(email)) return true;
+try
+{
+var addr = new EmailAddressAttribute();
+return addr.IsValid(email);
+}
+catch { return false; }
+}
+
+// -- Passwort Validierung --
+private bool HasMinimumLength => newPassword.Length >= 8;
+private bool HasUppercase => Regex.IsMatch(newPassword, @"[A-Z]");
+private bool HasLowercase => Regex.IsMatch(newPassword, @"[a-z]");
+private bool HasDigit => Regex.IsMatch(newPassword, @"[0-9]");
+private bool HasSpecialChar => Regex.IsMatch(newPassword, @"[#?!@$%^&*-]");
+private bool IsPasswordStrong => HasMinimumLength && HasUppercase && HasLowercase && HasDigit && HasSpecialChar;
+
+private bool PasswordMismatch =>
+!string.IsNullOrWhiteSpace(newPassword) && !string.IsNullOrWhiteSpace(confirmNewPassword) && (newPassword != confirmNewPassword);
+
+private bool IsNewPasswordSectionActive => !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(confirmNewPassword);
+
+private bool PasswordChangeValid =>
+!IsNewPasswordSectionActive || (IsNewPasswordSectionActive && IsPasswordStrong && !PasswordMismatch);
+
+private MarkupString GetRequirementIcon(bool passed) =>
+passed ? (MarkupString)"<span class=\"check-icon\">✔</span>" : (MarkupString)"<span class=\"fail-icon\">✗</span>";
+private string GetSpecialChars() => "#?!@$%^&*-";
+
+// -- Gesamt Validierung für Speichern Button --
+private bool CanSaveChanges => EmailValid && PasswordChangeValid;
+
+// ======================================
+// 2. AKTIONEN
+// ======================================
+
+private void ToggleLogoutMenu() => showLogout = !showLogout;
+private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
+
+// Bild-Lösch Logik
+private void SetHoveredIndex(int index) => hoveredIndex = index;
+private void ResetHoveredIndex() => hoveredIndex = null;
+
+private void ToggleDeletePopup(int index)
+{
+if (showDeletePopupIndex == index)
+{
+showDeletePopupIndex = null;
+}
+else
+{
+showDeletePopupIndex = index;
+}
+}
+
+private void DeletePhoto(string path)
+{
+uploadedImages.Remove(path);
+showDeletePopupIndex = null;
+Console.WriteLine($"Foto gelöscht: {path}");
+StateHasChanged();
+}
+
+private void SaveChanges()
+{
+if (!CanSaveChanges)
+{
+Console.WriteLine("Speichern abgebrochen: Ungültige Eingaben.");
+return;
+}
+
+Console.WriteLine("Änderungen gespeichert:");
+// ... Speicherlogik
+
+Nav.NavigateTo("/ProfilTest", forceLoad: true); // Zurück zum Profil
+}
+}
 
 <style>
     /* Globale Container und Schrift */
@@ -132,7 +450,7 @@
         font-family: 'Patrick Hand', cursive, sans-serif;
     }
 
-    /* --- TOP BAR (Von ProfilTest übernommen) --- */
+    /* --- TOP BAR (Unverändert) --- */
     .top-bar {
         display: flex;
         justify-content: space-between;
@@ -156,12 +474,7 @@
 
     /* Icon Wrapper (Rangliste) */
     .icon-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-weight: bold;
-        font-size: 12px;
-        width: 60px; /* Platzhalter */
+        width: 60px;
     }
 
     /* Rechtes Aktionsfeld (Hamburger Menü) */
@@ -188,10 +501,6 @@
         top: 45px;
         right: 0px;
         width: 150px;
-        background-color: #fff;
-        border: 3px solid #000;
-        border-radius: 8px;
-        box-shadow: 3px 3px 0 0 #000;
         z-index: 20;
         padding: 5px 0;
     }
@@ -208,6 +517,7 @@
         background-color: #eee;
     }
 
+
     /* --- CONTENT AREA & BOX STYLING --- */
     .scroll-content {
         flex-grow: 1;
@@ -216,105 +526,21 @@
     }
 
     .comic-box {
-        /* Dickerer Rand für die Hauptboxen (von ProfilTest übernommen) */
         border: 5px solid #000;
         border-radius: 10px;
-        box-shadow: 6px 6px 0 0 #000; 
+        box-shadow: 6px 6px 0 0 #000;
         background-color: #fff;
         padding: 15px;
         margin-bottom: 20px;
     }
-    
-    /* --- INPUT GRUPPEN --- */
-    .management-box .input-group {
-        margin-bottom: 15px;
-    }
 
-    .management-box label {
-        display: block;
-        font-size: 18px;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    .management-box .input-wrapper {
-        display: flex;
-        align-items: center;
-        border: 3px solid #000;
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 3px 3px 0 0 #000;
-        position: relative;
-    }
-
-    .management-box input {
-        flex-grow: 1;
-        border: none;
-        padding: 8px 10px;
-        font-size: 18px;
-        font-family: 'Patrick Hand', cursive, sans-serif;
-        background: transparent;
-        outline: none;
-        color: #000;
-    }
-    
-    .management-box input:read-only {
-        color: #555;
-    }
-    
-    .edit-icon {
+    .box-title {
         font-size: 20px;
-        padding: 0 10px;
-        cursor: pointer;
-    }
-    
-    /* Passwort Ändern Button neben Input */
-    .password-change-button {
-        background: #eee;
-        border: 2px solid #000;
-        border-radius: 5px;
         font-weight: bold;
-        padding: 5px 10px;
-        font-size: 16px;
-        margin-left: 10px;
-        box-shadow: 2px 2px 0 0 #000;
-        cursor: pointer;
-        transition: transform 0.1s;
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        border-bottom: 2px dashed #ccc;
     }
-    
-    .password-change-button:active {
-        transform: translate(2px, 2px);
-        box-shadow: none;
-    }
-    
-    /* Layoutkorrektur für Passwortfeld */
-    .input-group:nth-child(1) .input-wrapper {
-        box-shadow: none;
-        border: none;
-        padding: 0;
-        margin-bottom: 5px;
-    }
-    .input-group:nth-child(1) .input-wrapper input {
-        border: 3px solid #000;
-        border-radius: 8px;
-        box-shadow: 3px 3px 0 0 #000;
-        padding: 8px 10px;
-    }
-    .input-group:nth-child(1) {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-    .input-group:nth-child(1) .input-wrapper {
-        flex-grow: 1;
-    }
-    .input-group:nth-child(1) label {
-        width: 100%;
-    }
-    .input-group:nth-child(1) .edit-icon {
-        display: none; /* Icon im Passwortfeld entfernen, da der Button daneben ist */
-    }
-
 
     /* --- Trennlinie --- */
     .divider {
@@ -323,63 +549,310 @@
         box-shadow: 0 4px 0 0 #000;
     }
 
-    /* --- Biografie Sektion --- */
-    .management-box .bio-wrapper {
+
+    /* UNVERÄNDERBARE DATEN */
+    .info-box .info-item {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        border: 3px solid #000;
-        border-radius: 8px;
-        box-shadow: 3px 3px 0 0 #000;
-        padding: 10px;
+        align-items: center;
+        border-bottom: 1px dashed #eee;
+        padding: 5px 0;
     }
-    
-    .management-box .bio-wrapper p {
-        margin: 0;
-        flex-grow: 1;
+    .info-box label {
         font-size: 18px;
-        line-height: 1.4;
+        font-weight: bold;
         color: #555;
     }
-
-    .edit-bio-button {
-        background: #eee;
-        border: 2px solid #000;
-        border-radius: 5px;
+    .info-box p {
+        font-size: 18px;
         font-weight: bold;
-        padding: 5px 10px;
-        font-size: 16px;
-        white-space: nowrap;
-        margin-left: 10px;
-        box-shadow: 2px 2px 0 0 #000;
-        cursor: pointer;
-        transition: transform 0.1s;
-    }
-    .edit-bio-button:active {
-        transform: translate(2px, 2px);
-        box-shadow: none;
+        margin: 0;
+        color: #000;
     }
 
+    /* KONTAKTDATEN & PASSWORT INPUT STYLES (app-input) */
+    .input-group {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .input-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #000;
+        font-size: 1.1rem;
+    }
+
+    .app-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 1.2rem;
+        border: 3px solid #000;
+        border-radius: 5px;
+        box-shadow: 2px 2px 0 0 #000;
+        box-sizing: border-box;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+        transition: box-shadow 0.1s, border-color 0.1s;
+    }
+    .app-input:focus {
+        outline: none;
+        border-color: #8B45B3; /* Lila Fokus */
+        box-shadow: 4px 4px 0 0 #8B45B3;
+    }
+
+    .input-error {
+        border-color: red !important;
+        box-shadow: 4px 4px 0 0 red !important;
+    }
+
+    .inline-error {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: 5px;
+        margin-bottom: 0px;
+        font-style: italic;
+        text-align: left;
+    }
+
+    /* Spezifische Korrektur für Passwort bestätigen */
+    .password-box .confirm-password-group {
+        margin-top: 15px;
+    }
+
+    /* Kontaktfreigabe Styles */
+    .share-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #000;
+        margin-top: 20px; /* Sicherstellen, dass Abstand da ist */
+        margin-bottom: 10px;
+    }
+    .share-options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .form-check-group {
+        padding: 10px;
+        border: 2px solid #000;
+        border-radius: 8px;
+        box-shadow: 1px 1px 0 0 #000;
+        background-color: rgba(240, 240, 240, 0.9);
+    }
+    .form-check-custom {
+        display: flex;
+        align-items: center;
+    }
+    .app-check-input {
+        opacity: 0;
+        position: absolute;
+    }
+    .app-check-label {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #000;
+        display: block;
+        padding-left: 30px;
+        cursor: pointer;
+        position: relative;
+        line-height: 20px;
+    }
+    .app-check-label::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0px;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #000;
+        border-radius: 4px;
+        background-color: #f0f0f0;
+        transition: all 0.1s;
+    }
+    .app-check-input:checked + .app-check-label::before {
+        background-color: #8B45B3;
+        border-color: #000;
+    }
+    .app-check-input:checked + .app-check-label::after {
+        content: '✔';
+        position: absolute;
+        left: 3px;
+        top: -3px;
+        font-size: 18px;
+        line-height: 1;
+        color: white;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Passwort ändern */
+
+    .password-requirements {
+        margin-top: 7px;
+        padding: 7px;
+        border: 2px dashed #ccc;
+        border-radius: 5px;
+        background-color: #fafafa;
+    }
+    .req-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #444;
+    }
+    .password-requirements ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    .password-requirements li {
+        margin-bottom: 3px;
+        transition: color 0.3s;
+    }
+    .password-requirements li.passed {
+        color: #4CAF50;
+        font-weight: bold;
+    }
+    .check-icon, .fail-icon {
+        display: inline-block;
+        width: 15px;
+        text-align: center;
+        margin-right: 5px;
+        font-size: 1rem;
+    }
+    .check-icon {
+        color: #4CAF50;
+    }
+    .fail-icon {
+        color: #F44336;
+    }
+
+    /* --- Profilbild Karussell Styles --- */
+    .tag-headline {
+        font-weight: bold;
+        font-size: 1.4rem;
+        color: #000;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .profile-carousel-hybrid {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .profile-main-image-container-hybrid {
+        width: 130px;
+        height: 130px;
+        border: 4px solid #000;
+        box-shadow: 6px 6px 0 0 #000;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #f0f0f0;
+        flex-shrink: 0;
+    }
+
+    .selected-outline-hybrid {
+        border: 5px solid #8B45B3;
+        box-shadow: 0 0 0 3px #000, 7px 7px 0 0 #000;
+    }
+
+    .profile-preview-container-hybrid {
+        width: 60px;
+        height: 60px;
+        border: 2px solid #000;
+        box-shadow: 3px 3px 0 0 #000;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #fff;
+        opacity: 0.7;
+        flex-shrink: 0;
+    }
+
+    .profile-image-large {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .profile-image-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .arrow-nav-button {
+        width: 45px;
+        height: 45px;
+        padding: 0;
+        font-size: 1.5rem;
+        border-radius: 50%;
+        box-shadow: 3px 3px 0 0 #000;
+        margin-top: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        background-color: #ccc;
+        color: #000;
+        border: 3px solid #000;
+    }
+
+    .arrow-nav-button:active {
+        transform: translate(3px, 3px);
+        box-shadow: 0 0 0 0 #000;
+        background-color: #bbb;
+    }
+
+    /* --- Biografie Sektion (Textarea) --- */
+    .input-label {
+        font-size: 1.3rem;
+    }
+
+    .app-input-comic {
+        width: 100%;
+        padding: 10px;
+        border: 3px solid #000;
+        border-radius: 5px;
+        outline: none;
+        font-size: 1.1rem;
+        box-shadow: 3px 3px 0 0 #000;
+        font-family: 'Patrick Hand', cursive, sans-serif;
+        height: 100px;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+    .app-input-comic:focus {
+        border-color: #8B45B3;
+        box-shadow: 4px 4px 0 0 #8B45B3;
+    }
+
+    .char-counter {
+        text-align: right;
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 5px;
+    }
 
     /* --- Fotos Galerie --- */
-    .gallery-title {
-        font-size: 24px;
-        font-weight: bold;
-        margin-top: 15px;
-        margin-bottom: 15px;
-    }
-
     .harvest-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr); 
+        grid-template-columns: repeat(4, 1fr);
         gap: 17px;
     }
 
     .grid-item {
         position: relative;
         width: 100%;
-        padding-bottom: 177.77%; 
-        overflow: hidden;
+        padding-bottom: 177.77%;
+        overflow: visible;
     }
 
     .comic-grid-item {
@@ -397,16 +870,16 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        display: block;
     }
-    
-    /* Lösch-Overlay für Bilder */
+
     .delete-overlay {
         position: absolute;
         top: -10px;
         right: -10px;
         width: 30px;
         height: 30px;
-        background-color: #D62828; /* Rot */
+        background-color: #D62828;
         border: 3px solid #000;
         border-radius: 50%;
         display: flex;
@@ -414,47 +887,32 @@
         align-items: center;
         z-index: 10;
         box-shadow: 2px 2px 0 0 #000;
+        cursor: pointer;
     }
-    .delete-icon {
-        color: #fff;
-        font-size: 18px;
-        font-weight: bold;
-        line-height: 1;
-    }
-    
-    /* Platzhalter für "Foto löschen" (basierend auf Abbildung 9) */
-    .delete-placeholder {
-        background: none;
-        border: none;
-        box-shadow: none;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        cursor: default;
-        padding-bottom: 0;
-        height: 30px; /* Höhe des Overlays */
-        width: 100%;
-        position: static;
-        transform: translateY(-100%); /* Visuell an das Overlay anpassen */
-    }
-    .delete-icon-text {
+
+    .delete-popup {
+        position: absolute;
+        top: 5px;
+        right: 25px;
+        width: 150px;
         background-color: #fff;
-        border: 2px solid #000;
-        border-radius: 5px;
-        padding: 5px 10px;
-        font-size: 16px;
+        color: #D62828;
         font-weight: bold;
-        box-shadow: 2px 2px 0 0 #000;
-        white-space: nowrap;
-        margin-left: 20px;
+        font-size: 16px;
+        text-align: center;
+        padding: 10px 5px;
+        z-index: 15;
+        cursor: pointer;
     }
-    
-    /* --- SPEICHERN BUTTON --- */
+    .delete-popup:hover {
+        background-color: #ffe0e0;
+    }
+
+    /* --- SPEICHERN BUTTON (Lila) --- */
     .save-button {
-        width: calc(100% - 30px); /* Basierend auf 20px Padding links/rechts */
-        margin: 0 15px 30px 15px;
+        width: calc(100% - 30px);
+        margin: 0 15px 10px 15px;
         padding: 15px;
-        background-color: #4CAF50; /* Grün */
         color: #fff;
         border: 5px solid #000;
         border-radius: 10px;
@@ -466,66 +924,22 @@
         transition: transform 0.1s;
     }
 
+    .purple-button {
+        background-color: #8B45B3; /* Lila */
+    }
+
     .save-button:active {
         transform: translate(6px, 6px);
         box-shadow: 0 0 0 0 #000;
     }
 
-    /* --- BOTTOM NAV (Ausblenden) --- */
-    .bottom-nav {
-        display: none;
+    .disabled-hint.save-hint {
+        text-align: center;
+        color: #999;
+        font-size: 1rem;
+        margin-top: 0;
+        margin-bottom: 30px;
+        font-style: italic;
     }
+
 </style>
-
-@code {
-    private string bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit 2020.";
-    private List<string> uploadedImages = new List<string>
-    {
-        "pictures/Testbilder/Gurken_01.jpg",
-        "pictures/Testbilder/Tomaten_01.jpg",
-        "pictures/Testbilder/harvest_3.jpg",
-        "pictures/Testbilder/harvest_4.jpg",
-        "pictures/Testbilder/harvest_5.jpg",
-        "pictures/Testbilder/harvest_6.jpg"
-    };
-
-    private bool showLogout = false;
-
-    private void ToggleLogoutMenu() => showLogout = !showLogout;
-    private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
-
-    private void ChangePassword()
-    {
-        // Logik für Passwort ändern
-        Console.WriteLine("Passwort ändern Button geklickt.");
-    }
-    private void EditEmail()
-    {
-        // Logik für E-Mail bearbeiten
-        Console.WriteLine("E-Mail bearbeiten geklickt.");
-    }
-    private void EditPhone()
-    {
-        // Logik für Telefonnummer bearbeiten
-        Console.WriteLine("Telefonnummer bearbeiten geklickt.");
-    }
-    private void EditBio()
-    {
-        // Logik für Bio bearbeiten
-        Console.WriteLine("Bio bearbeiten geklickt.");
-    }
-    private void DeletePhoto(string path)
-    {
-        // Logik zum Löschen des Fotos
-        uploadedImages.Remove(path);
-        Console.WriteLine($"Foto gelöscht: {path}");
-        StateHasChanged(); // Komponente neu rendern, um die Liste zu aktualisieren
-    }
-    
-    private void SaveChanges()
-    {
-        // Logik zum Speichern aller Änderungen und Navigation zurück zum Profil
-        Console.WriteLine("Änderungen gespeichert und zum Profil zurückgekehrt.");
-        Nav.NavigateTo("/ProfilTest", forceLoad: true);
-    }
-}
