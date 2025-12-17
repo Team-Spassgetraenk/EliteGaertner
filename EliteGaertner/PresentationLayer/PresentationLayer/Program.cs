@@ -14,8 +14,6 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
 builder.Services.AddDbContext<EliteGaertnerDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(); // Blazor Server interaktiv
