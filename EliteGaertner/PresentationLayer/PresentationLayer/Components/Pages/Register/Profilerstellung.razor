@@ -85,7 +85,7 @@
     private string Bio { get; set; } = "";
     
     // Alle verfügbaren Profilbilder
-    private List<string> AvailableProfiles = new()
+    private List<string> _availableProfiles = new()
     {
         "Profilbild_01.png", "Profilbild_02.png", "Profilbild_03.png", "Profilbild_04.png", 
         "Profilbild_05.png", "Profilbild_06.png", "Profilbild_07.png", "Profilbild_08.png", 
@@ -103,27 +103,27 @@
     protected override void OnInitialized()
     {
         CurrentIndex = 0;
-        SelectedProfile = AvailableProfiles[CurrentIndex];
+        SelectedProfile = _availableProfiles[CurrentIndex];
     }
 
     private bool IsFormValid => !string.IsNullOrWhiteSpace(Bio) && !string.IsNullOrWhiteSpace(SelectedProfile);
 
     private string GetProfileName(int index)
     {
-        int effectiveIndex = (index % AvailableProfiles.Count + AvailableProfiles.Count) % AvailableProfiles.Count;
-        return AvailableProfiles[effectiveIndex];
+        int effectiveIndex = (index % _availableProfiles.Count + _availableProfiles.Count) % _availableProfiles.Count;
+        return _availableProfiles[effectiveIndex];
     }
     
     private void SelectNextProfile()
     {
-        CurrentIndex = (CurrentIndex + 1) % AvailableProfiles.Count;
-        SelectedProfile = AvailableProfiles[CurrentIndex];
+        CurrentIndex = (CurrentIndex + 1) % _availableProfiles.Count;
+        SelectedProfile = _availableProfiles[CurrentIndex];
     }
     
     private void SelectPreviousProfile()
     {
-        CurrentIndex = (CurrentIndex - 1 + AvailableProfiles.Count) % AvailableProfiles.Count;
-        SelectedProfile = AvailableProfiles[CurrentIndex];
+        CurrentIndex = (CurrentIndex - 1 + _availableProfiles.Count) % _availableProfiles.Count;
+        SelectedProfile = _availableProfiles[CurrentIndex];
     }
     
     private void Weiter()

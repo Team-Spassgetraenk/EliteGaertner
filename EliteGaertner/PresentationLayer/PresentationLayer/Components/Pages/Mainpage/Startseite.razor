@@ -23,7 +23,7 @@
     </header>
 
     @* --- NEUES KOMBINIERTES LOGOUT & ADMIN MENÜ --- *@
-    @if (showLogout)
+    @if (_showLogout)
     {
     <div class="logout-menu admin-menu-ext">
         @* Roter Logout Button *@
@@ -32,10 +32,10 @@
         <div class="admin-nav-section">
             <div class="admin-header" @onclick="ToggleAdminNav">
                 <span>🛠 Admin-Navigation</span>
-                <span style="font-size: 12px;">@(showAdminNav ? " ▲" : " ▼")</span>
+                <span style="font-size: 12px;">@(_showAdminNav ? " ▲" : " ▼")</span>
             </div>
             
-            @if (showAdminNav)
+            @if (_showAdminNav)
             {
                 <div class="admin-scroll-area">
                     <div class="admin-link" @onclick='() => NavTo("/")'>Login</div>
@@ -57,7 +57,7 @@
     }
 
     <div class="tinder-card-area">
-        @if (isProfileVisible)
+        @if (_isProfileVisible)
         {
         <div class="tinder-wrapper-card">
 
@@ -74,7 +74,7 @@
                     <div class="username-tag-combo">
                         @* ANKLICKBARER USERNAME *@
                         <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
-                            <span class="username-label">@user_name1</span>
+                            <span class="username-label">@_userName1</span>
                         </a>
 
                         <div class="tag-label">
@@ -149,7 +149,7 @@
         </p>
         }
 
-        @if (showReportModal)
+        @if (_showReportModal)
         {
         <div class="report-modal-overlay">
             <div class="report-modal">
@@ -157,27 +157,27 @@
                 <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
 
                 <div class="report-reason">
-                    <input type="checkbox" id="abstossende" @onchange="@(e => UpdateReportReason("abstossende Inhalte", e))" checked="@(selectedReportReason == "abstossende Inhalte")" />
+                    <input type="checkbox" id="abstossende" @onchange="@(e => UpdateReportReason("abstossende Inhalte", e))" checked="@(_selectedReportReason == "abstossende Inhalte")" />
                     <label for="abstossende">abstossende Inhalte</label>
                 </div>
 
                 <div class="report-reason">
-                    <input type="checkbox" id="sexuelle" @onchange="@(e => UpdateReportReason("sexuelle Inhalte", e))" checked="@(selectedReportReason == "sexuelle Inhalte")" />
+                    <input type="checkbox" id="sexuelle" @onchange="@(e => UpdateReportReason("sexuelle Inhalte", e))" checked="@(_selectedReportReason == "sexuelle Inhalte")" />
                     <label for="sexuelle">sexuelle Inhalte</label>
                 </div>
 
                 <div class="report-reason">
-                    <input type="checkbox" id="gewaltvolle" @onchange="@(e => UpdateReportReason("gewaltvolle Inhalte", e))" checked="@(selectedReportReason == "gewaltvolle Inhalte")" />
+                    <input type="checkbox" id="gewaltvolle" @onchange="@(e => UpdateReportReason("gewaltvolle Inhalte", e))" checked="@(_selectedReportReason == "gewaltvolle Inhalte")" />
                     <label for="gewaltvolle">gewaltvolle Inhalte</label>
                 </div>
 
                 <div class="report-reason">
-                    <input type="checkbox" id="catfishing" @onchange="@(e => UpdateReportReason("Catfishing", e))" checked="@(selectedReportReason == "Catfishing")" />
+                    <input type="checkbox" id="catfishing" @onchange="@(e => UpdateReportReason("Catfishing", e))" checked="@(_selectedReportReason == "Catfishing")" />
                     <label for="catfishing">Catfishing</label>
                 </div>
 
                 <div class="report-reason">
-                    <input type="checkbox" id="spam" @onchange="@(e => UpdateReportReason("Spam", e))" checked="@(selectedReportReason == "Spam")" />
+                    <input type="checkbox" id="spam" @onchange="@(e => UpdateReportReason("Spam", e))" checked="@(_selectedReportReason == "Spam")" />
                     <label for="spam">Spam</label>
                 </div>
 
@@ -212,24 +212,24 @@
 </div>
 
 @code {
-private bool showLogout = false;
-private bool showAdminNav = false; 
-private bool showReportModal = false;
-private bool isProfileVisible = true;
-private string selectedReportReason = "";
-private string user_name1 = "@user_name1";
+private bool _showLogout = false;
+private bool _showAdminNav = false; 
+private bool _showReportModal = false;
+private bool _isProfileVisible = true;
+private string _selectedReportReason = "";
+private string _userName1 = "@user_name1";
 
 private void ToggleLogoutMenu()
 {
-    showLogout = !showLogout;
-    if (!showLogout) showAdminNav = false;
+    _showLogout = !_showLogout;
+    if (!_showLogout) _showAdminNav = false;
 }
 
-private void ToggleAdminNav() => showAdminNav = !showAdminNav;
+private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
 
 private void NavTo(string path)
 {
-    showLogout = false;
+    _showLogout = false;
     Nav.NavigateTo(path, forceLoad: true);
 }
 
@@ -239,27 +239,27 @@ private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
 private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
 private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
 private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
-private void FlagProfile() => showReportModal = true;
-private void CloseReportModal() => showReportModal = false;
+private void FlagProfile() => _showReportModal = true;
+private void CloseReportModal() => _showReportModal = false;
 
 private void UpdateReportReason(string reason, ChangeEventArgs e)
 {
-    if ((bool)e.Value) selectedReportReason = reason;
-    else if (selectedReportReason == reason) selectedReportReason = string.Empty;
+    if ((bool)e.Value) _selectedReportReason = reason;
+    else if (_selectedReportReason == reason) _selectedReportReason = string.Empty;
 }
 
 private void ReportProfile()
 {
-    if (!string.IsNullOrEmpty(selectedReportReason))
+    if (!string.IsNullOrEmpty(_selectedReportReason))
     {
-        isProfileVisible = false;
-        showReportModal = false;
+        _isProfileVisible = false;
+        _showReportModal = false;
     }
 }
 
 private void DislikeProfile() => Console.WriteLine("0");
 private void LikeProfile() => Console.WriteLine("1");
-private string GetUsernameUrl() => user_name1.TrimStart('@');
+private string GetUsernameUrl() => _userName1.TrimStart('@');
 }
 
 <style>

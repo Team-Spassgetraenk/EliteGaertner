@@ -22,7 +22,7 @@
             
             <h4 class="tag-headline">Gemüse</h4>
             <div class="tag-grid">
-                @foreach (var tag in GemueseTags)
+                @foreach (var tag in _gemueseTags)
                 {
                     <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
                          @onclick="() => ToggleTag(tag.Name)">
@@ -34,7 +34,7 @@
 
             <h4 class="tag-headline">Obst</h4>
             <div class="tag-grid">
-                @foreach (var tag in ObstTags)
+                @foreach (var tag in _obstTags)
                 {
                     <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
                          @onclick="() => ToggleTag(tag.Name)">
@@ -64,7 +64,7 @@
 
     public record TagItem(string Name, string Icon);
 
-    List<TagItem> GemueseTags = new()
+    List<TagItem> _gemueseTags = new()
     {
         new("Auberginen", "🍆"),
         new("Gurken", "🥒"),
@@ -78,7 +78,7 @@
         new("Zwiebeln", "🧅")
     };
 
-    List<TagItem> ObstTags = new()
+    List<TagItem> _obstTags = new()
     {
         new("Melonen", "🍉"),
         new("Äpfel", "🍎"),

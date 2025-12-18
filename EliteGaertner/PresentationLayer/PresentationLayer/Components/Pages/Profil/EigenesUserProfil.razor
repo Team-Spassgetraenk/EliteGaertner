@@ -22,7 +22,7 @@
         @* Hamburger Menü für Logout *@
         <div class="header-right-action menu-wrapper">
             <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
-            @if (showLogout)
+            @if (_showLogout)
             {
             <div class="logout-menu comic-box">
                 <p @onclick="NavigateToLogout">Logout &lt;</p>
@@ -53,7 +53,7 @@
             </div>
 
             @* Bio/Beschreibung *@
-            <p class="profile-description">@bioText</p>
+            <p class="profile-description">@_bioText</p>
         </div>
 
         @* NEU: Galerie-Box im Comic-Stil, die das Grid umschließt *@
@@ -101,8 +101,8 @@
 </div>
 
 @code {
-private string bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit 2020.";
-private List<string> uploadedImages = new List<string>
+private string _bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit 2020.";
+private List<string> _uploadedImages = new List<string>
 {
 "pictures/Testbilder/Gurken_01.jpg",
 "pictures/Testbilder/Gurken_01.jpg",
@@ -112,7 +112,7 @@ private List<string> uploadedImages = new List<string>
 "pictures/Testbilder/Gurken_01.jpg"
 };
 
-private bool showLogout = false;
+private bool _showLogout = false;
 // Maximal 7 Bilder + 1 Plus-Feld
 private const int MaxContentItems = 8;
 
@@ -125,7 +125,7 @@ public string Path { get; set; } = "";
 
 private List<GridItem> GetGridItems()
 {
-var items = uploadedImages.Select(path => new GridItem { IsImage = true, Path = path }).ToList();
+var items = _uploadedImages.Select(path => new GridItem { IsImage = true, Path = path }).ToList();
 
 // Das Plus-Feld wird nur hinzugefügt, wenn die Max-Anzahl nicht erreicht ist.
 if (items.Count < MaxContentItems)
@@ -137,7 +137,7 @@ return items.Take(MaxContentItems).ToList();
 }
 
 
-private void ToggleLogoutMenu() => showLogout = !showLogout;
+private void ToggleLogoutMenu() => _showLogout = !_showLogout;
 private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
 private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
 private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);

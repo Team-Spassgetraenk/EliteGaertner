@@ -4,25 +4,25 @@
 <div class="speech-container">
     <img src="pictures/Profil_02.png" class="avatar" style="height: 100px; width: 100px" />
 
-    <div class="speech-bubble @bubbleAnimationClass">
-        <span class="typing">@visibleText</span>
+    <div class="speech-bubble @BubbleAnimationClass">
+        <span class="typing">@_visibleText</span>
     </div>
 </div>
 
 @code {
     [Parameter] public string Text { get; set; } = "";
-    private string visibleText = "";
-    private bool animationDone = false;
-    private string bubbleAnimationClass => animationDone ? "bubble-finished" : "bubble-anim";
+    private string _visibleText = "";
+    private bool _animationDone = false;
+    private string BubbleAnimationClass => _animationDone ? "bubble-finished" : "bubble-anim";
 
     protected override async Task OnInitializedAsync()
     {
         foreach (var c in Text)
         {
-            visibleText += c;
+            _visibleText += c;
             await Task.Delay(35); // Geschwindigkeit
             StateHasChanged();
         }
-        animationDone = true;  // Startet Puls-Animation
+        _animationDone = true;  // Startet Puls-Animation
     }
 }
