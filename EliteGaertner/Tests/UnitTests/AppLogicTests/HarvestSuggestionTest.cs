@@ -1,7 +1,13 @@
 using Contracts.Data_Transfer_Objects;
 using AppLogic.Services;
 
+
+
+///NULL RÜCKGABE TESTEN!
 namespace Tests.UnitTests.AppLogicTests;
+
+
+//WAS PRÜFT DIE TESTKLASSE?
 
 [TestClass]
 public class HarvestSuggestionTest

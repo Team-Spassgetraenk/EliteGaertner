@@ -13,6 +13,8 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
 
 builder.Services.AddDbContext<EliteGaertnerDbContext>(options =>
     options.UseNpgsql(connectionString));
+//ÜBERGABE DER DBCONTEXT AN DIE MANAGEMENTDDBS FEHLT!!!!
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
