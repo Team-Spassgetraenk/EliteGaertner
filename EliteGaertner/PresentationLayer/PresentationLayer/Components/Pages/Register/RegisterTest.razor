@@ -24,24 +24,24 @@
                 <div class="input-column">
                     <div class="input-group">
                         <label for="sirname-input">Name</label>
-                        <input id="sirname-input" class="app-input" placeholder="Nachname eingeben" @bind="_sirname" @bind:event="oninput" />
+                        <input id="sirname-input" class="app-input" placeholder="Nachname eingeben" @bind="sirname" @bind:event="oninput" />
                     </div>
 
                     <div class="input-group">
                         <label for="prename-input">Vorname</label>
-                        <input id="prename-input" class="app-input" placeholder="Vorname eingeben" @bind="_prename" @bind:event="oninput" />
+                        <input id="prename-input" class="app-input" placeholder="Vorname eingeben" @bind="prename" @bind:event="oninput" />
                     </div>
                     
                     <div class="input-group">
                         <label for="email-input">Email</label>
-                        <input id="email-input" class="app-input" placeholder="Email eingeben" @bind="_email" @bind:event="oninput" />
+                        <input id="email-input" class="app-input" placeholder="Email eingeben" @bind="email" @bind:event="oninput" />
                     </div>
                 </div>
 
                 <div class="input-column">
                     <div class="input-group">
                         <label for="username-input">Benutzername</label>
-                        <input id="username-input" class="app-input" placeholder="Benutzername eingeben" @bind="_username" @bind:event="oninput" />
+                        <input id="username-input" class="app-input" placeholder="Benutzername eingeben" @bind="username" @bind:event="oninput" />
                     </div>
 
                     <div class="input-group">
@@ -50,7 +50,7 @@
                                class="app-input" 
                                type="password" 
                                placeholder="Passwort eingeben" 
-                               @bind="_password" @bind:event="oninput" />
+                               @bind="password" @bind:event="oninput" />
                     </div>
                     
                     <div class="input-group">
@@ -59,7 +59,7 @@
                                class="app-input @(PasswordMismatch ? "input-error" : "")" 
                                type="password" 
                                placeholder="Passwort wiederholen" 
-                               @bind="_passwordConfirm" @bind:event="oninput" />
+                               @bind="passwordConfirm" @bind:event="oninput" />
                     </div>
                 </div>
             </div>
@@ -75,8 +75,8 @@
                 <p class="disabled-hint">
                     @(
                         (
-                            !string.IsNullOrWhiteSpace(_password) && 
-                            !string.IsNullOrWhiteSpace(_passwordConfirm) && 
+                            !string.IsNullOrWhiteSpace(password) && 
+                            !string.IsNullOrWhiteSpace(passwordConfirm) && 
                             PasswordMismatch
                         ) 
                         ? "⚠️ Die Passwörter stimmen nicht überein." 
@@ -95,28 +95,28 @@
 </div>
 
 @code {
-    string _sirname = "";
-    string _prename = "";
-    string _email = "";
-    string _username = "";
-    string _password = "";
-    string _passwordConfirm = "";
+    string sirname = "";
+    string prename = "";
+    string email = "";
+    string username = "";
+    string password = "";
+    string passwordConfirm = "";
 
     // Hilfseigenschaft: Prüft nur den Passwort-Fehler (falls beide gefüllt sind)
     private bool PasswordMismatch => 
-        !string.IsNullOrWhiteSpace(_password) && 
-        !string.IsNullOrWhiteSpace(_passwordConfirm) && 
-        (_password != _passwordConfirm);
+        !string.IsNullOrWhiteSpace(password) && 
+        !string.IsNullOrWhiteSpace(passwordConfirm) && 
+        (password != passwordConfirm);
 
 
     // Prüft alle Felder plus Passwort-Abgleich
     private bool RegisterEnabled => 
-        !string.IsNullOrWhiteSpace(_sirname) &&
-        !string.IsNullOrWhiteSpace(_prename) &&
-        !string.IsNullOrWhiteSpace(_email) &&
-        !string.IsNullOrWhiteSpace(_username) &&
-        !string.IsNullOrWhiteSpace(_password) &&
-        !string.IsNullOrWhiteSpace(_passwordConfirm) &&
+        !string.IsNullOrWhiteSpace(sirname) &&
+        !string.IsNullOrWhiteSpace(prename) &&
+        !string.IsNullOrWhiteSpace(email) &&
+        !string.IsNullOrWhiteSpace(username) &&
+        !string.IsNullOrWhiteSpace(password) &&
+        !string.IsNullOrWhiteSpace(passwordConfirm) &&
         !PasswordMismatch; // Muss FALSE sein
 
     void Registrieren()
@@ -126,13 +126,13 @@
             var profileDto = new ProfileDto
             {
                 ProfileId = 1,  // TODO Vorerst fest, später aus AuthStateProvider
-                UserName = _username,
-                FirstName = _prename,
-                LastName = _sirname,
-                EMail = _email,
+                UserName = username,
+                FirstName = prename,
+                LastName = sirname,
+                EMail = email,
                 PasswordHash = "", // TODO AuthStateProvider erstellen und Password handling
-                PhoneNumber = "",  // kommt später
-                ProfileText = "",
+                Phonenumber = "",  // kommt später
+                Profiletext = "",
                 ShareMail = false,
                 SharePhoneNumber = false,
                 UserCreated = DateTime.UtcNow
@@ -142,11 +142,11 @@
             if (success)
             {
                 Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
-                Console.WriteLine($"Profil aktualisiert für: {_email}");
+                Console.WriteLine($"Profil aktualisiert für: {email}");
             }
             else
             {
-                Console.WriteLine($"Profil konnte nicht gespeichert werden für: {_email}");
+                Console.WriteLine($"Profil konnte nicht gespeichert werden für: {email}");
             }
         }
     }

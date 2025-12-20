@@ -10,6 +10,12 @@ public class FakeHarvestDbs : IHarvestDbs
         throw new NotImplementedException();
     }
 
+
+    public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
+    {
+        throw new NotImplementedException();
+    }
+
     public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
     {
         return new List<HarvestUploadDto>
@@ -18,5 +24,15 @@ public class FakeHarvestDbs : IHarvestDbs
             new HarvestUploadDto { UploadId = 2, ProfileId = 3 },
             new HarvestUploadDto { UploadId = 3, ProfileId = 4 }
         };
+    }
+
+    public void SetReportHarvestUpload(int uploadId, Enum reason)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
+    {
+        throw new NotImplementedException();
     }
 }

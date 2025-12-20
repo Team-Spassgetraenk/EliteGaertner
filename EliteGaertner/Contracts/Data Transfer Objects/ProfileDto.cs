@@ -8,8 +8,8 @@ public record ProfileDto
     public string LastName { get; init; }
     public string EMail { get; init; }
     public string PasswordHash { get; init; }
-    public string PhoneNumber { get; init; }
-    public string ProfileText { get; init; }
+    public string Phonenumber { get; init; }
+    public string Profiletext { get; init; }
     public bool ShareMail { get; init; }
     public bool SharePhoneNumber { get; init; }
     public DateTime UserCreated { get; init; }

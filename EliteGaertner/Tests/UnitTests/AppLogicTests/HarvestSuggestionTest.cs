@@ -26,9 +26,16 @@ public class HarvestSuggestionTest
                 new PreferenceDto { TagId = 3 }
             }
         };
+        
+        //Aufbereitung der ProfileId und der dazugehörigen TagIds
+        var profileId = profile.ProfileId;
+        var tagIds = profile.PreferenceDtos
+            .Select(p => p.TagId)
+            .Distinct()
+            .ToList();
 
         // Act
-        var suggestion = new HarvestSuggestion(fakeRepo, profile, preloadCount: 10);
+        var suggestion = new HarvestSuggestion(fakeRepo, profileId, tagIds , 10);
         var result = suggestion.GetHarvestSuggestionList();
 
         // Assert

@@ -6,10 +6,10 @@ public interface IPreferenceDbs
 {
     
     //Gib die Preference des Users zurück
-    public PreferenceDto GetUserPreference(int userId);
+    public IEnumerable<PreferenceDto> GetUserPreference(int profileId);
 
     
     //Änder die Preference des Users
-    public void SetUserPreference(int userId, PreferenceDto newUserPreference);
+    public void SetUserPreference(int profileId, PreferenceDto newUserPreference);
 
 }

@@ -3,17 +3,22 @@ using DataManagement;
 using Microsoft.EntityFrameworkCore;
 using AppLogic.Interfaces;
 using AppLogic.Services;
+using DataManagement.Interfaces;
 using PresentationLayer.Components.Pages.Register;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//ConnectionString und Initialisierung für DbContext
+//ConnectionString für EliteGaertnerDbContext
 var connectionString = builder.Configuration.GetConnectionString("Default")
                        ?? "Host=localhost;Port=5432;Database=elitegaertner;Username=postgres;Password=postgres";
-
+//EliteGaertnerDbContext wird mit den Optionen + ConnectionString aufgerufen
 builder.Services.AddDbContext<EliteGaertnerDbContext>(options =>
     options.UseNpgsql(connectionString));
-//ÜBERGABE DER DBCONTEXT AN DIE MANAGEMENTDDBS FEHLT!!!!
+//Hier wird definiert welche Interfaces ManagementDbs implementieren
+builder.Services.AddScoped<IHarvestDbs, ManagementDbs>();
+builder.Services.AddScoped<IMatchesDbs, ManagementDbs>();
+builder.Services.AddScoped<IPreferenceDbs, ManagementDbs>();
+builder.Services.AddScoped<IProfileDbs, ManagementDbs>();
 
 
 // Add services to the container.

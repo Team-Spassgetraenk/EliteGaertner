@@ -5,7 +5,7 @@ namespace DataManagement.Interfaces;
 public interface IProfileDbs
 {
 
-    //Gibt ein P
-    public ProfileDto GetProfile(int userId);
+    //Gibt ein ProfilDto zurück
+    public ProfileDto GetProfile(int profileId);
 
 }

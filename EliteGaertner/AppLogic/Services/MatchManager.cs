@@ -17,6 +17,13 @@ public class MatchManager : IMatchManager
     {
 
         IPreferenceDbs preferenceDBS = new ManagementDbs();
+        
+        //Aufbereitung der ProfileId und der dazugehörigen TagIds
+        var profileId = contentReceiver.ProfileId;
+        var tagIds = contentReceiver.PreferenceDtos
+            .Select(p => p.TagId)
+            .Distinct()
+            .ToList();
 
         _contentReceiver = contentReceiver;
         _preferenceDto = preferenceDBS.GetUserPreference(contentReceiver.UserId);
@@ -26,8 +33,8 @@ public class MatchManager : IMatchManager
 
     public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
     {
-        var userSuggestion = new UserSuggestion(contentReceiver, preferences, preloadCount);
-        return userSuggestion.GetUserSuggestionList(contentReceiver.UserId);
+     //   var userSuggestion = new UserSuggestion(contentReceiver, preferences, preloadCount);
+     //   return userSuggestion.GetUserSuggestionList(contentReceiver.UserId);
     }
 
     public void AddSuggestions()
@@ -84,6 +91,8 @@ public class MatchManager : IMatchManager
             AddSuggestions();
     }
 
+    
+    //TODO Nicolas wird das implementieren. Wenn ich dazu komme, müssen wir uns absprechen.
     public void VisitUserProfile(ProfileDto targetProfile)
     {
         

@@ -6,10 +6,9 @@ using Contracts.Data_Transfer_Objects;
 
 namespace Tests.IntegrationTests.AppLogicTests;
 
-//WAS PRÜFT DIE TEST KLASSE?
-//TestAnforderungen erklären und was am Ende rauskommen soll
-    
-    
+//Die Test Klasse ist ein Integrationstest der Harvest Suggestions
+//Wir geben der Klasse den User Tomatentiger mit der UserId 1 und ein Interessensprofil (Details siehe in der Methode)
+//Am Ende erwarten wir ein passendes Bild pro User. Die neuesten sollten zuerst angezeigt werden.
 [TestClass]
 public class HarvestSuggestionTest_FromRealDb
 {
@@ -76,8 +75,16 @@ public class HarvestSuggestionTest_FromRealDb
             }
         };
         
+        //Aufbereiten der ProfileId und TagId List
+        var profileId = testDto.ProfileId;
+        var tagIds = testDto.PreferenceDtos
+            .Select(p => p.TagId)
+            .Distinct()
+            .ToList();
+        
+        
         //Testdaten werden jetzt an die Klasse übergeben
-        var testSuggestions = new HarvestSuggestion(repo, testDto, 10);
+        var testSuggestions = new HarvestSuggestion(repo, profileId, tagIds, 10);
         var result = testSuggestions.GetHarvestSuggestionList();
         
         //Logging der Testresult
@@ -98,9 +105,12 @@ public class HarvestSuggestionTest_FromRealDb
         
         CollectionAssert.AreEquivalent( new[] {43, 17, 34, 26, 36, 31, 24, 10, 21, 22}, resultIds );
     }
-
+    
+    
+    //MUSS NOCH FERTIG KOMMENTIERT WERDEN
     private static void Run(string file, params string[] args)
     {
+        //Definition wie der Prozess gestartet werden soll
         var psi = new ProcessStartInfo
         {
             FileName = file,
@@ -108,14 +118,16 @@ public class HarvestSuggestionTest_FromRealDb
             RedirectStandardError = true,
             UseShellExecute = false
         };
-
+        
+        //Setzt die Argumente in einer 
         foreach (var a in args)
             psi.ArgumentList.Add(a);
 
         using var p = Process.Start(psi);
         if (p == null)
             throw new AssertFailedException($"Failed to start process: {file}");
-
+        
+        //Wartet bis der Prozess fertig ist
         p.WaitForExit();
 
         var stdout = p.StandardOutput.ReadToEnd();

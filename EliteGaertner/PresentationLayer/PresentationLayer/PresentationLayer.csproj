@@ -24,4 +24,8 @@
       <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.3.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\tempUploads\" />
+    </ItemGroup>
+
 </Project>

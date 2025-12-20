@@ -16,7 +16,36 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
     }
     
     
-    public IEnumerable<HarvestUploadDto> GetHarvestUploadsRepo(int profileId)
+    public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
+    {
+        //Falls die profileId <= 0 ist, return leere HarvestUploadDto Enumerable 
+        if (profileId <= 0)
+            return Enumerable.Empty<HarvestUploadDto>();
+
+        var result = _dbContext.Harvestuploads
+            .AsNoTracking()
+            .Where(h => h.Profileid == profileId)
+            .Select(h => new HarvestUploadDto()
+            {
+                UploadId = h.Uploadid,
+                ImageUrl = h.Imageurl,
+                Description = h.Description,
+                WeightGram = h.Weightgramm,
+                WidthCm = h.Widthcm,
+                LengthCm = h.Lengthcm,
+                UploadDate = h.Uploaddate,
+                ProfileId = h.Profileid
+            });
+
+        return result;
+    }
+
+    public void SetReportHarvestUpload(int uploadId, Enum reason)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
     {
         throw new NotImplementedException();
     }
@@ -27,17 +56,11 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         //Falls nicht -> leere Liste zurückgeben
         if (profileId <= 0 || tagIds is null || tagIds.Count == 0 || preloadCount <= 0)
             return new List<HarvestUploadDto>();
-
-        // Query: hol pro fremdem Profil genau den neuesten Upload, der mindestens einen passenden Tag hat.
-        // Wichtig: NICHT vorher .ToList() machen, sonst materialisierst du unnötig viele Entities/DTOs.
-
-        // Subquery: pro ProfileId den maximalen UploadDate-Wert (nur für passende Uploads)
         
         //Hier bin ich in einen bekannten EF Core Query Translation Bug gelaufen.
         //Anscheinend mag er die Kombi aus GroupBy, Select(g => g.OrderByDescending(...).First()), Select(new Dto) nicht.
         //-> KeyNotFoundException: EmptyProjectionMember 
         //Deswegen musste ich die Query "aufsplitten"
-        
         var latestPerProfile = _dbContext.Harvestuploads
             //Da es sich hier um eine Read Only Abfrage handelt, muss sich EF kein Objekt merken
             .AsNoTracking()
@@ -55,8 +78,8 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
                 MaxUploadDate = g.Max(x => x.Uploaddate)
             });
 
-        // Hauptquery: Join auf (ProfileId, UploadDate) => genau diese neuesten Uploads
-        // Dann sortieren + Take(preloadCount) und erst ganz am Ende materialisieren.
+        //Hauptquery: Join auf (ProfileId, UploadDate) => genau diese neuesten Uploads
+        //Dann sortieren + Take(preloadCount) und erst ganz am Ende materialisieren.
         var result = (
                 from h in _dbContext.Harvestuploads.AsNoTracking()
                 //Wir joinen jetzt das Ergebnis von latestPerProfile mit der HarvestUpload Tabelle
@@ -104,9 +127,26 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         throw new NotImplementedException();
     }
 
-    public PreferenceDto GetUserPreference(int userId)
+    public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
     {
-        throw new NotImplementedException();
+        //Falls die profileId <= 0 ist, return ein leeres PreferenceDto Enumerable 
+        if (profileId <= 0)
+            return Enumerable.Empty<PreferenceDto>();
+
+        var result = _dbContext.Profilepreferences
+            //Da es sich hier um eine Read Only Abfrage handelt, muss sich EF kein Objekt merken
+            .AsNoTracking()
+            //Gib mir alle ProfilePreferences des Profils zurück
+            .Where(p => p.Profileid == profileId)
+            //Erstelle aus dem Ergebnis der Query die PreferenceDtos
+            .Select(p => new PreferenceDto()
+            {
+                Profileid = p.Profileid,
+                TagId = p.Tagid,
+                DateUpdated = p.Dateupdated
+            });
+
+        return result;
     }
 
     public void SetUserPreference(int userId, PreferenceDto newUserPreference)
@@ -114,8 +154,36 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         throw new NotImplementedException();
     }
 
-    public ProfileDto GetProfile(int userId)
+    public ProfileDto GetProfile(int profileId)
     {
-        throw new NotImplementedException();
+        //Falls die profileId <= 0 ist, return ein leeres ProfileDto
+        if (profileId <= 0)
+            return new ProfileDto();
+
+        var p = _dbContext.Profiles
+            //Da es sich hier um eine Read Only Abfrage handelt, muss sich EF kein Objekt merken
+            .AsNoTracking()
+            //Gib mir maximal ein Profil zurück, dass mit der Id übereinstimmt
+            .SingleOrDefault(x => x.Profileid == profileId);
+        
+        //Erstelle aus dem Ergebnis der Query ein ProfilDto
+        var result = new ProfileDto
+        {
+            ProfileId = p.Profileid,
+            UserName = p.Username,
+            FirstName = p.Firstname,
+            LastName = p.Lastname,
+            EMail = p.Email,
+            Phonenumber = p.Phonenumber,
+            Profiletext = p.Profiletext,
+            ShareMail = p.Sharemail,
+            SharePhoneNumber = p.Sharephonenumber,
+            //Hol dir die HarvestUploads des Profils
+            HarvestUploads = GetProfileHarvestUploads(profileId).ToList(),
+            //Hol dir die UserPreference des Profils
+            PreferenceDtos = GetUserPreference(profileId).ToList()
+        };
+        
+        return result;
     }
 }

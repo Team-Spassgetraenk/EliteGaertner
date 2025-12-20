@@ -9,40 +9,46 @@ public class UserSuggestion : IUserSuggestion
 {
     
     private readonly Dictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
+    private readonly IProfileDbs _profileDbs;
+    private readonly IHarvestDbs _harvestDbs;
     
-    
-    public UserSuggestion(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
+    public UserSuggestion(IProfileDbs profileDbs, IHarvestDbs harvestDbs, int profileId, List<int> tagIds, int preloadCount)
     {
         _userSuggestionList = new Dictionary<ProfileDto, HarvestUploadDto>();
-        CreateUserSuggestions(contentReceiver, CreateHarvestSuggestions(contentReceiver, preferences, preloadCount));
+        _profileDbs = profileDbs;
+        _harvestDbs = harvestDbs;
+        CreateUserSuggestions(profileId, CreateHarvestSuggestions(profileId, tagIds, preloadCount));
     }
-
-    public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList(int userId)
-        => _userSuggestionList;
-
-    public void CreateUserSuggestions(ProfileDto contentReceiver, List<HarvestUploadDto> harvestSuggestions)
+    
+    public List<HarvestUploadDto> CreateHarvestSuggestions(int profileId, List<int> tagIds, int preloadCount)
     {
-        IProfileDbs profileDbs = new ManagementDbs();
-        
-        //ÜBERPRÜFUNG OB MATCH SCHON BESTEHT FEHLT!!!!
-        foreach (var harvestUpload in harvestSuggestions)
-        {
-            var targetProfile = profileDbs.GetProfile(harvestUpload.ProfileId);
-            if (!ProfileAlreadyRated(contentReceiver, targetProfile ))
-                _userSuggestionList.Add(targetProfile, harvestUpload);
-        }
-    }
-
-    public List<HarvestUploadDto> CreateHarvestSuggestions(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
-    {
-        var harvestSuggestion = new HarvestSuggestion(contentReceiver, preferences, preloadCount);
+        var harvestSuggestion = new HarvestSuggestion(_harvestDbs, profileId, tagIds, preloadCount);
         return harvestSuggestion.GetHarvestSuggestionList();
     }
 
-    public bool ProfileAlreadyRated(ProfileDto contentReceiver, ProfileDto contentTarget)
+    public void CreateUserSuggestions(int profileId, List<HarvestUploadDto> harvestSuggestions)
+    {
+        //Gehe durch jedes einzelne HarvestUpload durch
+        foreach (var harvestUpload in harvestSuggestions)
+        {
+            //Gebe dir für jedes HarvestUpload das passende ProfileDto zurück
+            var targetProfile = _profileDbs.GetProfile(harvestUpload.ProfileId);
+            //Wenn das Profil noch nicht bewertet worden ist....
+            if (!ProfileAlreadyRated(profileId, harvestUpload.ProfileId))
+            {
+                //Füge ProfileDto + HarvestUpload zur Dictionary 
+                _userSuggestionList.Add(targetProfile, harvestUpload);
+            }
+        }
+    }
+
+    bool ProfileAlreadyRated (int profileIdReceiver,  int profileIdCreator)
     {
         IMatchesDbs matchesDbs = new ManagementDbs();
-        var match = matchesDbs.GetMatchInfo(contentReceiver, contentTarget);
-        return match.TargetProfileValue != null;
+        var match = matchesDbs.GetMatchInfo(profileIdReceiver, profileIdCreator);
+        
     }
+    
+    public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList(int userId)
+        => _userSuggestionList;
 }
