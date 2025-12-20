@@ -24,17 +24,17 @@
                 <div class="input-column">
                     <div class="input-group">
                         <label for="sirname-input">Nachname</label>
-                        <input id="sirname-input" class="app-input" placeholder="Nachname eingeben" @bind="sirname" @bind:event="oninput" />
+                        <input id="sirname-input" class="app-input" placeholder="Nachname eingeben" @bind="_sirname" @bind:event="oninput" />
                     </div>
 
                     <div class="input-group">
                         <label for="prename-input">Vorname</label>
-                        <input id="prename-input" class="app-input" placeholder="Vorname eingeben" @bind="prename" @bind:event="oninput" />
+                        <input id="prename-input" class="app-input" placeholder="Vorname eingeben" @bind="_prename" @bind:event="oninput" />
                     </div>
 
                     <div class="input-group">
                         <label for="username-input">Benutzername</label>
-                        <input id="username-input" class="app-input" placeholder="Benutzername eingeben" @bind="username" @bind:event="oninput" />
+                        <input id="username-input" class="app-input" placeholder="Benutzername eingeben" @bind="_username" @bind:event="oninput" />
                     </div>
 
                     <div class="input-group">
@@ -42,7 +42,7 @@
 
                         <div class="phone-input-container">
                             <select class="country-code-select" @bind="SelectedCountryCode" @bind:event="onchange">
-                                @foreach (var country in CountryCodes)
+                                @foreach (var country in _countryCodes)
                                 {
                                 <option value="@country.Code">
                                     @country.Flag @country.Code
@@ -62,11 +62,11 @@
                     <div class="input-group mb-0"> @* mb-0 am letzten Element der linken Spalte ist gut für die Optik *@
                         <label for="email-input">Email</label>
                         <input id="email-input"
-                               class="app-input @(!string.IsNullOrWhiteSpace(email) && !EmailValid ? "input-error" : "")"
+                               class="app-input @(!string.IsNullOrWhiteSpace(_email) && !EmailValid ? "input-error" : "")"
                                placeholder="Email eingeben"
-                               @bind="email" @bind:event="oninput"/>
+                               @bind="_email" @bind:event="oninput"/>
 
-                        @if (!string.IsNullOrWhiteSpace(email) && !EmailValid)
+                        @if (!string.IsNullOrWhiteSpace(_email) && !EmailValid)
                         {
                         <p class="inline-error error-text">⚠️ Die eingegebene Email-Adresse ist ungültig.</p>
                         }
@@ -81,10 +81,10 @@
                         <div class="input-group">
                             <label for="password-input">Passwort</label>
                             <input id="password-input"
-                                   class="app-input @(!IsPasswordStrong && !string.IsNullOrWhiteSpace(password) ? "input-error" : "")"
+                                   class="app-input @(!IsPasswordStrong && !string.IsNullOrWhiteSpace(_password) ? "input-error" : "")"
                                    type="password"
                                    placeholder="Passwort eingeben"
-                                   @bind="password" @bind:event="oninput"/>
+                                   @bind="_password" @bind:event="oninput"/>
 
                             <div class="password-requirements mt-2">
                                 <h5 class="req-title">Passwortanforderungen:</h5>
@@ -114,7 +114,7 @@
                                    class="app-input @(PasswordMismatch ? "input-error" : "")"
                                    type="password"
                                    placeholder="Passwort wiederholen"
-                                   @bind="passwordConfirm" @bind:event="oninput" />
+                                   @bind="_passwordConfirm" @bind:event="oninput" />
 
                             @if (PasswordMismatch)
                             {
@@ -132,7 +132,7 @@
                 <div class="share-options-grid">
                     <div class="form-check-group">
                         <div class="form-check-custom">
-                            <input class="app-check-input" type="checkbox" id="shareEmail" @bind="shareEmail" @bind:event="onchange" />
+                            <input class="app-check-input" type="checkbox" id="shareEmail" @bind="_shareEmail" @bind:event="onchange" />
                             <label class="app-check-label" for="shareEmail">
                                 Email
                             </label>
@@ -141,7 +141,7 @@
 
                     <div class="form-check-group">
                         <div class="form-check-custom">
-                            <input class="app-check-input" type="checkbox" id="shareTel" @bind="shareTelephone" @bind:event="onchange" />
+                            <input class="app-check-input" type="checkbox" id="shareTel" @bind="_shareTelephone" @bind:event="onchange" />
                             <label class="app-check-label" for="shareTel">
                                 Telefonnummer
                             </label>
@@ -198,12 +198,12 @@ public string Flag { get; set; }
 }
 
 // Eingabefeld-Variablen (Data Binding)
-string sirname = "";
-string prename = "";
-string email = "";
-string username = "";
-string password = "";
-string passwordConfirm = "";
+string _sirname = "";
+string _prename = "";
+string _email = "";
+string _username = "";
+string _password = "";
+string _passwordConfirm = "";
 
 public string SelectedCountryCode { get; set; } = "+49";
 
@@ -227,11 +227,11 @@ _telephoneNumberLocal = "";
 }
 
 // Checkbox-Zustände der Freigabe-Optionen
-bool shareEmail = false;
-bool shareTelephone = false;
+bool _shareEmail = false;
+bool _shareTelephone = false;
 
 // Liste der Ländercodes
-private List<CountryCode> CountryCodes = new List<CountryCode>
+private List<CountryCode> _countryCodes = new List<CountryCode>
 {
 new CountryCode { Name = "Deutschland", Code = "+49", Flag = "🇩🇪" },
 new CountryCode { Name = "Österreich", Code = "+43", Flag = "🇦🇹" },
@@ -285,11 +285,11 @@ $"{SelectedCountryCode.Replace("+", "")}{TelephoneNumberLocal}";
 // 1. PASSWORD VALIDIERUNG 
 // ======================================
 
-private bool HasMinimumLength => password.Length >= 8;
-private bool HasUppercase => Regex.IsMatch(password, @"[A-Z]");
-private bool HasLowercase => Regex.IsMatch(password, @"[a-z]");
-private bool HasDigit => Regex.IsMatch(password, @"[0-9]");
-private bool HasSpecialChar => Regex.IsMatch(password, @"[#?!@$%^&*-]");
+private bool HasMinimumLength => _password.Length >= 8;
+private bool HasUppercase => Regex.IsMatch(_password, @"[A-Z]");
+private bool HasLowercase => Regex.IsMatch(_password, @"[a-z]");
+private bool HasDigit => Regex.IsMatch(_password, @"[0-9]");
+private bool HasSpecialChar => Regex.IsMatch(_password, @"[#?!@$%^&*-]");
 private bool IsPasswordStrong =>
 HasMinimumLength && HasUppercase && HasLowercase && HasDigit && HasSpecialChar;
 private MarkupString GetRequirementIcon(bool passed) =>
@@ -302,14 +302,14 @@ private string GetSpecialChars() => "#?!@$%^&*-";
 // ======================================
 
 private bool PasswordMismatch =>
-!string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(passwordConfirm) && (password != passwordConfirm);
-private bool EmailValid => string.IsNullOrWhiteSpace(email) || IsValidEmail(email);
+!string.IsNullOrWhiteSpace(_password) && !string.IsNullOrWhiteSpace(_passwordConfirm) && (_password != _passwordConfirm);
+private bool EmailValid => string.IsNullOrWhiteSpace(_email) || IsValidEmail(_email);
 private bool IsTelephoneNumberValid => !string.IsNullOrWhiteSpace(TelephoneNumberLocal);
 private bool RequiredFieldsFilled =>
-!string.IsNullOrWhiteSpace(sirname) && !string.IsNullOrWhiteSpace(prename) &&
-!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(username) &&
-IsTelephoneNumberValid && !string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(passwordConfirm);
-private bool ContactShareSelected => shareEmail || shareTelephone;
+!string.IsNullOrWhiteSpace(_sirname) && !string.IsNullOrWhiteSpace(_prename) &&
+!string.IsNullOrWhiteSpace(_email) && !string.IsNullOrWhiteSpace(_username) &&
+IsTelephoneNumberValid && !string.IsNullOrWhiteSpace(_password) && !string.IsNullOrWhiteSpace(_passwordConfirm);
+private bool ContactShareSelected => _shareEmail || _shareTelephone;
 private bool RegisterEnabled =>
 RequiredFieldsFilled && !PasswordMismatch && ContactShareSelected && EmailValid && IsPasswordStrong;
 
@@ -318,7 +318,7 @@ void Registrieren()
 {
 if (RegisterEnabled)
 {
-Console.WriteLine($"Registrierung erfolgreich für: {email}");
+Console.WriteLine($"Registrierung erfolgreich für: {_email}");
 Console.WriteLine($"Volle Telefonnummer zur Speicherung: {FullTelephoneNumber}");
 Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
 }

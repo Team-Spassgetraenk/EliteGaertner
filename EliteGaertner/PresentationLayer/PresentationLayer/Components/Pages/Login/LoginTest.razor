@@ -17,12 +17,12 @@
 
             <div class="input-group">
                 <label for="email-input">Email</label>
-                <input id="email-input" class="app-input" placeholder="Email eingeben..." @bind="email" @bind:event="oninput"/>
+                <input id="email-input" class="app-input" placeholder="Email eingeben..." @bind="_email" @bind:event="oninput"/>
             </div>
 
             <div class="input-group">
                 <label for="password-input">Passwort</label>
-                <input id="password-input" class="app-input" type="password" placeholder="Passwort eingeben..." @bind="password" @bind:event="oninput"/>
+                <input id="password-input" class="app-input" type="password" placeholder="Passwort eingeben..." @bind="_password" @bind:event="oninput"/>
             </div>
 
             <button class="app-button primary-button"
@@ -47,11 +47,11 @@
 </div>
 
 @code {
-    string email = "";
-    string password = "";
+    string _email = "";
+    string _password = "";
 
     // Berechnete Eigenschaft, die überprüft, ob beide Felder gefüllt sind
-    private bool LoginEnabled => !string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password);
+    private bool LoginEnabled => !string.IsNullOrWhiteSpace(_email) && !string.IsNullOrWhiteSpace(_password);
 
     void Login()
     {
@@ -59,7 +59,7 @@
         if (LoginEnabled)
         {
             Nav.NavigateTo("/startseite", forceLoad: true);
-            Console.WriteLine($"Eingegeben: {email} / {password}");
+            Console.WriteLine($"Eingegeben: {_email} / {_password}");
         }
     }
 }

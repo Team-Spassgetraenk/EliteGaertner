@@ -30,7 +30,7 @@
                 <div class="left-column">
                     @* --- Flexibler Bild-Container (Passt sich der Bildgröße an) --- *@
                     <div class="ernte-image-container">
-                        @if (string.IsNullOrEmpty(HochgeladenesBild))
+                        @if (string.IsNullOrEmpty(_hochgeladenesBild))
                         {
                         @* **Platzhalter-Bild** (Hier ein statisches Bild zur besseren Visualisierung) *@
                         <img src="pictures/PlatzhalterBild.jpg" alt="Bild-Platzhalter" class="ernte-image placeholder-img" />
@@ -41,7 +41,7 @@
                         else
                         {
                         @* Flexibles hochgeladenes Bild *@
-                        <img src="@HochgeladenesBild" alt="Erntebild" class="ernte-image" />
+                        <img src="@_hochgeladenesBild" alt="Erntebild" class="ernte-image" />
                         }
                     </div>
 
@@ -56,9 +56,9 @@
                 <div class="right-column">
                     <h4 class="tag-headline">Gemüse</h4>
                     <div class="tag-grid">
-                        @foreach (var tag in GemueseTags)
+                        @foreach (var tag in _gemueseTags)
                         {
-                        <div class="tag app-tag @(SelectedTag == tag.Name ? "selected" : "")"
+                        <div class="tag app-tag @(_selectedTag == tag.Name ? "selected" : "")"
                              @onclick="() => ToggleTag(tag.Name)">
                             <span>@tag.Emoji</span> <span>@tag.Name</span>
                         </div>
@@ -67,9 +67,9 @@
 
                     <h4 class="tag-headline">Obst</h4>
                     <div class="tag-grid">
-                        @foreach (var tag in ObstTags)
+                        @foreach (var tag in _obstTags)
                         {
-                        <div class="tag app-tag @(SelectedTag == tag.Name ? "selected" : "")"
+                        <div class="tag app-tag @(_selectedTag == tag.Name ? "selected" : "")"
                              @onclick="() => ToggleTag(tag.Name)">
                             <span>@tag.Emoji</span> <span>@tag.Name</span>
                         </div>
@@ -104,12 +104,12 @@
             </div>
 
             <button class="app-button primary-button weiter-button"
-                    disabled="@( string.IsNullOrEmpty(SelectedTag) || string.IsNullOrEmpty(HochgeladenesBild) )"
+                    disabled="@( string.IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild) )"
                     @onclick="Veröffentlichen">
                 Ernte veröffentlichen
             </button>
 
-            @if (string.IsNullOrEmpty(SelectedTag) || string.IsNullOrEmpty(HochgeladenesBild))
+            @if (string.IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild))
             {
             <p class="disabled-hint">Bitte lade zuerst ein Bild hoch und wähle ein Tag aus.</p>
             }
@@ -118,7 +118,7 @@
 </div>
 
 @code {
-    private string? HochgeladenesBild = null;
+    private string? _hochgeladenesBild = null;
 
     public class TagItem(string name, string emoji)
     {
@@ -126,19 +126,19 @@
         public string Emoji { get; set; } = emoji;
     }
     
-    List<TagItem> GemueseTags = new()
+    List<TagItem> _gemueseTags = new()
     {
         new("Auberginen", "🍆"), new("Gurken", "🥒"), new("Tomaten", "🍅"), new("Kürbisse", "🎃"), 
         new("Paprika", "🌶️"), new("Zucchini", "🥒"), new("Kartoffeln", "🥔"), new("Karotten", "🥕"), 
         new("Salate", "🥬"), new("Zwiebeln", "🧅")
     };
-    List<TagItem> ObstTags = new()
+    List<TagItem> _obstTags = new()
     {
         new("Melonen", "🍉"), new("Äpfel", "🍎"), new("Birnen", "🍐"), new("Pfirsiche", "🍑"), 
         new("Kirschen", "🍒"), new("Erdbeeren", "🍓"), new("Trauben", "🍇")
     };
 
-string? SelectedTag = null;
+string? _selectedTag = null;
 int? Gewicht { get; set; }
 int? Laenge { get; set; }
 int? Breite { get; set; }
@@ -146,7 +146,7 @@ string Kommentar { get; set; } = "";
 
 void ToggleTag(string tag)
 {
-SelectedTag = (SelectedTag == tag) ? null : tag;
+_selectedTag = (_selectedTag == tag) ? null : tag;
 }
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
@@ -177,7 +177,7 @@ SelectedTag = (SelectedTag == tag) ? null : tag;
             using var fileStream = new FileStream(filePath, FileMode.Create);
             await stream.CopyToAsync(fileStream);
             
-            HochgeladenesBild = $"/tempUploads/{fileName}";
+            _hochgeladenesBild = $"/tempUploads/{fileName}";
         
             Console.WriteLine($"Bild gespeichert: {filePath}");
         }
@@ -189,7 +189,7 @@ SelectedTag = (SelectedTag == tag) ? null : tag;
 
     void Veröffentlichen()
     {
-        if (string.IsNullOrEmpty(SelectedTag) || string.IsNullOrEmpty(HochgeladenesBild)) return;
+        if (string.IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild)) return;
 
         // TODO: echten UserId z.B. aus Auth/Context holen
         int userId = 1;
@@ -201,7 +201,7 @@ SelectedTag = (SelectedTag == tag) ? null : tag;
         var dto = new HarvestUploadDto
         {
             UploadId = 0, //Von Upload Service
-            ImageUrl = HochgeladenesBild!, // aktuell Data-URL; später URL aus Storage
+            ImageUrl = _hochgeladenesBild!, // aktuell Data-URL; später URL aus Storage
             Description = Kommentar,
             WeightGram = weightGram,
             WidthCm = widthCm,
@@ -214,7 +214,7 @@ SelectedTag = (SelectedTag == tag) ? null : tag;
 
         if (success)
         {
-            Console.WriteLine($"Veröffentlicht: {SelectedTag}, Bildgröße: {HochgeladenesBild.Length}");
+            Console.WriteLine($"Veröffentlicht: {_selectedTag}, Bildgröße: {_hochgeladenesBild.Length}");
             Nav.NavigateTo("/ProfilTest", forceLoad: true);
         }
         else

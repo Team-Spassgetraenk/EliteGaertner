@@ -24,30 +24,30 @@
                 
                 <div class="form-check-group">
                     <div class="form-check-custom">
-                        <input class="app-check-input" type="checkbox" id="shareEmail" @bind="shareEmail" @bind:event="onchange" />
+                        <input class="app-check-input" type="checkbox" id="shareEmail" @bind="_shareEmail" @bind:event="onchange" />
                         <label class="app-check-label" for="shareEmail">
                             Email
                         </label>
                     </div>
                     <input class="app-input mt-1 @(EmailMissing ? "input-error" : "")" 
                            placeholder="✉ Email eingeben..." 
-                           @bind="email" 
+                           @bind="_email" 
                            @bind:event="oninput"
-                           disabled="@(!shareEmail)" />
+                           disabled="@(!_shareEmail)" />
                 </div>
 
                 <div class="form-check-group">
                     <div class="form-check-custom">
-                        <input class="app-check-input" type="checkbox" id="shareTel" @bind="shareTelephone" @bind:event="onchange" />
+                        <input class="app-check-input" type="checkbox" id="shareTel" @bind="_shareTelephone" @bind:event="onchange" />
                         <label class="app-check-label" for="shareTel">
                             Telefonnummer
                         </label>
                     </div>
                     <input class="app-input mt-1 @(TelephoneMissing ? "input-error" : "")" 
                            placeholder="✆ Telefonnummer eingeben..." 
-                           @bind="telephone" 
+                           @bind="_telephone" 
                            @bind:event="oninput"
-                           disabled="@(!shareTelephone)" />
+                           disabled="@(!_shareTelephone)" />
                 </div>
             </div>
 
@@ -73,26 +73,26 @@
 </div>
 
 @code {
-    int userID = 123;
-    string email = "";
-    string telephone = "";
-    bool shareEmail = false;
-    bool shareTelephone = false;
+    int _userId = 123;
+    string _email = "";
+    string _telephone = "";
+    bool _shareEmail = false;
+    bool _shareTelephone = false;
 
     // Hilfseigenschaft: Prüft, ob Email ausgewählt, aber leer ist
-    private bool EmailMissing => shareEmail && string.IsNullOrWhiteSpace(email);
+    private bool EmailMissing => _shareEmail && string.IsNullOrWhiteSpace(_email);
     
     // Hilfseigenschaft: Prüft, ob Telefon ausgewählt, aber leer ist
-    private bool TelephoneMissing => shareTelephone && string.IsNullOrWhiteSpace(telephone);
+    private bool TelephoneMissing => _shareTelephone && string.IsNullOrWhiteSpace(_telephone);
 
     // Haupt-Validierungslogik: Formular ist gültig, wenn...
     private bool FormValid => 
         // 1. Mindestens eine Methode ist ausgewählt (oder die Felder sind gefüllt)
-        (shareEmail || shareTelephone) &&
+        (_shareEmail || _shareTelephone) &&
         // 2. WENN Email ausgewählt ist, MUSS das Feld gefüllt sein
-        (!shareEmail || !string.IsNullOrWhiteSpace(email)) &&
+        (!_shareEmail || !string.IsNullOrWhiteSpace(_email)) &&
         // 3. WENN Telefon ausgewählt ist, MUSS das Feld gefüllt sein
-        (!shareTelephone || !string.IsNullOrWhiteSpace(telephone));
+        (!_shareTelephone || !string.IsNullOrWhiteSpace(_telephone));
 
     void GoNext()
     {
@@ -101,10 +101,10 @@
             var contactDto = new ContactVisibilityDto
             {
                 UserId = 123, // Fester UserId (später dynamisch)
-                EMail = email,
-                phoneNumber = telephone,
-                ShareMail = shareEmail,
-                SharePhoneNumber = shareTelephone
+                EMail = _email,
+                PhoneNumber = _telephone,
+                ShareMail = _shareEmail,
+                SharePhoneNumber = _shareTelephone
             };
 
             // Direkt ans Interface weitergeben

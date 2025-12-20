@@ -21,7 +21,7 @@
         @* Hamburger Menü für Melden/Logout *@
         <div class="header-right-action menu-wrapper">
             <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
-            @if (showLogout)
+            @if (_showLogout)
             {
             <div class="logout-menu comic-box">
                 <p @onclick="ReportUser">Melden</p> @* Aktion für Fremdprofil *@
@@ -50,7 +50,7 @@
             </div>
 
             @* Bio/Beschreibung *@
-            <p class="profile-description">@bioText</p>
+            <p class="profile-description">@_bioText</p>
         </div>
 
         @* GALERIE: Box im Comic-Stil, die das Grid umschließt *@
@@ -58,7 +58,7 @@
             <div class="harvest-grid">
 
                 @* Statische Bilder (Kein Plus-Icon) *@
-                @foreach (var imgPath in HarvestImages)
+                @foreach (var imgPath in _harvestImages)
                 {
                 <div class="grid-item comic-grid-item">
                     <img src="@imgPath" alt="Erntebild" class="harvest-photo" />
@@ -341,8 +341,8 @@
 [Parameter]
 public string Username { get; set; } = "";
 
-private string bioText = "Hier steht die Profilbeschreibung des fremden Users... Ein leidenschaftlicher Hobbygärtner, der sich auf seltene Chilisorten spezialisiert hat und regelmäßig an Wettbewerben teilnimmt.";
-private List<string> HarvestImages = new List<string>
+private string _bioText = "Hier steht die Profilbeschreibung des fremden Users... Ein leidenschaftlicher Hobbygärtner, der sich auf seltene Chilisorten spezialisiert hat und regelmäßig an Wettbewerben teilnimmt.";
+private List<string> _harvestImages = new List<string>
 {
 "pictures/Testbilder/Gurken_01.jpg",
 "pictures/Testbilder/Gurken_01.jpg",
@@ -354,18 +354,18 @@ private List<string> HarvestImages = new List<string>
 "pictures/Testbilder/Gurken_01.jpg"
 };
 
-private bool showLogout = false;
+private bool _showLogout = false;
 
 public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
 
-private void ToggleLogoutMenu() => showLogout = !showLogout;
+private void ToggleLogoutMenu() => _showLogout = !_showLogout;
 private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
 
 private void ReportUser()
 {
 // Logik zum Melden des Benutzers
 Console.WriteLine($"Benutzer {Username} gemeldet.");
-showLogout = false;
+_showLogout = false;
 }
 
 private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);

@@ -20,7 +20,7 @@
         </div>
     </header>
 
-    @if (showLogout)
+    @if (_showLogout)
     {
     <div class="logout-menu">
         <p @onclick="NavigateToLogout">Logout ➜]</p>
@@ -30,14 +30,14 @@
     <div class="scroll-content rangliste-content">
         
         <div class="category-selector">
-            <span class="current-category">@CurrentCategory.DisplayName</span>
+            <span class="current-category">@_currentCategory.DisplayName</span>
             <span class="dropdown-arrow" @onclick="ToggleCategoryMenu">▼</span>
         </div>
         
-        @if (showCategoryMenu)
+        @if (_showCategoryMenu)
         {
             <div class="category-dropdown-menu comic-box-dropdown">
-                @foreach (var cat in Categories)
+                @foreach (var cat in _categories)
                 {
                     <div class="dropdown-item" @onclick="() => SelectCategory(cat)">
                         @cat.DisplayName
@@ -51,7 +51,7 @@
                 <img src="pictures/Rangliste.png" alt="Rangliste" height="80" /> 
             </div>
 
-            @foreach (var rank in CurrentCategory.Ranking)
+            @foreach (var rank in _currentCategory.Ranking)
             {
                 <div class="rank-entry @GetRankCssClass(rank.Rank)">
                     <div class="rank-info" @onclick="() => GoToProfile(rank.Username)">
@@ -98,11 +98,11 @@
         public List<RankEntry> Ranking { get; set; } = new();
     }
 
-    private bool showLogout = false;
-    private bool showCategoryMenu = false;
-    private Category CurrentCategory = new();
+    private bool _showLogout = false;
+    private bool _showCategoryMenu = false;
+    private Category _currentCategory = new();
     
-    private readonly List<Category> Categories = new()
+    private readonly List<Category> _categories = new()
     {
         new Category
         {
@@ -136,7 +136,7 @@
 
     protected override void OnInitialized()
     {
-        CurrentCategory = Categories.First();
+        _currentCategory = _categories.First();
     }
     
     private string GetRankCssClass(int rank)
@@ -144,7 +144,7 @@
         if (rank == 1) return "rank-1";
         if (rank == 2) return "rank-2";
         if (rank == 3) return "rank-3";
-        if (CurrentCategory.Ranking.Any(r => r.Rank == rank && r.IsCurrentUser)) return "current-user-rank";
+        if (_currentCategory.Ranking.Any(r => r.Rank == rank && r.IsCurrentUser)) return "current-user-rank";
         return "default-rank";
     }
 
@@ -155,19 +155,19 @@
 
     private void ToggleCategoryMenu()
     {
-        showCategoryMenu = !showCategoryMenu;
+        _showCategoryMenu = !_showCategoryMenu;
     }
     
     private void SelectCategory(Category category)
     {
-        CurrentCategory = category;
-        showCategoryMenu = false;
+        _currentCategory = category;
+        _showCategoryMenu = false;
     }
 
     // --- Navigations-Methoden ---
     private void ToggleLogoutMenu()
     {
-        showLogout = !showLogout;
+        _showLogout = !_showLogout;
     }
 
     private void NavigateToLogout()

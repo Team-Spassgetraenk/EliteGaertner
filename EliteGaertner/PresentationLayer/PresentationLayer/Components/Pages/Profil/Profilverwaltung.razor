@@ -21,7 +21,7 @@
 
         <div class="header-right-action menu-wrapper">
             <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
-            @if (showLogout)
+            @if (_showLogout)
             {
             <div class="logout-menu comic-box">
                 <p @onclick="NavigateToLogout">Logout ➜]</p>
@@ -81,10 +81,10 @@
                 <label class="input-label" for="bio-input">Biographie:</label>
                 <textarea id="bio-input"
                           class="app-input-comic"
-                          @bind="bioText"
+                          @bind="_bioText"
                           placeholder="Erzähle kurz, wer du bist und was du anbaust..."
                           maxlength="150"></textarea>
-                <div class="char-counter">@bioText.Length / 150</div>
+                <div class="char-counter">@_bioText.Length / 150</div>
             </div>
         </div>
 
@@ -97,17 +97,17 @@
 
             <div class="info-item">
                 <label>Nachname:</label>
-                <p>@sirname</p>
+                <p>@_sirname</p>
             </div>
 
             <div class="info-item">
                 <label>Vorname:</label>
-                <p>@prename</p>
+                <p>@_prename</p>
             </div>
 
             <div class="info-item">
                 <label>Benutzername:</label>
-                <p>@username</p>
+                <p>@_username</p>
             </div>
         </div>
 
@@ -124,7 +124,7 @@
                 <input id="email-input"
                        class="app-input @(!EmailValid ? "input-error" : "")"
                        type="email"
-                       @bind="email"
+                       @bind="_email"
                        @bind:event="oninput" />
                 @if (!EmailValid)
                 {
@@ -139,7 +139,7 @@
                        class="app-input"
                        type="tel"
                        placeholder="+49123456789"
-                       @bind="fullTelephoneNumber"
+                       @bind="_fullTelephoneNumber"
                        @bind:event="oninput" />
             </div>
 
@@ -148,14 +148,14 @@
             <div class="share-options-grid">
                 <div class="form-check-group">
                     <div class="form-check-custom">
-                        <input class="app-check-input" type="checkbox" id="shareEmail" @bind="shareEmail" @bind:event="onchange" />
+                        <input class="app-check-input" type="checkbox" id="shareEmail" @bind="_shareEmail" @bind:event="onchange" />
                         <label class="app-check-label" for="shareEmail">Email freigeben</label>
                     </div>
                 </div>
 
                 <div class="form-check-group">
                     <div class="form-check-custom">
-                        <input class="app-check-input" type="checkbox" id="shareTel" @bind="shareTelephone" @bind:event="onchange" />
+                        <input class="app-check-input" type="checkbox" id="shareTel" @bind="_shareTelephone" @bind:event="onchange" />
                         <label class="app-check-label" for="shareTel">Telefon freigeben</label>
                     </div>
                 </div>
@@ -169,15 +169,15 @@
             @* Neues Passwort *@
             <div class="input-group">
                 <label>Neues Passwort</label>
-                <input class="app-input @(!string.IsNullOrWhiteSpace(newPassword) && !IsPasswordStrong ? "input-error" : "")"
+                <input class="app-input @(!string.IsNullOrWhiteSpace(_newPassword) && !IsPasswordStrong ? "input-error" : "")"
                        type="password"
-                       @bind="newPassword"
+                       @bind="_newPassword"
                        @bind:event="oninput"
                        placeholder="Neues Passwort" />
             </div>
 
             @* Passwort Anforderungen *@
-            @if (!string.IsNullOrWhiteSpace(newPassword))
+            @if (!string.IsNullOrWhiteSpace(_newPassword))
             {
             <div class="password-requirements">
                 <h5 class="req-title">Anforderungen:</h5>
@@ -206,7 +206,7 @@
                 <label>Passwort bestätigen</label>
                 <input class="app-input @(PasswordMismatch ? "input-error" : "")"
                        type="password"
-                       @bind="confirmNewPassword"
+                       @bind="_confirmNewPassword"
                        @bind:event="oninput"
                        placeholder="Passwort wiederholen" />
 
@@ -226,9 +226,9 @@
 
             <div class="harvest-grid">
 
-                @for (int i = 0; i < uploadedImages.Count; i++)
+                @for (int i = 0; i < _uploadedImages.Count; i++)
                 {
-                var imgPath = uploadedImages[i];
+                var imgPath = _uploadedImages[i];
                 var index = i;
 
                 <div class="grid-item comic-grid-item" @onmouseover="() => SetHoveredIndex(index)" @onmouseout="ResetHoveredIndex">
@@ -239,7 +239,7 @@
                         <span class="delete-icon" style="color: #FFFFFF">✖</span>
                     </div>
 
-                    @if (showDeletePopupIndex == index)
+                    @if (_showDeletePopupIndex == index)
                     {
                     <div class="delete-popup comic-box" @onclick="() => DeletePhoto(imgPath)">
                         Bild löschen
@@ -273,23 +273,23 @@
 
 @code {
 // --- Statische (nicht änderbare) Benutzerdaten ---
-string sirname = "Mustermann";
-string prename = "Max";
-string username = "MaxiGärtner";
+string _sirname = "Mustermann";
+string _prename = "Max";
+string _username = "MaxiGärtner";
 
 // --- Bearbeitbare Felder ---
-string email = "max.mustermann@gmail.com";
-string fullTelephoneNumber = "+49174123456789";
-bool shareEmail = true;
-bool shareTelephone = false;
+string _email = "max.mustermann@gmail.com";
+string _fullTelephoneNumber = "+49174123456789";
+bool _shareEmail = true;
+bool _shareTelephone = false;
 
 // --- Passwort Felder ---
-string newPassword = "";
-string confirmNewPassword = "";
+string _newPassword = "";
+string _confirmNewPassword = "";
 
 // --- Bio und Bilder ---
-private string bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit 2020.";
-private List<string> uploadedImages = new List<string>
+private string _bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit 2020.";
+private List<string> _uploadedImages = new List<string>
 {
 "pictures/Testbilder/Gurken_01.jpg",
 "pictures/Testbilder/Tomaten_01.jpg",
@@ -300,7 +300,7 @@ private List<string> uploadedImages = new List<string>
 };
 
 // --- Profilbild Karussell Logik ---
-private List<string> AvailableProfiles = new()
+private List<string> _availableProfiles = new()
 {
 "Profilbild_01.png", "Profilbild_02.png", "Profilbild_03.png", "Profilbild_04.png",
 "Profilbild_05.png", "Profilbild_06.png", "Profilbild_07.png", "Profilbild_08.png",
@@ -315,41 +315,41 @@ private string SelectedProfile { get; set; }
 private int CurrentIndex { get; set; } = 0;
 
 // UI/Steuerungsfelder
-private bool showLogout = false;
-private int? showDeletePopupIndex = null;
-private int? hoveredIndex = null;
+private bool _showLogout = false;
+private int? _showDeletePopupIndex = null;
+private int? _hoveredIndex = null;
 
 protected override void OnInitialized()
 {
 // Simuliertes Laden des gespeicherten Profilbildes
 CurrentIndex = 4; // Index von "Profilbild_05.png"
-SelectedProfile = AvailableProfiles[CurrentIndex];
+SelectedProfile = _availableProfiles[CurrentIndex];
 }
 
 private string GetProfileName(int index)
 {
-int count = AvailableProfiles.Count;
+int count = _availableProfiles.Count;
 int effectiveIndex = (index % count + count) % count;
-return AvailableProfiles[effectiveIndex];
+return _availableProfiles[effectiveIndex];
 }
 
 private void SelectNextProfile()
 {
-CurrentIndex = (CurrentIndex + 1) % AvailableProfiles.Count;
-SelectedProfile = AvailableProfiles[CurrentIndex];
+CurrentIndex = (CurrentIndex + 1) % _availableProfiles.Count;
+SelectedProfile = _availableProfiles[CurrentIndex];
 }
 
 private void SelectPreviousProfile()
 {
-CurrentIndex = (CurrentIndex - 1 + AvailableProfiles.Count) % AvailableProfiles.Count;
-SelectedProfile = AvailableProfiles[CurrentIndex];
+CurrentIndex = (CurrentIndex - 1 + _availableProfiles.Count) % _availableProfiles.Count;
+SelectedProfile = _availableProfiles[CurrentIndex];
 }
 
 // ======================================
 // 1. VALIDIERUNG & LOGIK (C#)
 // ======================================
 
-private bool EmailValid => string.IsNullOrWhiteSpace(email) || IsValidEmail(email);
+private bool EmailValid => string.IsNullOrWhiteSpace(_email) || IsValidEmail(_email);
 public static bool IsValidEmail(string email)
 {
 if (string.IsNullOrWhiteSpace(email)) return true;
@@ -362,17 +362,17 @@ catch { return false; }
 }
 
 // -- Passwort Validierung --
-private bool HasMinimumLength => newPassword.Length >= 8;
-private bool HasUppercase => Regex.IsMatch(newPassword, @"[A-Z]");
-private bool HasLowercase => Regex.IsMatch(newPassword, @"[a-z]");
-private bool HasDigit => Regex.IsMatch(newPassword, @"[0-9]");
-private bool HasSpecialChar => Regex.IsMatch(newPassword, @"[#?!@$%^&*-]");
+private bool HasMinimumLength => _newPassword.Length >= 8;
+private bool HasUppercase => Regex.IsMatch(_newPassword, @"[A-Z]");
+private bool HasLowercase => Regex.IsMatch(_newPassword, @"[a-z]");
+private bool HasDigit => Regex.IsMatch(_newPassword, @"[0-9]");
+private bool HasSpecialChar => Regex.IsMatch(_newPassword, @"[#?!@$%^&*-]");
 private bool IsPasswordStrong => HasMinimumLength && HasUppercase && HasLowercase && HasDigit && HasSpecialChar;
 
 private bool PasswordMismatch =>
-!string.IsNullOrWhiteSpace(newPassword) && !string.IsNullOrWhiteSpace(confirmNewPassword) && (newPassword != confirmNewPassword);
+!string.IsNullOrWhiteSpace(_newPassword) && !string.IsNullOrWhiteSpace(_confirmNewPassword) && (_newPassword != _confirmNewPassword);
 
-private bool IsNewPasswordSectionActive => !string.IsNullOrWhiteSpace(newPassword) || !string.IsNullOrWhiteSpace(confirmNewPassword);
+private bool IsNewPasswordSectionActive => !string.IsNullOrWhiteSpace(_newPassword) || !string.IsNullOrWhiteSpace(_confirmNewPassword);
 
 private bool PasswordChangeValid =>
 !IsNewPasswordSectionActive || (IsNewPasswordSectionActive && IsPasswordStrong && !PasswordMismatch);
@@ -388,29 +388,29 @@ private bool CanSaveChanges => EmailValid && PasswordChangeValid;
 // 2. AKTIONEN
 // ======================================
 
-private void ToggleLogoutMenu() => showLogout = !showLogout;
+private void ToggleLogoutMenu() => _showLogout = !_showLogout;
 private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
 
 // Bild-Lösch Logik
-private void SetHoveredIndex(int index) => hoveredIndex = index;
-private void ResetHoveredIndex() => hoveredIndex = null;
+private void SetHoveredIndex(int index) => _hoveredIndex = index;
+private void ResetHoveredIndex() => _hoveredIndex = null;
 
 private void ToggleDeletePopup(int index)
 {
-if (showDeletePopupIndex == index)
+if (_showDeletePopupIndex == index)
 {
-showDeletePopupIndex = null;
+_showDeletePopupIndex = null;
 }
 else
 {
-showDeletePopupIndex = index;
+_showDeletePopupIndex = index;
 }
 }
 
 private void DeletePhoto(string path)
 {
-uploadedImages.Remove(path);
-showDeletePopupIndex = null;
+_uploadedImages.Remove(path);
+_showDeletePopupIndex = null;
 Console.WriteLine($"Foto gelöscht: {path}");
 StateHasChanged();
 }

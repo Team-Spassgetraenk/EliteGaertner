@@ -21,7 +21,7 @@
     </header>
 
     @* HIER: Dropdown-Menü für Logout *@
-    @if (showLogout)
+    @if (_showLogout)
     {
     <div class="logout-menu">
         <p @onclick="NavigateToLogout">Logout &lt;</p>
@@ -29,7 +29,7 @@
     }
 
     <div class="scroll-content">
-        @foreach (var match in Matches)
+        @foreach (var match in _matches)
         {
         <div class="match-card">
             <div class="card-inner">
@@ -68,7 +68,7 @@
 
 @code {
 // NEU: Logout-Variable
-private bool showLogout = false;
+private bool _showLogout = false;
 
 public class UserMatch
 {
@@ -80,7 +80,7 @@ public string Email { get; set; } = "";
 public string UsernameUrl => UserName.TrimStart('@');
 }
 
-private List<UserMatch> Matches = new List<UserMatch>
+private List<UserMatch> _matches = new List<UserMatch>
 {
 new UserMatch { UserName = "@user_name1", Phone = "+49 12345678901", Email = "max.mustermann@gmail.com" },
 new UserMatch { UserName = "@user_name3", Phone = "+49 8415 7563344", Email = "reiner.zufall@gmx.de" },
@@ -91,7 +91,7 @@ new UserMatch { UserName = "@user_name5", Phone = "+49 34523045646", Email = "6s
 // NEU: Logout-Methoden
 private void ToggleLogoutMenu()
 {
-showLogout = !showLogout;
+_showLogout = !_showLogout;
 }
 
 private void NavigateToLogout()
