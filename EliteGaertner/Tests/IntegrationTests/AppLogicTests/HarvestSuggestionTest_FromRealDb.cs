@@ -56,7 +56,7 @@ public class HarvestSuggestionTest_FromRealDb
         var repo = new ManagementDbs(db);
         
         //TestUser DTO erstellen (TomatenTiger)
-        var testDto = new ProfileDto()
+        var testDto = new PrivateProfileDto()
         {
             ProfileId = 1,
             PreferenceDtos = new List<PreferenceDto>

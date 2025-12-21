@@ -1,7 +1,7 @@
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 
-namespace Tests.UnitTests.AppLogicTests;
+namespace Tests.UnitTests.AppLogicTests.FakeDbs;
 
 public class FakeHarvestDbs : IHarvestDbs
 {

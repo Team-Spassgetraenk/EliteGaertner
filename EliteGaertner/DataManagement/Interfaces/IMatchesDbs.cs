@@ -5,9 +5,9 @@ namespace DataManagement.Interfaces;
 public interface IMatchesDbs
 {
 
-    public MatchDto GetMatchInfo(ProfileDto contentReceiver, ProfileDto targetProfile);
+    public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator);
 
-    public List<ProfileDto> GetSuccessfulMatches(ProfileDto contentReceiver);
+    public List<PublicProfileDto> GetActiveMatches(int profileIdReceiver);
 
     public void SaveMatchInfo(MatchDto matchDto);
     

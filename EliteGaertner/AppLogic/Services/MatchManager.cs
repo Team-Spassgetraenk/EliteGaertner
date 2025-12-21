@@ -2,119 +2,103 @@ using AppLogic.Interfaces;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 using DataManagement;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AppLogic.Services;
 
 public class MatchManager : IMatchManager
 {
-    private readonly ProfileDto _contentReceiver;
-    private readonly PreferenceDto _preferenceDto;
+    private readonly IMatchesDbs _matchesDbs;
+    private readonly IProfileDbs _profileDbs;
+    private readonly IHarvestDbs _harvestDbs;
+    private readonly int _profileId;
+    private readonly List<int> _tagIds;
     private readonly int _preloadCount;
-    private readonly Dictionary<ProfileDto, HarvestUploadDto> _userSuggestionList;
+    private readonly Dictionary<PublicProfileDto, HarvestUploadDto> _profileSuggestionList;
+    private List<PublicProfileDto> _activeMatchesList;
     
-    
-    public MatchManager(ProfileDto contentReceiver, int preloadCount)
+    public MatchManager(IMatchesDbs matchesDbs, IProfileDbs profileDbs, IHarvestDbs harvestDbs, 
+        PrivateProfileDto contentReceiver, int preloadCount)
     {
-
-        IPreferenceDbs preferenceDBS = new ManagementDbs();
+        _matchesDbs = matchesDbs;
+        _profileDbs = profileDbs;
+        _harvestDbs = harvestDbs;
         
         //Aufbereitung der ProfileId und der dazugehörigen TagIds
-        var profileId = contentReceiver.ProfileId;
-        var tagIds = contentReceiver.PreferenceDtos
+        _profileId = contentReceiver.ProfileId;
+        _tagIds = contentReceiver.PreferenceDtos
             .Select(p => p.TagId)
             .Distinct()
             .ToList();
-
-        _contentReceiver = contentReceiver;
-        _preferenceDto = preferenceDBS.GetUserPreference(contentReceiver.UserId);
+        
         _preloadCount = preloadCount;
-        _userSuggestionList = CreateUserSuggestionList(_contentReceiver, _preferenceDto.Tags, _preloadCount);
+        _profileSuggestionList = CreateProfileSuggestionList(_profileId, _tagIds, _preloadCount);
+        UpdateActiveMatches();
     }
 
-    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(ProfileDto contentReceiver, List<string> preferences, int preloadCount)
-    {
-     //   var userSuggestion = new UserSuggestion(contentReceiver, preferences, preloadCount);
-     //   return userSuggestion.GetUserSuggestionList(contentReceiver.UserId);
+    public Dictionary<PublicProfileDto, HarvestUploadDto> CreateProfileSuggestionList(int profileId, List<int> tagIds, int preloadCount)
+    { 
+        //Initialisiere die ProfileSuggestion Klasse
+        var profileSuggestion = new ProfileSuggestion(_matchesDbs, _profileDbs, _harvestDbs, profileId, _tagIds, preloadCount);
+        //Gib die Profil + HarvestUpload Vorschläge zurück 
+        return profileSuggestion.GetProfileSuggestionList();
     }
 
     public void AddSuggestions()
     {
         //Gib eine neue Liste an Suggestions zurück.
-        var newSuggestions = CreateUserSuggestionList(_contentReceiver, _preferenceDto.Tags, _preloadCount);
+        var newSuggestions = CreateProfileSuggestionList(_profileId, _tagIds, _preloadCount);
         //Prüfe, ob die neu generierten Profile bereits in der "alten" Liste vorhanden sind.
         //Falls nicht, füge sie zur "alten" Liste hinzu.
         foreach (var sug in newSuggestions)
-            if (!_userSuggestionList.ContainsKey(sug.Key))
-                _userSuggestionList.Add(sug.Key, sug.Value);
+            if (!_profileSuggestionList.ContainsKey(sug.Key))
+                _profileSuggestionList.Add(sug.Key, sug.Value);
     }
 
-    public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList()
-        => _userSuggestionList;
+    public Dictionary<PublicProfileDto, HarvestUploadDto> GetProfileSuggestionList()
+        => _profileSuggestionList;
 
-    public void RateUser(ProfileDto targetProfile, bool value)
+    
+    public void RateUser(PublicProfileDto creatorProfile, bool value)
     {
-        //Initialisiere die passende Datenbankschnittstelle.
-        //Datenbank gibt das passende MatchDto zurück.
-        IMatchesDbs matchesDbs = new ManagementDbs();
-        MatchDto matchDto = matchesDbs.GetMatchInfo(_contentReceiver, targetProfile);
-
-        //Speicher die Daten der MatchDto in den lokalen Variablen der Methode ab.
-        var contentReceiver = matchDto.ContentReceiver;
-        var contentReceiverValue = matchDto.ContentReceiverValue;
-        var targetUser = matchDto.TargetProfile;
-        var targetUserValue = matchDto.TargetProfileValue;
-
-        //Überprüfe, ob der Content Receiver das targetProfile positiv oder negativ bewertet hat.
-        //Falls sich beide User gegenseitig positiv bewertet haben, wird ein Match erstellt (CreateMatch).
-        if (value == true)
-        {
-            contentReceiverValue = true;
-            if (targetUserValue == true)
-                CreateMatch(targetProfile);
-        }
-
-        //Erstell aus den lokalen Variablen ein neues MatchDto und speicher es in der Datenbank.
+        //Holt sich MatchDto aus Datenbank
+        var matchDto = _matchesDbs.GetMatchInfo(_profileId, creatorProfile.ProfileId); 
+        
+        //Erstelle neue MatchDto mit der Bewertung und Zeitpunkt
         var dto = new MatchDto
         {
-            ContentReceiver = contentReceiver,
-            ContentReceiverValue = contentReceiverValue,
-            TargetProfile = targetUser,
-            TargetProfileValue = targetUserValue
+            ContentReceiver = _profileId,
+            ContentReceiverValue = value,
+            ContentCreator = matchDto.ContentCreator,
+            ContentCreatorValue = matchDto.ContentCreatorValue,
+            ContentReceiverRatingDate = DateTime.Now,
+            ContentCreatorRatingDate = matchDto.ContentCreatorRatingDate
         };
-        matchesDbs.SaveMatchInfo(dto);
+        _matchesDbs.SaveMatchInfo(dto);
+        
+        //Entferne Profil + HarvestUpload aus der Liste
+        _profileSuggestionList.Remove(creatorProfile);
+        
+        //Erstelle ein Match, wenn sich beide Profile positiv bewertet haben
+        if (dto.ContentCreatorValue && dto.ContentReceiverValue)
+            CreateMatch(creatorProfile);
 
-        //Entferne den Vorschlag aus der Liste
-        _userSuggestionList.Remove(targetProfile);
+        //Nach jeder Bewertung wird die Matchliste aktualisiert
+        UpdateActiveMatches();
 
         //Falls, nicht mehr genug Suggestions in der Liste sind -> neue erstellen.
-        if (_userSuggestionList.Count < 5)
+        if (_profileSuggestionList.Count < 5)
             AddSuggestions();
     }
 
+    public PublicProfileDto CreateMatch(PublicProfileDto creatorProfile)
+        => creatorProfile;
     
-    //TODO Nicolas wird das implementieren. Wenn ich dazu komme, müssen wir uns absprechen.
-    public void VisitUserProfile(ProfileDto targetProfile)
+    public void UpdateActiveMatches()
     {
-        
-        //Wir müssen auf die Datenbank zugreifen, um uns die passenden HarvestUploads zu holen.
-        IHarvestDbs harvestDbs = new ManagementDbs();
-        //Das Interface gibt eine Liste der HarvestUploads zurück.
-        var harvestUploads = harvestDbs.GetHarvestUploadRepo(targetProfile);
-    }
-    
-    
-    public void CreateMatch(ProfileDto targetProfile)
-    {
-        //Initialisiere die passende Datenbankschnittstelle.
-        //Datenbank gibt die passenden erfolgreichen Matches zurück.
-        
-        
-    }
-    
-    public List<ProfileDto> ShowMatches()
-    {
-        IMatchesDbs matchesDbs = new ManagementDbs();
-        return matchesDbs.GetSuccessfulMatches(_contentReceiver);
+        _activeMatchesList = _matchesDbs.GetActiveMatches(_profileId);
     }
 
+    public List<PublicProfileDto> GetActiveMatches()
+        => _activeMatchesList;
 }

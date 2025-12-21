@@ -2,14 +2,19 @@ using System.Runtime.InteropServices.JavaScript;
 
 namespace Contracts.Data_Transfer_Objects;
 
+//Manche Properties hier sind nullable, da auch keine Ratings vorhanden sein können 
 public record MatchDto
 {
-    public ProfileDto ContentReceiver { get; init; }
+    //Wie hat der Receiver den Creator bewertet?
+    public int? ContentReceiver { get; init; }
     public bool ContentReceiverValue { get; init; }
-    public ProfileDto TargetProfile { get; init; }
-    public bool TargetProfileValue { get; init; }
-    public DateTime ContentReceiverRatingDate { get; init; }
-    public DateTime TargetProfileRatingDate { get; init; }
-    public bool MatchActive { get; init; }
-    public DateTime MatchActiveDate { get; init; }
+    
+    //Wie hat der Creator den Receiver bewertet?
+    public int? ContentCreator { get; init; }
+    public bool ContentCreatorValue { get; init; }
+    
+    //Wann hat der Creator den Receiver bewertet, vice versa
+    public DateTime? ContentReceiverRatingDate { get; init; }
+    public DateTime? ContentCreatorRatingDate { get; init; }
+
 }

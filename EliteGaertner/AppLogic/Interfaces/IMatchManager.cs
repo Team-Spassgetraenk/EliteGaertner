@@ -3,40 +3,32 @@ using Contracts.Data_Transfer_Objects;
 namespace AppLogic.Interfaces;
 
 
-//Das Interface implementiert die Match Logik beim Swipen der Profile
+//Dieses Interface stellt alle Methoden zur Verfügung, die für die Erstellung und Verwaltung der Profil-
+//und HarvestUpload Vorschläge benötigt werden. Zusätzlich sind hier die Methoden, die die Matchlogik behandeln.
 public interface IMatchManager
 {
+    //Diese Methode erstellt für den Match Manager ein User Suggestion List.
+    public Dictionary<PublicProfileDto, HarvestUploadDto> CreateProfileSuggestionList(int profileId, List<int> tagIds,
+        int preloadCount);
     
+    //TODO kommentar fehlt
+    public void AddSuggestions();
+    
+    //Gibt eine Liste an User+HarvestUpload Suggestions zurück
+    public Dictionary<PublicProfileDto, HarvestUploadDto> GetProfileSuggestionList();
     
     //Diese Methode implementiert das Bewerten der Profile/Bilder.
     //Der Content Receiver kann den User positiv oder negativ bewerten.
     //Nach der Bewertung wird die jeweilige ProfileDTO mit ihrer HarvestDTO aus der Liste entfernt.
-    //Dabei wird auch überprüft ob es zu einem Match kommt. Falls ja -> CreateMatch Methode
-    //Dabei wird immer überprüft ob noch genug Vorschläge in der Liste vorhanden sind.
-    //Falls nicht werden wieder neue Vorschläge generiert.
-    public void RateUser(ProfileDto targetProfile, bool value);
-
+    //Dabei wird auch überprüft, ob es zu einem Match kommt. Falls ja -> CreateMatch Methode.
+    //Es wird dabei immer überprüft, ob noch genug Vorschläge in der Liste vorhanden sind.
+    //Falls nicht, werden wieder neue Vorschläge generiert.
+    public void RateUser(PublicProfileDto targetProfile, bool value);
     
-    //Diese Methode ist für die 
-    public void CreateMatch(ProfileDto targetProfile);
-
-    public void AddSuggestions();
-
-
-    //Diese Methode erstellt für den Match Manager ein User Suggestion List.
-    public Dictionary<ProfileDto, HarvestUploadDto> CreateUserSuggestionList(ProfileDto contentReceiver,
-        List<string> preferences, int preloadCount);
+    //TODO braucht man überhaupt die Methode?
+    public PublicProfileDto CreateMatch(PublicProfileDto targetProfile);
     
-    
+    public void UpdateActiveMatches();
 
-    public void VisitUserProfile(ProfileDto targetProfile);
-
-    
-    public List<ProfileDto> ShowMatches();
-
-    public Dictionary<ProfileDto, HarvestUploadDto> GetUserSuggestionList();
-
-
-
-
+    public List<PublicProfileDto> GetActiveMatches();
 }

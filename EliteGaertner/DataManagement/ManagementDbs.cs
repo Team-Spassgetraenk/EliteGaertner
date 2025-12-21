@@ -50,6 +50,8 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         throw new NotImplementedException();
     }
 
+    
+    //TODO Ich muss den Output randomisieren, sonst findet der irgendwann nicht mehr die richtigen Bilder
     public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
     {
         //Überprüfung ob ProfilId, TagIds vorhanden sind und PreloadCount > 0 ist
@@ -112,12 +114,47 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    public MatchDto GetMatchInfo(ProfileDto contentReceiver, ProfileDto targetProfile)
+    public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator)
     {
-        throw new NotImplementedException();
+        //Überprüfung, ob ProfileIds unterschiedlich sind und > 0 sind
+        //Falls ja -> gib leere MatchDto zurück
+        if (profileIdReceiver <= 0 || profileIdCreator <= 0 ||
+            profileIdReceiver == profileIdReceiver)
+            return new MatchDto();
+
+        var ratings = _dbContext.Ratings
+            .AsNoTracking()
+            .Where(r =>
+                (r.Contentreceiverid == profileIdReceiver && r.Contentcreatorid == profileIdCreator) ||
+                (r.Contentreceiverid == profileIdCreator && r.Contentcreatorid == profileIdReceiver))
+            .ToList();
+        
+        //Gib mir, falls vorhanden, das Rating vom Receiver zurück
+        var receiverRating = _dbContext.Ratings
+            .SingleOrDefault(r =>
+                r.Contentreceiverid == profileIdReceiver && r.Contentcreatorid == profileIdCreator);
+
+        //Gib mir, falls vorhanden, das Rating vom Creator zurück
+        var creatorRating = _dbContext.Ratings
+            .SingleOrDefault(r =>
+                r.Contentreceiverid == profileIdCreator && r.Contentcreatorid == profileIdReceiver);
+        
+        //MatchDto wird erstellt
+        //Falls kein ReceiverRating oder CreatorRating vorhanden ist -> null
+        return new MatchDto()
+        {
+            ContentReceiver = receiverRating?.Contentreceiverid,
+            ContentReceiverValue = receiverRating?.Profilerating ?? false,
+
+            ContentCreator = creatorRating?.Contentreceiverid,
+            ContentCreatorValue = creatorRating?.Profilerating ?? false,
+
+            ContentReceiverRatingDate = receiverRating?.Ratingdate,
+            ContentCreatorRatingDate = creatorRating?.Ratingdate,
+        };
     }
 
-    public List<ProfileDto> GetSuccessfulMatches(ProfileDto contentReceiver)
+    public List<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
     {
         throw new NotImplementedException();
     }
@@ -154,26 +191,69 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         throw new NotImplementedException();
     }
 
-    public ProfileDto GetProfile(int profileId)
+
+    public Profile? GetProfile(int profileId)
     {
         //Falls die profileId <= 0 ist, return ein leeres ProfileDto
         if (profileId <= 0)
-            return new ProfileDto();
-
+            return null;
+        
+        //Fragt die Datenbank nach dem Profil ab und speichert es in die Entität
         var p = _dbContext.Profiles
             //Da es sich hier um eine Read Only Abfrage handelt, muss sich EF kein Objekt merken
             .AsNoTracking()
             //Gib mir maximal ein Profil zurück, dass mit der Id übereinstimmt
             .SingleOrDefault(x => x.Profileid == profileId);
+
+        return p;
+    }
+
+    public PublicProfileDto GetPublicProfile(int profileId)
+    {
+        //Entität Profil wird zurückgegeben
+        var p = GetProfile(profileId);
+
+        //Falls kein Profil gefunden wird -> Gib leeres PublicProfileDto zurück
+        if (p is null)
+            return new PublicProfileDto();
         
-        //Erstelle aus dem Ergebnis der Query ein ProfilDto
-        var result = new ProfileDto
+        //Erstelle aus dem Ergebnis der Query ein PublicProfileDto
+        var result = new PublicProfileDto()
+        {
+            ProfileId = p.Profileid,
+            UserName = p.Username,
+            EMail = p.Email,
+            Phonenumber = p.Phonenumber,
+            Profiletext = p.Profiletext,
+            ShareMail = p.Sharemail,
+            SharePhoneNumber = p.Sharephonenumber,
+            UserCreated = p.Usercreated,
+            //Hol dir die HarvestUploads des Profils
+            HarvestUploads = GetProfileHarvestUploads(profileId).ToList(),
+            //Hol dir die UserPreference des Profils
+        };
+        
+        return result;
+    }
+
+    public PrivateProfileDto GetPrivateProfile(int profileId)
+    {
+        //Entität Profil wird zurückgegeben
+        var p = GetProfile(profileId);
+
+        //Falls kein Profil gefunden wird -> Gib leeres PrivateProfileDto zurück
+        if (p is null)
+            return new PrivateProfileDto();
+        
+        //Erstelle aus dem Ergebnis der Query ein PrivateProfileDto
+        var result = new PrivateProfileDto
         {
             ProfileId = p.Profileid,
             UserName = p.Username,
             FirstName = p.Firstname,
             LastName = p.Lastname,
             EMail = p.Email,
+            PasswordHash = p.Passwordhash,
             Phonenumber = p.Phonenumber,
             Profiletext = p.Profiletext,
             ShareMail = p.Sharemail,
@@ -183,7 +263,7 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
             //Hol dir die UserPreference des Profils
             PreferenceDtos = GetUserPreference(profileId).ToList()
         };
-        
+
         return result;
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Contracts.Data_Transfer_Objects;
 
-public record ProfileDto
+public record PrivateProfileDto
 {
     public int ProfileId { get; init; }
     public string UserName { get; init; }
@@ -15,5 +15,4 @@ public record ProfileDto
     public DateTime UserCreated { get; init; }
     public List <HarvestUploadDto> HarvestUploads { get; init; }
     public List <PreferenceDto> PreferenceDtos { get; init; }
-    //HIER FEHLT VIELLEICHT NOCH DAS RATING FELD
 }

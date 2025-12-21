@@ -5,12 +5,18 @@ namespace AppLogic.Services;
 
 public class ProfileMgm : IProfileMgm
 {
-    public ProfileDto GetProfile(int userId)
+
+    public PrivateProfileDto VisitReceiverProfile(int userId)
     {
         throw new NotImplementedException();
     }
 
-    public bool UpdateProfile(ProfileDto profile)
+    public PrivateProfileDto VisitCreatorProfile(int userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool UpdateProfile(PrivateProfileDto profile)
     {
         Console.WriteLine("Profildaten geändert");
         return true;
