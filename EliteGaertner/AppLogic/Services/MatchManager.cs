@@ -1,8 +1,6 @@
 using AppLogic.Interfaces;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
-using DataManagement;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AppLogic.Services;
 
@@ -30,10 +28,14 @@ public class MatchManager : IMatchManager
             .Select(p => p.TagId)
             .Distinct()
             .ToList();
-        
         _preloadCount = preloadCount;
         _profileSuggestionList = CreateProfileSuggestionList(_profileId, _tagIds, _preloadCount);
-        UpdateActiveMatches();
+        
+        //Hier müssen wir die _activeMatchesList erstmal initialisieren bevor wir
+        //die Ergebnisse aus der UpdateActiveMatches übergeben können, da er in der Methode überprüft,
+        //ob _activeMatchesList leer ist oder nicht. -> NullReferenceException
+        _activeMatchesList = new List<PublicProfileDto>();
+        _activeMatchesList = UpdateActiveMatches();
     }
 
     public Dictionary<PublicProfileDto, HarvestUploadDto> CreateProfileSuggestionList(int profileId, List<int> tagIds, int preloadCount)
@@ -57,7 +59,6 @@ public class MatchManager : IMatchManager
 
     public Dictionary<PublicProfileDto, HarvestUploadDto> GetProfileSuggestionList()
         => _profileSuggestionList;
-
     
     public void RateUser(PublicProfileDto creatorProfile, bool value)
     {
@@ -78,13 +79,9 @@ public class MatchManager : IMatchManager
         
         //Entferne Profil + HarvestUpload aus der Liste
         _profileSuggestionList.Remove(creatorProfile);
-        
-        //Erstelle ein Match, wenn sich beide Profile positiv bewertet haben
-        if (dto.ContentCreatorValue && dto.ContentReceiverValue)
-            CreateMatch(creatorProfile);
 
         //Nach jeder Bewertung wird die Matchliste aktualisiert
-        UpdateActiveMatches();
+        _activeMatchesList = UpdateActiveMatches();
 
         //Falls, nicht mehr genug Suggestions in der Liste sind -> neue erstellen.
         if (_profileSuggestionList.Count < 5)
@@ -94,9 +91,34 @@ public class MatchManager : IMatchManager
     public PublicProfileDto CreateMatch(PublicProfileDto creatorProfile)
         => creatorProfile;
     
-    public void UpdateActiveMatches()
+    
+    public List<PublicProfileDto> UpdateActiveMatches()
     {
-        _activeMatchesList = _matchesDbs.GetActiveMatches(_profileId);
+        var newActiveMatchesList = _matchesDbs.GetActiveMatches(_profileId).ToList();
+        
+        //Falls die _activeMatchesList null ist, schreibt er den Rückgabewert der Datebank sofort rein
+        if (_activeMatchesList.Count == 0)
+        {
+            return newActiveMatchesList.ToList();
+        }
+
+        //Herausfinden welche neuen Matches dazu gekommen sind
+        var newlyAddedMatches =
+            newActiveMatchesList
+                .Where(newProfile =>
+                    //Gib mir alle Elemente der _activeMatchesList
+                    _activeMatchesList.All(existing =>
+                        //und gib mir alle Elemente zurück, die nicht die selben ProfilIds haben -> also neu sind
+                        existing.ProfileId != newProfile.ProfileId))
+                .ToList();
+        
+        //Für jedes neue Match wird die CreateMatch Methode aufgerufen
+        foreach (var newMatch in newlyAddedMatches)
+        {
+            CreateMatch(newMatch);
+        }
+        
+        return newActiveMatchesList;
     }
 
     public List<PublicProfileDto> GetActiveMatches()

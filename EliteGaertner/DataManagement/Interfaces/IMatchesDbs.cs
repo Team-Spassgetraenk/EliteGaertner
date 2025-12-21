@@ -7,7 +7,7 @@ public interface IMatchesDbs
 
     public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator);
 
-    public List<PublicProfileDto> GetActiveMatches(int profileIdReceiver);
+    public IEnumerable<PublicProfileDto> GetActiveMatches(int profileIdReceiver);
 
     public void SaveMatchInfo(MatchDto matchDto);
     

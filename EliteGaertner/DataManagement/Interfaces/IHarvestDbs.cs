@@ -14,6 +14,12 @@ public interface IHarvestDbs
     //des Users passen. Die Menge der DTOs wird vom preloadCount bestimmt.
     public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount);
 
+    //TODO Nicolas
+    public void SetHarvestUpload(HarvestUploadDto harvestUpload);
+    
+    //TODO Nicolas
+    public void DeleteHarvestUpload(int uploadId);
+    
     //BESCHREIBUNG FEHLT!!!!!
     public void SetReportHarvestUpload(int uploadId, Enum reason);
 

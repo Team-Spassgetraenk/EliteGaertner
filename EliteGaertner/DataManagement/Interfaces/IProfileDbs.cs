@@ -5,6 +5,12 @@ namespace DataManagement.Interfaces;
 
 public interface IProfileDbs
 {
+    //TODO Nicolas 
+    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile);
+
+    //TODO Nicolas
+    public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile);
+    
     //Gibt die Entität des Profils zurück
     public Profile? GetProfile(int profileId);
     

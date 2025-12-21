@@ -9,8 +9,10 @@ namespace AppLogic.Services;
 
 public class UploadServiceImpl : IUploadService
 {
+    //TODO Aleks: Du initialisierst fälschlicherweise die EliteGaertnderDbContext.
+    //TODO Richtig -> IHarvestDbs initialisieren -> die greift auf ManagementDbs zu
     private readonly EliteGaertnerDbContext _context;
-
+    
     public UploadServiceImpl(EliteGaertnerDbContext context)
     {
         _context = context;
@@ -26,6 +28,7 @@ public class UploadServiceImpl : IUploadService
             if (profile == null)
                 return false;
 
+            //TODO Aleks: Wir erstellen keinen Entitäten, nur DTOs in der AppLogic
             var entity = new Harvestupload
             {
                 Imageurl = imageUrl,

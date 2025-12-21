@@ -28,7 +28,7 @@ public interface IMatchManager
     //TODO braucht man überhaupt die Methode?
     public PublicProfileDto CreateMatch(PublicProfileDto targetProfile);
     
-    public void UpdateActiveMatches();
+    public List<PublicProfileDto> UpdateActiveMatches();
 
     public List<PublicProfileDto> GetActiveMatches();
 }

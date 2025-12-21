@@ -15,7 +15,6 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         _dbContext = dbContext;
     }
     
-    
     public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
     {
         //Falls die profileId <= 0 ist, return leere HarvestUploadDto Enumerable 
@@ -40,6 +39,11 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
+    public void DeleteHarvestUpload(int uploadId)
+    {
+        throw new NotImplementedException();
+    }
+
     public void SetReportHarvestUpload(int uploadId, Enum reason)
     {
         throw new NotImplementedException();
@@ -57,7 +61,7 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         //Überprüfung ob ProfilId, TagIds vorhanden sind und PreloadCount > 0 ist
         //Falls nicht -> leere Liste zurückgeben
         if (profileId <= 0 || tagIds is null || tagIds.Count == 0 || preloadCount <= 0)
-            return new List<HarvestUploadDto>();
+            return Enumerable.Empty<HarvestUploadDto>();
         
         //Hier bin ich in einen bekannten EF Core Query Translation Bug gelaufen.
         //Anscheinend mag er die Kombi aus GroupBy, Select(g => g.OrderByDescending(...).First()), Select(new Dto) nicht.
@@ -114,12 +118,17 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
+    public void SetHarvestUpload(HarvestUploadDto harvestUpload)
+    {
+        throw new NotImplementedException();
+    }
+
     public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator)
     {
         //Überprüfung, ob ProfileIds unterschiedlich sind und > 0 sind
         //Falls ja -> gib leere MatchDto zurück
         if (profileIdReceiver <= 0 || profileIdCreator <= 0 ||
-            profileIdReceiver == profileIdReceiver)
+            profileIdReceiver == profileIdCreator)
             return new MatchDto();
 
         var ratings = _dbContext.Ratings
@@ -154,9 +163,53 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         };
     }
 
-    public List<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
+    public IEnumerable<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
     {
-        throw new NotImplementedException();
+        //Überprüfe, ob ProfileId <= 0 ist. Falls ja -> Gib leere Liste zurück 
+        if (profileIdReceiver <= 0)
+            return Enumerable.Empty<PublicProfileDto>();
+        
+        //Finde alle Ratings, in denen sich der Receiver und der Creator gegenseitig
+        //positiv bewertet haben -> Gib mir am Ende die CreatorIds zurück 
+        var matches =
+            //Nimm die Tabelle Ratings und mach ein Selfjoin und überprüfe, 
+            //ob Receiver und Creator sich gegenseitig bewertet haben
+            (from r1 in _dbContext.Ratings.AsNoTracking()
+                join r2 in _dbContext.Ratings.AsNoTracking()
+                    on new { A = r1.Contentreceiverid, B = r1.Contentcreatorid }
+                    equals new { A = r2.Contentcreatorid, B = r2.Contentreceiverid }
+                //Zeig alle Ratings vom Receiver 
+                where r1.Contentreceiverid == profileIdReceiver
+                      //Überprüfe, ob sich beide gegenseitig positiv bewertet haben
+                      && r1.Profilerating
+                      && r2.Profilerating
+                //Speicher die Id vom Creator ab      
+                select r1.Contentcreatorid)
+            //Eigentlich nicht möglich, da ProfileIds PK sind, aber vorsichtshalber 
+            //können ProfileIds nicht mehrmals vorkommen
+            .Distinct();
+
+        //Gleich alle profileIds mit der Profiles-Tabelle ab und erstelle aus ihnen die PublicProfileDto
+        var result =
+            //Nimm jede ProfileId aus Matches
+            (from pid in matches
+                //Macht einen Join mit den Inhalten der Profiles-Tabelle die mit profileIds aus matches übereinstimmen 
+                join p in _dbContext.Profiles.AsNoTracking()
+                    on pid equals p.Profileid
+                //Aus den Ergebnissen werden die passenden PublicProfileDtos erstellt     
+                select new PublicProfileDto
+                {
+                    //Wir benötigen für die Matchübersicht nur ProfileId, Username
+                    //und möglicherweise Email und Phonenumber 
+                    ProfileId = p.Profileid,
+                    UserName = p.Username,
+                    //Prüft ob der Creator seine Mail und/oder Telefonnummer freigegeben hat
+                    EMail = p.Sharemail ? p.Email : null,
+                    Phonenumber = p.Sharephonenumber ? p.Phonenumber : null,
+                })
+            .ToList();
+
+        return result;
     }
 
     public void SaveMatchInfo(MatchDto matchDto)
@@ -191,6 +244,16 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         throw new NotImplementedException();
     }
 
+
+    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
+    {
+        throw new NotImplementedException();
+    }
+
+    public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
+    {
+        throw new NotImplementedException();
+    }
 
     public Profile? GetProfile(int profileId)
     {
