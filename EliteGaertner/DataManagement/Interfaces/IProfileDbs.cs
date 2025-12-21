@@ -19,7 +19,4 @@ public interface IProfileDbs
     
     //Erstellt aus der Entität Profil ein PublicProfileDto
     public PublicProfileDto GetPublicProfile(int profileId);
-    
-    
-
 }

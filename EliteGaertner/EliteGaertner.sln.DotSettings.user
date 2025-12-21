@@ -7,6 +7,9 @@
   &lt;Or&gt;
     &lt;ProjectFile&gt;19847B85-B531-4825-BC6C-E5F67FEE252D/d:IntegrationTests/d:AppLogicTests/f:HarvestSuggestionTest_FromRealDb.cs&lt;/ProjectFile&gt;
     &lt;ProjectFile&gt;19847B85-B531-4825-BC6C-E5F67FEE252D/d:UnitTests/d:AppLogicTests/f:UploadServiceTest.cs&lt;/ProjectFile&gt;
+    &lt;ProjectFile&gt;19847B85-B531-4825-BC6C-E5F67FEE252D/d:UnitTests/d:AppLogicTests/f:HarvestSuggestionTests.cs&lt;/ProjectFile&gt;
+    &lt;ProjectFile&gt;19847B85-B531-4825-BC6C-E5F67FEE252D/d:UnitTests/d:AppLogicTests/f:ProfileSuggestionTests.cs&lt;/ProjectFile&gt;
+    &lt;ProjectFile&gt;19847B85-B531-4825-BC6C-E5F67FEE252D/d:UnitTests/d:AppLogicTests/f:MatchManagerTests.cs&lt;/ProjectFile&gt;
   &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
 	

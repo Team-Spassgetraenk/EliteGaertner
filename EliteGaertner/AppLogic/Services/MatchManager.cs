@@ -41,7 +41,7 @@ public class MatchManager : IMatchManager
     public Dictionary<PublicProfileDto, HarvestUploadDto> CreateProfileSuggestionList(int profileId, List<int> tagIds, int preloadCount)
     { 
         //Initialisiere die ProfileSuggestion Klasse
-        var profileSuggestion = new ProfileSuggestion(_matchesDbs, _profileDbs, _harvestDbs, profileId, _tagIds, preloadCount);
+        var profileSuggestion = new ProfileSuggestion(_matchesDbs, _profileDbs, _harvestDbs, profileId, tagIds, preloadCount);
         //Gib die Profil + HarvestUpload Vorschläge zurück 
         return profileSuggestion.GetProfileSuggestionList();
     }
@@ -53,8 +53,11 @@ public class MatchManager : IMatchManager
         //Prüfe, ob die neu generierten Profile bereits in der "alten" Liste vorhanden sind.
         //Falls nicht, füge sie zur "alten" Liste hinzu.
         foreach (var sug in newSuggestions)
-            if (!_profileSuggestionList.ContainsKey(sug.Key))
+        {
+            var alreadyExists = _profileSuggestionList.Keys.Any(k => k.ProfileId == sug.Key.ProfileId);
+            if (!alreadyExists)
                 _profileSuggestionList.Add(sug.Key, sug.Value);
+        }
     }
 
     public Dictionary<PublicProfileDto, HarvestUploadDto> GetProfileSuggestionList()
@@ -77,9 +80,13 @@ public class MatchManager : IMatchManager
         };
         _matchesDbs.SaveMatchInfo(dto);
         
+        //TODO
         //Entferne Profil + HarvestUpload aus der Liste
-        _profileSuggestionList.Remove(creatorProfile);
-
+        var keyToRemove = _profileSuggestionList.Keys
+            .SingleOrDefault(p => p.ProfileId == creatorProfile.ProfileId);
+        if (keyToRemove != null)
+            _profileSuggestionList.Remove(keyToRemove);
+        
         //Nach jeder Bewertung wird die Matchliste aktualisiert
         _activeMatchesList = UpdateActiveMatches();
 
@@ -91,7 +98,6 @@ public class MatchManager : IMatchManager
     public PublicProfileDto CreateMatch(PublicProfileDto creatorProfile)
         => creatorProfile;
     
-    
     public List<PublicProfileDto> UpdateActiveMatches()
     {
         var newActiveMatchesList = _matchesDbs.GetActiveMatches(_profileId).ToList();
@@ -99,7 +105,8 @@ public class MatchManager : IMatchManager
         //Falls die _activeMatchesList null ist, schreibt er den Rückgabewert der Datebank sofort rein
         if (_activeMatchesList.Count == 0)
         {
-            return newActiveMatchesList.ToList();
+            _activeMatchesList = newActiveMatchesList;
+            return _activeMatchesList;
         }
 
         //Herausfinden welche neuen Matches dazu gekommen sind
@@ -118,7 +125,8 @@ public class MatchManager : IMatchManager
             CreateMatch(newMatch);
         }
         
-        return newActiveMatchesList;
+        _activeMatchesList = newActiveMatchesList;
+        return _activeMatchesList;
     }
 
     public List<PublicProfileDto> GetActiveMatches()
