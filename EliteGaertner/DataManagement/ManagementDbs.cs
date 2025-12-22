@@ -3,6 +3,7 @@ using Contracts.Data_Transfer_Objects;
 using DataManagement.Entities;
 using DataManagement.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace DataManagement;
 
@@ -243,13 +244,83 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
     {
         throw new NotImplementedException();
     }
-
-
-    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
+    
+    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
     {
-        throw new NotImplementedException();
+        
+        //Es ist nicht möglich, Stand jetzt, eine PrivateProfileDto/CredentialProfileDto
+        //zu übergeben die = null ist. Trotzdem defensive Programmierung.
+        if (privateProfile is null || credentials is null)
+            return new PrivateProfileDto();
+        
+        //TODO Seed Username -> lowercase machen
+        //UserName und Email normalisieren. Uppercase -> Lowercase
+        var userName = privateProfile.UserName?.Trim().ToLowerInvariant();
+        var eMail = credentials.EMail?.Trim().ToLowerInvariant();
+        
+        //Pflichtfelder vorhanden?
+        if (string.IsNullOrWhiteSpace(userName) ||
+            string.IsNullOrWhiteSpace(eMail) ||
+            string.IsNullOrWhiteSpace(credentials.PasswordHash))
+            //Falls nicht -> return leeres PrivateProfileDto
+            return new PrivateProfileDto();
+        
+        //Prüfe Mail und Username auf Duplikate
+        var userNameExists = _dbContext.Profiles
+            .AsNoTracking()
+            .Any(p => p.Username == userName);
+        var eMailExists = _dbContext.Profiles
+            .AsNoTracking()
+            .Any(p => p.Email == eMail);
+        //Falls UserName oder Passwort schon existiert -> leeres ProfileDto wird zurückgegeben
+        //Nicht in einem Statement zusammengelegt, um für die Zukunft festellen zu können
+        //welcher Wert bereits vorhanden ist
+        if (userNameExists)
+            return new PrivateProfileDto();
+        if (eMailExists)
+            return new PrivateProfileDto();
+        
+        //Dto auf Entity mappen
+        var profileEntity = new Profile()
+        {
+            Profilepictureurl = privateProfile.ProfilepictureUrl,
+            Username = userName,
+            Firstname = privateProfile.FirstName,
+            Lastname = privateProfile.LastName,
+            //Die Email und Passwort kommen aus dem CredentialDto
+            Email = eMail,
+            Passwordhash = credentials.PasswordHash,
+            Phonenumber = privateProfile.Phonenumber,
+            Profiletext = privateProfile.Profiletext,
+            Sharemail = privateProfile.ShareMail,
+            Sharephonenumber = privateProfile.SharePhoneNumber,
+            Usercreated = DateTime.UtcNow
+        };
+
+        //Entity wird in Datenbank gespeichert
+        _dbContext.Profiles.Add(profileEntity);
+        _dbContext.SaveChanges();
+        
+        //Dto wird erstellt und zurückgegeben
+        var result = new PrivateProfileDto()
+        {
+            ProfileId = profileEntity.Profileid,
+            ProfilepictureUrl = profileEntity.Profilepictureurl,
+            UserName = profileEntity.Username,
+            FirstName = profileEntity.Firstname,
+            LastName = profileEntity.Lastname,
+            EMail = profileEntity.Email,
+            Phonenumber = profileEntity.Phonenumber,
+            Profiletext = profileEntity.Profiletext,
+            ShareMail = profileEntity.Sharemail,
+            SharePhoneNumber = profileEntity.Sharephonenumber,
+            UserCreated = profileEntity.Usercreated,
+        };
+
+        return result;
     }
 
+    //TODO Nicolas
     public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
     {
         throw new NotImplementedException();
@@ -299,6 +370,11 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
+    public int? CheckPassword(string eMail, string passwordHash)
+    {
+        throw new NotImplementedException();
+    }
+
     public PrivateProfileDto GetPrivateProfile(int profileId)
     {
         //Entität Profil wird zurückgegeben
@@ -316,7 +392,6 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
             FirstName = p.Firstname,
             LastName = p.Lastname,
             EMail = p.Email,
-            PasswordHash = p.Passwordhash,
             Phonenumber = p.Phonenumber,
             Profiletext = p.Profiletext,
             ShareMail = p.Sharemail,

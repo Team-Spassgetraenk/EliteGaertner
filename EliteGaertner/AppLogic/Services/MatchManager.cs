@@ -80,7 +80,6 @@ public class MatchManager : IMatchManager
         };
         _matchesDbs.SaveMatchInfo(dto);
         
-        //TODO
         //Entferne Profil + HarvestUpload aus der Liste
         var keyToRemove = _profileSuggestionList.Keys
             .SingleOrDefault(p => p.ProfileId == creatorProfile.ProfileId);

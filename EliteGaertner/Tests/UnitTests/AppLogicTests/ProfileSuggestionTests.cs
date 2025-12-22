@@ -105,7 +105,7 @@ public class ProfileSuggestionTests
 
     private sealed class ProfileDbsFake : IProfileDbs
     {
-        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
+        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
             => throw new NotImplementedException();
 
         public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
@@ -125,5 +125,10 @@ public class ProfileSuggestionTests
                 EMail = null,
                 Phonenumber = null
             };
+
+        public int? CheckPassword(string eMail, string passwordHash)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

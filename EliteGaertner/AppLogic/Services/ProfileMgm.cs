@@ -27,4 +27,19 @@ public class ProfileMgm : IProfileMgm
         Console.WriteLine("Kontaktdaten geändert");
         return true;
     }
+
+    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile)
+    {
+        throw new NotImplementedException();
+    }
+
+    public PrivateProfileDto LoginProfile(PrivateProfileDto receiverProfile)
+    {
+        throw new NotImplementedException();
+    }
+
+    public List<PreferenceDto> SetPreferences(PreferenceDto profilePreferences)
+    {
+        throw new NotImplementedException();
+    }
 }
