@@ -2,11 +2,14 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Tests.UnitTests.AppLogicTests;
 
 //Komplett durch ChatGPT generiert!!!!!!
 [TestClass]
+[TestCategory("Unit")]
 public class MatchManagerTests
 {
     // --------------------------------------------------
@@ -47,6 +50,12 @@ public class MatchManagerTests
 
         // Act
         sut.RateUser(creator, true);
+
+        Assert.AreEqual(1, matchesDbs.SaveCalls.Count);
+        Assert.AreEqual(1, matchesDbs.SaveCalls[0].ContentReceiver);
+        Assert.AreEqual(2, matchesDbs.SaveCalls[0].ContentCreator);
+        Assert.AreEqual(true, matchesDbs.SaveCalls[0].ContentReceiverValue);
+        Assert.IsNotNull(matchesDbs.SaveCalls[0].ContentReceiverRatingDate);
 
         // Assert: Creator bleibt entfernt
         Assert.IsFalse(
@@ -98,6 +107,12 @@ public class MatchManagerTests
         // Act
         sut.RateUser(creator2, true);
 
+        Assert.AreEqual(1, matchesDbs.SaveCalls.Count);
+        Assert.AreEqual(1, matchesDbs.SaveCalls[0].ContentReceiver);
+        Assert.AreEqual(2, matchesDbs.SaveCalls[0].ContentCreator);
+        Assert.AreEqual(true, matchesDbs.SaveCalls[0].ContentReceiverValue);
+        Assert.IsNotNull(matchesDbs.SaveCalls[0].ContentReceiverRatingDate);
+
         // Assert: alter Creator weg
         Assert.IsFalse(
             sut.GetProfileSuggestionList().Any(x => x.Key.ProfileId == 2));
@@ -128,20 +143,26 @@ public class MatchManagerTests
     private sealed class MatchesDbsFake : IMatchesDbs
     {
         private readonly Queue<List<PublicProfileDto>> _queue;
+        private readonly HashSet<(int receiverId, int creatorId)> _ratedPairs = new();
 
-        public List<MatchDto> SaveCalls { get; } = new();
+        public List<RateDto> SaveCalls { get; } = new();
 
         public MatchesDbsFake(IEnumerable<List<PublicProfileDto>> activeMatchesSequence)
             => _queue = new Queue<List<PublicProfileDto>>(activeMatchesSequence);
 
-        public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator)
-            => new MatchDto();
-
         public IEnumerable<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
             => _queue.Count > 0 ? _queue.Dequeue() : Enumerable.Empty<PublicProfileDto>();
 
-        public void SaveMatchInfo(MatchDto matchDto)
-            => SaveCalls.Add(matchDto);
+        public void SaveMatchInfo(RateDto matchDto)
+        {
+            SaveCalls.Add(matchDto);
+
+            // Sobald gespeichert wurde, gilt das Paar als "bereits bewertet"
+            _ratedPairs.Add((matchDto.ContentReceiver, matchDto.ContentCreator));
+        }
+
+        public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
+            => _ratedPairs.Contains((profileIdReceiver, profileIdCreator));
     }
 
     private sealed class ProfileDbsFake : IProfileDbs

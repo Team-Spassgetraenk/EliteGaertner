@@ -65,18 +65,14 @@ public class MatchManager : IMatchManager
     
     public void RateUser(PublicProfileDto creatorProfile, bool value)
     {
-        //Holt sich MatchDto aus Datenbank
-        var matchDto = _matchesDbs.GetMatchInfo(_profileId, creatorProfile.ProfileId); 
         
         //Erstelle neue MatchDto mit der Bewertung und Zeitpunkt
-        var dto = new MatchDto
+        var dto = new RateDto
         {
             ContentReceiver = _profileId,
+            ContentCreator = creatorProfile.ProfileId,
             ContentReceiverValue = value,
-            ContentCreator = matchDto.ContentCreator,
-            ContentCreatorValue = matchDto.ContentCreatorValue,
-            ContentReceiverRatingDate = DateTime.Now,
-            ContentCreatorRatingDate = matchDto.ContentCreatorRatingDate
+            ContentReceiverRatingDate = DateTime.UtcNow,
         };
         _matchesDbs.SaveMatchInfo(dto);
         

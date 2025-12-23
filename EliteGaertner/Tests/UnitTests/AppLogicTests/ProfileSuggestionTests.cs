@@ -9,6 +9,7 @@ namespace Tests.UnitTests.AppLogicTests;
 
 //Komplett durch ChatGPT generiert!!!
 [TestClass]
+[TestCategory("Unit")]
 public class ProfileSuggestionTests
 {
     [TestMethod]
@@ -25,7 +26,7 @@ public class ProfileSuggestionTests
 
         var harvestDbs = new HarvestDbsFake(harvestUploads);
 
-        // Profil 2 wurde bereits bewertet
+        // Profil 2 gilt als bereits bewertet und muss deshalb herausgefiltert werden
         var matchesDbs = new MatchesDbsFake(
             ratedPairs: new[] { (receiverId, 2) }
         );
@@ -84,23 +85,13 @@ public class ProfileSuggestionTests
         public MatchesDbsFake(IEnumerable<(int receiver, int creator)> ratedPairs)
             => _ratedPairs = ratedPairs.ToHashSet();
 
-        public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator)
-        {
-            if (_ratedPairs.Contains((profileIdReceiver, profileIdCreator)))
-            {
-                return new MatchDto
-                {
-                    ContentReceiver = profileIdReceiver
-                };
-            }
-
-            return new MatchDto();
-        }
+        public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
+            => _ratedPairs.Contains((profileIdReceiver, profileIdCreator));
 
         public IEnumerable<PublicProfileDto> GetActiveMatches(int profileId)
             => Enumerable.Empty<PublicProfileDto>();
 
-        public void SaveMatchInfo(MatchDto matchDto) { }
+        public void SaveMatchInfo(RateDto matchDto) { }
     }
 
     private sealed class ProfileDbsFake : IProfileDbs

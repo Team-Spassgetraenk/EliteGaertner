@@ -8,6 +8,7 @@ namespace Tests.UnitTests.AppLogicTests;
 
 //Komplett von ChatGPT erstellt!
 [TestClass]
+[TestCategory("Unit")]
 public class HarvestSuggestionTests
 {
     private sealed class HarvestDbsFake : IHarvestDbs

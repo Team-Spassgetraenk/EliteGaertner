@@ -36,20 +36,12 @@ public class ProfileSuggestion : IProfileSuggestion
             //Gebe dir für jedes HarvestUpload das passende ProfileDto zurück
             var targetProfile = _profileDbs.GetPublicProfile(harvestUpload.ProfileId);
             //Wenn das Profil noch nicht bewertet worden ist....
-            if (!ProfileAlreadyRated(profileId, harvestUpload.ProfileId))
+            if (!_matchesDbs.ProfileAlreadyRated(profileId, harvestUpload.ProfileId))
             {
                 //Füge ProfileDto + HarvestUpload zur Dictionary 
                 _userSuggestionList.Add(targetProfile, harvestUpload);
             }
         }
-    }
-
-    public bool ProfileAlreadyRated (int profileIdReceiver,  int profileIdCreator)
-    {
-        //Datenbank gibt MatchDto zurück
-        var matchDto = _matchesDbs.GetMatchInfo(profileIdReceiver, profileIdCreator);
-        //Überprüfe ob Receiver schon Creator bewertet hat
-        return matchDto.ContentReceiver != null; 
     }
     
     public Dictionary<PublicProfileDto, HarvestUploadDto> GetProfileSuggestionList()

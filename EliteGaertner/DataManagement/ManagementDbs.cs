@@ -124,46 +124,6 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         throw new NotImplementedException();
     }
 
-    public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator)
-    {
-        //Überprüfung, ob ProfileIds unterschiedlich sind und > 0 sind
-        //Falls ja -> gib leere MatchDto zurück
-        if (profileIdReceiver <= 0 || profileIdCreator <= 0 ||
-            profileIdReceiver == profileIdCreator)
-            return new MatchDto();
-
-        var ratings = _dbContext.Ratings
-            .AsNoTracking()
-            .Where(r =>
-                (r.Contentreceiverid == profileIdReceiver && r.Contentcreatorid == profileIdCreator) ||
-                (r.Contentreceiverid == profileIdCreator && r.Contentcreatorid == profileIdReceiver))
-            .ToList();
-        
-        //Gib mir, falls vorhanden, das Rating vom Receiver zurück
-        var receiverRating = _dbContext.Ratings
-            .SingleOrDefault(r =>
-                r.Contentreceiverid == profileIdReceiver && r.Contentcreatorid == profileIdCreator);
-
-        //Gib mir, falls vorhanden, das Rating vom Creator zurück
-        var creatorRating = _dbContext.Ratings
-            .SingleOrDefault(r =>
-                r.Contentreceiverid == profileIdCreator && r.Contentcreatorid == profileIdReceiver);
-        
-        //MatchDto wird erstellt
-        //Falls kein ReceiverRating oder CreatorRating vorhanden ist -> null
-        return new MatchDto()
-        {
-            ContentReceiver = receiverRating?.Contentreceiverid,
-            ContentReceiverValue = receiverRating?.Profilerating ?? false,
-
-            ContentCreator = creatorRating?.Contentreceiverid,
-            ContentCreatorValue = creatorRating?.Profilerating ?? false,
-
-            ContentReceiverRatingDate = receiverRating?.Ratingdate,
-            ContentCreatorRatingDate = creatorRating?.Ratingdate,
-        };
-    }
-
     public IEnumerable<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
     {
         //Überprüfe, ob ProfileId <= 0 ist. Falls ja -> Gib leere Liste zurück 
@@ -213,9 +173,55 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    public void SaveMatchInfo(MatchDto matchDto)
+    public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
     {
-        throw new NotImplementedException();
+        return _dbContext.Ratings                    
+            .Any(r =>                               
+                r.Contentreceiverid == profileIdReceiver &&
+                r.Contentcreatorid == profileIdCreator); 
+    }
+
+
+    //TODO ALEKS -> Kommentare fehlen noch
+    public void SaveMatchInfo(RateDto matchDto)
+    {
+        //Prüfung, ob matchDto null ist -> ArgumentNullException
+        if (matchDto is null)
+            throw new ArgumentNullException(nameof(matchDto), "matchDto darf nicht null sein und kann nicht gespeichert werden.");
+        //Prüfung der Inhalte der MatchDto -> ArgumentException
+        if (matchDto.ContentCreator <= 0 || matchDto.ContentReceiver <= 0 ||
+            matchDto.ContentCreator == matchDto.ContentReceiver)
+            throw new ArgumentException("matchDto hat inhaltliche Fehler und kann nicht gespeichert werden.",
+                nameof(matchDto));
+
+        //Prüft, ob Eintrag bereits vorhanden ist
+        var alreadyRated = _dbContext.Ratings
+            .SingleOrDefault(r => 
+                r.Contentreceiverid == matchDto.ContentReceiver &&
+                r.Contentcreatorid == matchDto.ContentCreator);
+
+        //Falls nicht -> Füge Rating zu Datenbank
+        if (alreadyRated is null)
+        {
+            var rating = new Rating
+            {
+                Contentreceiverid = matchDto.ContentReceiver,
+                Contentcreatorid = matchDto.ContentCreator,
+                Profilerating = matchDto.ContentReceiverValue,
+                Ratingdate = matchDto.ContentReceiverRatingDate,
+            };
+            _dbContext.Ratings.Add(rating);
+        }
+        //Falls schon -> Update die Zeile in der Datenbank
+        //Das kann eigentlich nicht passieren, weil nur User zur Bewertung vorgeschlagen werden, die noch nie 
+        //bewertet worden sind. Aber falls man in Zukunft das doch erlaubt -> Update in der Datenbank
+        else
+        {
+            alreadyRated.Profilerating = matchDto.ContentReceiverValue;
+            alreadyRated.Ratingdate = matchDto.ContentReceiverRatingDate;
+        }
+        
+        _dbContext.SaveChanges();
     }
 
     public IEnumerable<PreferenceDto> GetUserPreference(int profileId)

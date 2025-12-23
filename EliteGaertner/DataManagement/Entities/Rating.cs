@@ -5,8 +5,8 @@ namespace DataManagement.Entities;
 
 public partial class Rating
 {
-    public int Contentcreatorid { get; set; }
     public int Contentreceiverid { get; set; }
+    public int Contentcreatorid { get; set; }
     public bool Profilerating { get; set; }
     public DateTime Ratingdate { get; set; }
     public virtual Profile Contentcreator { get; set; } = null!;
