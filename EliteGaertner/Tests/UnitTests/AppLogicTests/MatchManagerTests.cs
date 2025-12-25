@@ -1,9 +1,7 @@
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System.Linq;
+using Contracts.Enumeration;
 
 namespace Tests.UnitTests.AppLogicTests;
 
@@ -124,6 +122,82 @@ public class MatchManagerTests
     }
 
     // --------------------------------------------------
+    // TEST 3
+    // --------------------------------------------------
+    [TestMethod]
+    public void ReportHarvestUpload_ShouldDeleteUpload_WhenReportThresholdReached()
+    {
+        // Arrange
+        var receiver = CreateReceiver(profileId: 1);
+
+        var matchesDbs = new MatchesDbsFake(activeMatchesSequence: new[]
+        {
+            new List<PublicProfileDto>() // ctor
+        });
+
+        var profileDbs = new ProfileDbsFake();
+
+        // Für diesen Test egal, aber ctor braucht mindestens eine Sequenz
+        var harvestDbs = new HarvestDbsFake(new[]
+        {
+            new List<HarvestUploadDto>()
+        })
+        {
+            ReportCountToReturn = 5
+        };
+
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
+
+        // Act
+        sut.ReportHarvestUpload(uploadId: 123, reason: ReportReasons.Spam);
+
+        // Assert
+        Assert.AreEqual(1, harvestDbs.SetReportCalls.Count, "SetReportHarvestUpload muss genau 1x aufgerufen werden.");
+        Assert.AreEqual(123, harvestDbs.SetReportCalls[0].uploadId);
+        Assert.AreEqual(ReportReasons.Spam, harvestDbs.SetReportCalls[0].reason);
+
+        Assert.AreEqual(1, harvestDbs.DeleteCalls.Count, "Bei >= 5 Reports muss das Upload gelöscht werden.");
+        Assert.AreEqual(123, harvestDbs.DeleteCalls[0]);
+    }
+
+    // --------------------------------------------------
+    // TEST 4
+    // --------------------------------------------------
+    [TestMethod]
+    public void ReportHarvestUpload_ShouldNotDeleteUpload_WhenBelowThreshold()
+    {
+        // Arrange
+        var receiver = CreateReceiver(profileId: 1);
+
+        var matchesDbs = new MatchesDbsFake(activeMatchesSequence: new[]
+        {
+            new List<PublicProfileDto>() // ctor
+        });
+
+        var profileDbs = new ProfileDbsFake();
+
+        var harvestDbs = new HarvestDbsFake(new[]
+        {
+            new List<HarvestUploadDto>()
+        })
+        {
+            ReportCountToReturn = 4
+        };
+
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
+
+        // Act
+        sut.ReportHarvestUpload(uploadId: 456, reason: ReportReasons.CatFishing);
+
+        // Assert
+        Assert.AreEqual(1, harvestDbs.SetReportCalls.Count, "SetReportHarvestUpload muss genau 1x aufgerufen werden.");
+        Assert.AreEqual(456, harvestDbs.SetReportCalls[0].uploadId);
+        Assert.AreEqual(ReportReasons.CatFishing, harvestDbs.SetReportCalls[0].reason);
+
+        Assert.AreEqual(0, harvestDbs.DeleteCalls.Count, "Bei < 5 Reports darf NICHT gelöscht werden.");
+    }
+
+    // --------------------------------------------------
     // HELPERS
     // --------------------------------------------------
     private static PrivateProfileDto CreateReceiver(int profileId)
@@ -196,6 +270,11 @@ public class MatchManagerTests
     {
         private readonly Queue<List<HarvestUploadDto>> _queue;
 
+        public int ReportCountToReturn { get; set; } = 0;
+
+        public List<(int uploadId, ReportReasons reason)> SetReportCalls { get; } = new();
+        public List<int> DeleteCalls { get; } = new();
+
         public HarvestDbsFake(IEnumerable<List<HarvestUploadDto>> sequence)
             => _queue = new Queue<List<HarvestUploadDto>>(sequence);
 
@@ -205,10 +284,13 @@ public class MatchManagerTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => Enumerable.Empty<HarvestUploadDto>();
 
+        public void DeleteHarvestUpload(int uploadId) => DeleteCalls.Add(uploadId);
+
+        public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
+            => SetReportCalls.Add((uploadId, reason));
+
+        public int GetReportCount(int uploadId) => ReportCountToReturn;
+
         public void SetHarvestUpload(HarvestUploadDto harvestUpload) { }
-        public void DeleteHarvestUpload(int uploadId) { }
-        public void SetReportHarvestUpload(int uploadId, Enum reason) { }
-        public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
-            => Enumerable.Empty<ReportDto>();
     }
 }

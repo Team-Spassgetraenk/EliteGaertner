@@ -15,6 +15,7 @@ public class MatchManager : IMatchManager
     private readonly int _preloadCount;
     private readonly Dictionary<PublicProfileDto, HarvestUploadDto> _profileSuggestionList;
     private List<PublicProfileDto> _activeMatchesList;
+    private const int ReportThreshold = 5;
     
     public MatchManager(IMatchesDbs matchesDbs, IProfileDbs profileDbs, IHarvestDbs harvestDbs, 
         PrivateProfileDto contentReceiver, int preloadCount)
@@ -128,10 +129,13 @@ public class MatchManager : IMatchManager
     public List<PublicProfileDto> GetActiveMatches()
         => _activeMatchesList;
 
-    //TODO IMPLEMENTIERUNG FEHLT
+    
     public void ReportHarvestUpload(int uploadId, ReportReasons reason)
     {
-        
+        _harvestDbs.SetReportHarvestUpload(uploadId,reason);
+        //Sobald ein Bild 5 Mal reported worden ist, wird es gelöscht
+        if (_harvestDbs.GetReportCount(uploadId) >= ReportThreshold) 
+            _harvestDbs.DeleteHarvestUpload(uploadId);
     }
     
     public MatchManagerDto GetMatchManager()

@@ -1,6 +1,6 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 using DataManagement.Interfaces;
 
 namespace Tests.UnitTests.AppLogicTests;
@@ -40,11 +40,11 @@ public class HarvestSuggestionTests
         public void DeleteHarvestUpload(int uploadId)
             => throw new NotImplementedException();
 
-        public void SetReportHarvestUpload(int uploadId, Enum reason)
+        public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
             => throw new NotImplementedException();
 
-        public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
-            => throw new NotImplementedException();
+        public int GetReportCount(int uploadId)
+            => 0;
     }
 
     [TestMethod]

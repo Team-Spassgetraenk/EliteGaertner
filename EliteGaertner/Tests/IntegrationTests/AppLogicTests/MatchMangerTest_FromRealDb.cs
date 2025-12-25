@@ -1,8 +1,8 @@
-using System.Diagnostics;
-using System.Linq;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 using DataManagement;
+using DataManagement.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Tests.IntegrationTests.AppLogicTests;
@@ -98,4 +98,95 @@ public class MatchManagerTest_FromRealDb
         TestContext.WriteLine($"ActiveMatches db:      {string.Join(", ", dbIds)}");
     }
 
+    [TestMethod]
+    public void ReportHarvestUpload_ShouldIncreaseReportCount_AndNotDeleteBeforeThreshold()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<EliteGaertnerDbContext>()
+            .UseNpgsql(ConnectionString)
+            .Options;
+
+        using var db = new EliteGaertnerDbContext(options);
+        var repo = new ManagementDbs(db);
+
+        var receiver = new PrivateProfileDto
+        {
+            ProfileId = 1,
+            PreferenceDtos = new List<PreferenceDto>
+            {
+                new PreferenceDto { TagId = 3,  Profileid = 1 },
+            }
+        };
+
+        var manager = new MatchManager(repo, repo, repo, receiver, preloadCount: 10);
+
+        var uploadId = CreateTestUpload(db, profileId: 1);
+
+        // Act (4 reports < threshold)
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+
+        // Assert
+        Assert.IsTrue(db.Harvestuploads.AsNoTracking().Any(h => h.Uploadid == uploadId),
+            "Der Upload darf vor Erreichen des Report-Thresholds nicht gelöscht werden.");
+
+        var count = repo.GetReportCount(uploadId);
+        Assert.AreEqual(4, count, "Es müssen genau 4 Reports gezählt werden.");
+    }
+
+    [TestMethod]
+    public void ReportHarvestUpload_ShouldDeleteUpload_WhenThresholdReached()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<EliteGaertnerDbContext>()
+            .UseNpgsql(ConnectionString)
+            .Options;
+
+        using var db = new EliteGaertnerDbContext(options);
+        var repo = new ManagementDbs(db);
+
+        var receiver = new PrivateProfileDto
+        {
+            ProfileId = 1,
+            PreferenceDtos = new List<PreferenceDto>
+            {
+                new PreferenceDto { TagId = 3,  Profileid = 1 },
+            }
+        };
+
+        var manager = new MatchManager(repo, repo, repo, receiver, preloadCount: 10);
+
+        var uploadId = CreateTestUpload(db, profileId: 1);
+
+        // Act (5 reports == threshold)
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+        manager.ReportHarvestUpload(uploadId, ReportReasons.Spam);
+
+        // Assert
+        Assert.IsFalse(db.Harvestuploads.AsNoTracking().Any(h => h.Uploadid == uploadId),
+            "Der Upload muss gelöscht werden, sobald der Report-Threshold erreicht ist.");
+    }
+
+    private static int CreateTestUpload(EliteGaertnerDbContext db, int profileId)
+    {
+        var upload = new Harvestupload
+        {
+            Imageurl = "https://example.com/uploads/test_report.jpg",
+            Description = "IntegrationTest Upload for ReportHarvestUpload",
+            Weightgramm = 123,
+            Widthcm = 4,
+            Lengthcm = 5,
+            Uploaddate = DateTime.UtcNow,
+            Profileid = profileId
+        };
+
+        db.Harvestuploads.Add(upload);
+        db.SaveChanges();
+        return upload.Uploadid;
+    }
 }

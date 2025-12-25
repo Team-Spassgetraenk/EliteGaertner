@@ -2,7 +2,6 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using Contracts.Enumeration;
 using DataManagement.Interfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.UnitTests.AppLogicTests;
 

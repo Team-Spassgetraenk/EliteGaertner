@@ -2,8 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
+using Contracts.Enumeration;
 
 namespace Tests.UnitTests.AppLogicTests;
 
@@ -73,9 +72,8 @@ public class ProfileSuggestionTests
 
         public void SetHarvestUpload(HarvestUploadDto harvestUpload) { }
         public void DeleteHarvestUpload(int uploadId) { }
-        public void SetReportHarvestUpload(int uploadId, Enum reason) { }
-        public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
-            => Enumerable.Empty<ReportDto>();
+        public void SetReportHarvestUpload(int uploadId, ReportReasons reason) { }
+        public int GetReportCount(int uploadId) => 0;
     }
 
     private sealed class MatchesDbsFake : IMatchesDbs

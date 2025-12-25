@@ -768,7 +768,7 @@ WHERE p1.UserName = 'gurkenguru'
 -- =============================
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Sieht aus wie ein Stockfoto.' AS Reason, (:'seed_now')::timestamptz - interval '20 hours' AS ReportDate,
+SELECT 'Spam' AS Reason, (:'seed_now')::timestamptz - interval '20 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -776,7 +776,7 @@ WHERE p.UserName = 'tomatentiger'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Beschreibung passt nicht zum Bild.' AS Reason, (:'seed_now')::timestamptz - interval '18 hours' AS ReportDate,
+SELECT 'CatFishing' AS Reason, (:'seed_now')::timestamptz - interval '18 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -784,7 +784,7 @@ WHERE p.UserName = 'tomatentiger'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Verdacht auf Fake-Upload.' AS Reason, (:'seed_now')::timestamptz - interval '16 hours' AS ReportDate,
+SELECT 'CatFishing' AS Reason, (:'seed_now')::timestamptz - interval '16 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -792,7 +792,7 @@ WHERE p.UserName = 'tomatentiger'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Mehrfach hochgeladenes Bild.' AS Reason, (:'seed_now')::timestamptz - interval '15 hours' AS ReportDate,
+SELECT 'Spam' AS Reason, (:'seed_now')::timestamptz - interval '15 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -800,7 +800,7 @@ WHERE p.UserName = 'tomatentiger'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Zu dunkel aufgenommen, schwer erkennbar.' AS Reason, (:'seed_now')::timestamptz - interval '12 hours' AS ReportDate,
+SELECT 'AbstossendeInhalte' AS Reason, (:'seed_now')::timestamptz - interval '12 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -808,7 +808,7 @@ WHERE p.UserName = 'kürbiskönig'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Kategorie wirkt unpassend für das Bild.' AS Reason, (:'seed_now')::timestamptz - interval '10 hours' AS ReportDate,
+SELECT 'Spam' AS Reason, (:'seed_now')::timestamptz - interval '10 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -816,7 +816,7 @@ WHERE p.UserName = 'melonenmaster'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Text enthält unpassende Formulierungen.' AS Reason, (:'seed_now')::timestamptz - interval '8 hours' AS ReportDate,
+SELECT 'AbstossendeInhalte' AS Reason, (:'seed_now')::timestamptz - interval '8 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -824,7 +824,7 @@ WHERE p.UserName = 'paprikapiratin'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Bildqualität ist zu niedrig.' AS Reason, (:'seed_now')::timestamptz - interval '6 hours' AS ReportDate,
+SELECT 'Spam' AS Reason, (:'seed_now')::timestamptz - interval '6 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -832,7 +832,7 @@ WHERE p.UserName = 'kartoffelknight'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Vermutlich nicht selbst angebaut.' AS Reason, (:'seed_now')::timestamptz - interval '4 hours' AS ReportDate,
+SELECT 'CatFishing' AS Reason, (:'seed_now')::timestamptz - interval '4 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId
@@ -840,7 +840,7 @@ WHERE p.UserName = 'traubentaktiker'
     LIMIT 1;
 
 INSERT INTO REPORT (Reason, ReportDate, UploadId)
-SELECT 'Kein Obst, gehört eher in Gemüse-Kategorie.' AS Reason, (:'seed_now')::timestamptz - interval '2 hours' AS ReportDate,
+SELECT 'Spam' AS Reason, (:'seed_now')::timestamptz - interval '2 hours' AS ReportDate,
        h.UploadId
 FROM HARVESTUPLOADS h
     JOIN PROFILE p ON p.ProfileId = h.ProfileId

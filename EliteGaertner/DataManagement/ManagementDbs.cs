@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace DataManagement;
 
+//TODO Reads Prüfungen -> Null zurückgeben, Write Prüfungen -> Exceptions implementieren
+//TODO Prüfungen vielleicht in einer Methode zusammenführen
 public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileDbs
 {
     private readonly EliteGaertnerDbContext _dbContext;
@@ -42,23 +44,73 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
+    //TODO LÖSCHUNG funktioniert noch nicht, da ich noch nicht die Abhängigkeiten mitlösche
     public void DeleteHarvestUpload(int uploadId)
     {
-        throw new NotImplementedException();
-    }
+        if (uploadId <= 0)
+            throw new ArgumentOutOfRangeException(nameof (uploadId), "UploadId muss größer als 0 sein.");
+        
+        //Existiert überhaupt Upload?
+        var uploadIdExists = _dbContext.Harvestuploads
+            .AsNoTracking()
+            .Any(h => h.Uploadid == uploadId);
 
-    //TODO ALEKS
-    public void SetReportHarvestUpload(int uploadId, Enum reason)
+        if (!uploadIdExists)
+            throw new ArgumentException("Kein HarvestUpload mit dieser UploadId auffindbar!", nameof(uploadId));
+
+        //Finde das gesuchte Bild
+        var deleteUpload = _dbContext.Harvestuploads
+            .Single(h => h.Uploadid == uploadId);
+
+        //Lösche es
+        _dbContext.Remove(deleteUpload);
+        _dbContext.SaveChanges();
+    }
+    
+    public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
     {
-        throw new NotImplementedException();
-    }
+        if (uploadId <= 0)
+            throw new ArgumentOutOfRangeException(nameof (uploadId), "UploadId muss größer als 0 sein.");
+        
+        //Existiert überhaupt Upload?
+        var uploadIdExists = _dbContext.Harvestuploads
+            .AsNoTracking()
+            .Any(h => h.Uploadid == uploadId);
 
-    //TODO ALEKS
-    public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
+        if (!uploadIdExists)
+            throw new ArgumentException("Kein HarvestUpload mit dieser UploadId auffindbar!", nameof(uploadId));
+
+        var report = new Report
+        {
+            Reason = reason.ToString(),
+            Reportdate = DateTime.UtcNow,
+            Uploadid = uploadId,
+        };
+
+        _dbContext.Reports.Add(report);
+        _dbContext.SaveChanges();
+    }
+    
+    public int GetReportCount(int uploadId)
     {
-        throw new NotImplementedException();
-    }
+        //Falls ungültige ID -> 0 zurück
+        if (uploadId <= 0)
+            return 0;
+        
+        //Existiert überhaupt Upload?
+        var uploadIdExists = _dbContext.Harvestuploads
+            .AsNoTracking()
+            .Any(h => h.Uploadid == uploadId);
 
+        //Falls ungültige ID -> 0 zurück
+        if (!uploadIdExists)
+            return 0;
+
+        //Gib die Anzahl der Reports zurück
+        return _dbContext.Reports
+            .AsNoTracking()
+            .Count(r => r.Uploadid == uploadId);
+    }
     
     //TODO Ich muss den Output randomisieren, sonst findet der irgendwann nicht mehr die richtigen Bilder
     public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
