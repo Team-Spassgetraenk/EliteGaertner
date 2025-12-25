@@ -31,8 +31,15 @@ public class LeaderboardServiceTest_FromRealDb
         using var db = new EliteGaertnerDbContext(options);
         var dbs = new LeaderboardDbs(db);
 
+        // "Eingeloggter" User für PersonalEntry: beerenboss (hat im Seed 2 Likes)
+        var myProfileId = db.Profiles
+            .AsNoTracking()
+            .Single(p => p.Username == "beerenboss")
+            .Profileid;
+
         var sut = new LeaderboardService(
             leaderboardTitle: "Most Likes",
+            profileId: myProfileId,
             tagId: null,
             goal: LeaderboardSearchGoal.MostLikes,
             leaderBoardDbs: dbs);
@@ -40,13 +47,14 @@ public class LeaderboardServiceTest_FromRealDb
         // Act
         var dto = sut.GetLeaderBoardDto();
         var entries = dto.Entries;
+        var personal = dto.PersonalEntry;
 
         // Assert (Seed-basiert)
         Assert.AreEqual(LeaderboardSearchGoal.MostLikes, dto.Goal);
         Assert.IsNull(dto.TagId);
 
         // beerenboss hat 2 Likes; mit 1 Like (alphabetisch): apfelalchemist, gurkenguru, melonenmaster, tomatentiger, zucchinizauberer
-        Assert.AreEqual(6, entries.Count, "Im Seed gibt es genau 6 Creator mit positiven Likes.");
+        Assert.AreEqual(5, entries.Count, "Im Seed gibt es 6 Creator mit positiven Likes, aber das Leaderboard liefert Top 5.");
 
         Assert.AreEqual(1, entries[0].Rank);
         Assert.AreEqual("beerenboss", entries[0].UserName);
@@ -68,9 +76,11 @@ public class LeaderboardServiceTest_FromRealDb
         Assert.AreEqual("tomatentiger", entries[4].UserName);
         Assert.AreEqual(1f, entries[4].Value);
 
-        Assert.AreEqual(6, entries[5].Rank);
-        Assert.AreEqual("zucchinizauberer", entries[5].UserName);
-        Assert.AreEqual(1f, entries[5].Value);
+        // PersonalEntry (eingeloggter User)
+        Assert.IsNotNull(personal);
+        Assert.AreEqual(1, personal!.Rank);
+        Assert.AreEqual("beerenboss", personal.UserName);
+        Assert.AreEqual(2f, personal.Value);
     }
 
     [TestMethod]
@@ -82,6 +92,11 @@ public class LeaderboardServiceTest_FromRealDb
             .Options;
 
         using var db = new EliteGaertnerDbContext(options);
+
+        var myProfileId = db.Profiles
+            .AsNoTracking()
+            .Single(p => p.Username == "beerenboss")
+            .Profileid;
 
         // TagId nicht hart coden: kann je nach bestehender DB / Sequence variieren
         var tagIdTrauben = db.Tags
@@ -95,6 +110,7 @@ public class LeaderboardServiceTest_FromRealDb
 
         var sut = new LeaderboardService(
             leaderboardTitle: "Heaviest Trauben",
+            profileId: myProfileId,
             tagId: tagIdTrauben,
             goal: goal,
             leaderBoardDbs: dbs);
@@ -102,6 +118,7 @@ public class LeaderboardServiceTest_FromRealDb
         // Act
         var dto = sut.GetLeaderBoardDto();
         var entries = dto.Entries;
+        var personal = dto.PersonalEntry;
 
         // Assert (Seed-basiert)
         Assert.AreEqual(goal, dto.Goal);
@@ -117,5 +134,11 @@ public class LeaderboardServiceTest_FromRealDb
         Assert.AreEqual(2, entries[1].Rank);
         Assert.AreEqual("beerenboss", entries[1].UserName);
         Assert.AreEqual(200f, entries[1].Value);
+
+        // PersonalEntry: beerenboss hat bei Trauben max 200g und ist Rang 2
+        Assert.IsNotNull(personal);
+        Assert.AreEqual(2, personal!.Rank);
+        Assert.AreEqual("beerenboss", personal.UserName);
+        Assert.AreEqual(200f, personal.Value);
     }
 }

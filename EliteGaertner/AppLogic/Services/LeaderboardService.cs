@@ -10,17 +10,21 @@ public class LeaderboardService : ILeaderBoardService
 {
     private readonly ILeaderBoardDbs _leaderBoardDbs;
     private readonly string _leaderboardTitle;
+    private readonly int _profileId;
     private readonly int? _tagId;
     private readonly LeaderboardSearchGoal _goal;
+    private readonly LeaderboardEntryDto? _personalEntry;
     private readonly IReadOnlyList<LeaderboardEntryDto> _entries;
     
-    public LeaderboardService(string leaderboardTitle, int? tagId, LeaderboardSearchGoal goal, ILeaderBoardDbs leaderBoardDbs)
+    public LeaderboardService(string leaderboardTitle, int profileId, int? tagId, LeaderboardSearchGoal goal, ILeaderBoardDbs leaderBoardDbs)
     {
         _leaderBoardDbs = leaderBoardDbs;
         _leaderboardTitle = leaderboardTitle;
+        _profileId = profileId;
         _tagId = tagId;
         _goal = goal;
-        _entries = _leaderBoardDbs.GetLeaderBoardEntries(_tagId, _goal).ToList();
+        _personalEntry = _leaderBoardDbs.GetPersonalLeaderBoardEntry(_profileId, _tagId, _goal);
+        _entries = _leaderBoardDbs.GetLeaderBoardEntries(_profileId, _tagId, _goal).ToList();
     }
 
     public LeaderboardDto GetLeaderBoardDto()
@@ -29,6 +33,7 @@ public class LeaderboardService : ILeaderBoardService
             LeaderboardTitle = _leaderboardTitle,
             TagId = _tagId,
             Goal = _goal,
+            PersonalEntry = _personalEntry,
             Entries = _entries
         };
 }
