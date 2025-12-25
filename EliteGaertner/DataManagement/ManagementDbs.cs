@@ -1,5 +1,7 @@
+using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 using DataManagement.Entities;
 using DataManagement.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -45,11 +47,13 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         throw new NotImplementedException();
     }
 
+    //TODO ALEKS
     public void SetReportHarvestUpload(int uploadId, Enum reason)
     {
         throw new NotImplementedException();
     }
 
+    //TODO ALEKS
     public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
     {
         throw new NotImplementedException();
@@ -180,9 +184,7 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
                 r.Contentreceiverid == profileIdReceiver &&
                 r.Contentcreatorid == profileIdCreator); 
     }
-
-
-    //TODO ALEKS -> Kommentare fehlen noch
+    
     public void SaveMatchInfo(RateDto matchDto)
     {
         //Prüfung, ob matchDto null ist -> ArgumentNullException
@@ -259,7 +261,6 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         if (privateProfile is null || credentials is null)
             return new PrivateProfileDto();
         
-        //TODO Seed Username -> lowercase machen
         //UserName und Email normalisieren. Uppercase -> Lowercase
         var userName = privateProfile.UserName?.Trim().ToLowerInvariant();
         var eMail = credentials.EMail?.Trim().ToLowerInvariant();
@@ -332,6 +333,11 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         throw new NotImplementedException();
     }
 
+    public int? CheckPassword(string eMail, string passwordHash)
+    {
+        throw new NotImplementedException();
+    }
+    
     public Profile? GetProfile(int profileId)
     {
         //Falls die profileId <= 0 ist, return ein leeres ProfileDto
@@ -347,7 +353,7 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
 
         return p;
     }
-
+    
     public PublicProfileDto GetPublicProfile(int profileId)
     {
         //Entität Profil wird zurückgegeben
@@ -361,24 +367,15 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         var result = new PublicProfileDto()
         {
             ProfileId = p.Profileid,
+            ProfilepictureUrl = p.Profilepictureurl,
             UserName = p.Username,
-            EMail = p.Email,
-            Phonenumber = p.Phonenumber,
             Profiletext = p.Profiletext,
-            ShareMail = p.Sharemail,
-            SharePhoneNumber = p.Sharephonenumber,
             UserCreated = p.Usercreated,
             //Hol dir die HarvestUploads des Profils
             HarvestUploads = GetProfileHarvestUploads(profileId).ToList(),
-            //Hol dir die UserPreference des Profils
         };
         
         return result;
-    }
-
-    public int? CheckPassword(string eMail, string passwordHash)
-    {
-        throw new NotImplementedException();
     }
 
     public PrivateProfileDto GetPrivateProfile(int profileId)

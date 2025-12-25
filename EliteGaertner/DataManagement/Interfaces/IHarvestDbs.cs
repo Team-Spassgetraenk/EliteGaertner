@@ -20,9 +20,9 @@ public interface IHarvestDbs
     //TODO Nicolas
     public void DeleteHarvestUpload(int uploadId);
     
-    //BESCHREIBUNG FEHLT!!!!!
+    //TODO
     public void SetReportHarvestUpload(int uploadId, Enum reason);
 
-    //Beschreibung fehlt
+    //TODO
     public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId);
 }

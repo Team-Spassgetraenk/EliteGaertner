@@ -1,5 +1,6 @@
 using AppLogic.Interfaces;
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 using DataManagement.Interfaces;
 
 namespace AppLogic.Services;
@@ -126,4 +127,20 @@ public class MatchManager : IMatchManager
 
     public List<PublicProfileDto> GetActiveMatches()
         => _activeMatchesList;
+
+    //TODO IMPLEMENTIERUNG FEHLT
+    public void ReportHarvestUpload(int uploadId, ReportReasons reason)
+    {
+        
+    }
+    
+    public MatchManagerDto GetMatchManager()
+        => new MatchManagerDto
+        {
+            ProfileId = _profileId,
+            TagIds = _tagIds,
+            PreloadCount = _preloadCount,
+            ProfileSuggestionList = _profileSuggestionList,
+            ActiveMatchesList = _activeMatchesList
+        };
 }

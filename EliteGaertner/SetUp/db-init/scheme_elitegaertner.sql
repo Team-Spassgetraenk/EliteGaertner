@@ -1,6 +1,6 @@
 CREATE TABLE PROFILE (
     ProfileId SERIAL PRIMARY KEY,
-    ProfilePictureUrl TEXT,
+    ProfilePictureUrl TEXT NOT NULL ,
     UserName TEXT NOT NULL,
     FirstName TEXT NOT NULL,
     LastName TEXT NOT NULL,
