@@ -199,7 +199,7 @@ public class LeaderboardDbs : ILeaderBoardDbs
             .Select(g => new
             {
                 ProfileId = g.Key,
-                Likes = (int?)g.Count()   // 👈 WICHTIG: nullable!
+                Likes = (int?)g.Count() 
             });
         
         //Alle Profile + Like Anzahl (0 wenn keine Likes vorhanden)

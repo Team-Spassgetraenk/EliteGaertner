@@ -233,21 +233,21 @@ WHERE p.UserName = 'maismagier'
 -- 1 TomatenTiger: 3 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/tomate1.jpg',
+SELECT 'https://example.com/uploads/uploadid01_profileid01.jpg',
        'Rote Tomaten aus dem Gewächshaus.',
        180, 7, 7, (:'seed_now')::timestamptz - interval '9 days' + interval '08 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'tomatentiger';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/tomate2.jpg',
+SELECT 'https://example.com/uploads/uploadid02_profileid01.jpg',
        'Fleischtomate, perfekt für Soßen.',
        250, 9, 8, (:'seed_now')::timestamptz - interval '8 days' + interval '14 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'tomatentiger';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/tomate3.jpg',
+SELECT 'https://example.com/uploads/uploadid03_profileid01.jpg',
        'Gelbe Tomaten, mild im Geschmack.',
        160, 6, 6, (:'seed_now')::timestamptz - interval '7 days' + interval '18 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'tomatentiger';
@@ -255,14 +255,14 @@ FROM PROFILE p WHERE p.UserName = 'tomatentiger';
 -- 2 ZucchiniZauberer: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/zucchini1.jpg',
+SELECT 'https://example.com/uploads/uploadid04_profileid02.jpg',
        'Lange Zucchini, direkt vom Hochbeet.',
        320, 25, 5, (:'seed_now')::timestamptz - interval '8 days' + interval '09 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'zucchinizauberer';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/zucchini2.jpg',
+SELECT 'https://example.com/uploads/uploadid05_profileid02.jpg',
        'Runde Zucchini für gefüllte Gerichte.',
        400, 15, 15, (:'seed_now')::timestamptz - interval '6 days' + interval '16 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'zucchinizauberer';
@@ -270,14 +270,14 @@ FROM PROFILE p WHERE p.UserName = 'zucchinizauberer';
 -- 3 GurkenGuru: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/gurke1.jpg',
+SELECT 'https://example.com/uploads/uploadid06_profileid03.jpg',
        'Gurke, super knackig.',
        300, 25, 4, (:'seed_now')::timestamptz - interval '7 days' + interval '10 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'gurkenguru';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/gurke2.jpg',
+SELECT 'https://example.com/uploads/uploadid07_profileid03.jpg',
        'Einlegegurken für den Winter.',
        200, 15, 4, (:'seed_now')::timestamptz - interval '5 days' + interval '13 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'gurkenguru';
@@ -285,21 +285,21 @@ FROM PROFILE p WHERE p.UserName = 'gurkenguru';
 -- 4 BeerenBoss: 3 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/erdbeeren1.jpg',
+SELECT 'https://example.com/uploads/uploadid08_profileid04.jpg',
        'Süße Erdbeeren vom Feld.',
        120, 10, 10, (:'seed_now')::timestamptz - interval '6 days' + interval '08 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'beerenboss';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/kirschen1.jpg',
+SELECT 'https://example.com/uploads/uploadid09_profileid04.jpg',
        'Dunkelrote Kirschen, sehr aromatisch.',
        150, 8, 8, (:'seed_now')::timestamptz - interval '4 days' + interval '12 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'beerenboss';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/trauben1.jpg',
+SELECT 'https://example.com/uploads/uploadid10_profileid04.jpg',
        'Kleine, sehr süße Trauben.',
        200, 12, 12, (:'seed_now')::timestamptz - interval '3 days' + interval '19 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'beerenboss';
@@ -307,14 +307,14 @@ FROM PROFILE p WHERE p.UserName = 'beerenboss';
 -- 5 KürbisKönig: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/kuerbis1.jpg',
+SELECT 'https://example.com/uploads/uploadid11_profileid05.jpg',
        'Hokkaido-Kürbis für Suppe.',
        1000, 25, 25, (:'seed_now')::timestamptz - interval '10 days' + interval '17 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'kürbiskönig';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/kuerbis2.jpg',
+SELECT 'https://example.com/uploads/uploadid12_profileid05.jpg',
        'Zierkürbis für die Deko.',
        500, 15, 15, (:'seed_now')::timestamptz - interval '2 days' + interval '09 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'kürbiskönig';
@@ -322,14 +322,14 @@ FROM PROFILE p WHERE p.UserName = 'kürbiskönig';
 -- 6 PaprikaPiratin: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/paprika1.jpg',
+SELECT 'https://example.com/uploads/uploadid13_profileid06.jpg',
        'Rote Paprika, sehr aromatisch.',
        180, 7, 7, (:'seed_now')::timestamptz - interval '5 days' + interval '18 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'paprikapiratin';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/paprika2.jpg',
+SELECT 'https://example.com/uploads/uploadid14_profileid06.jpg',
        'Gelbe Spitzpaprika, süß und mild.',
        160, 6, 8, (:'seed_now')::timestamptz - interval '2 days' + interval '16 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'paprikapiratin';
@@ -337,21 +337,21 @@ FROM PROFILE p WHERE p.UserName = 'paprikapiratin';
 -- 7 MelonenMaster: 3 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/melone1.jpg',
+SELECT 'https://example.com/uploads/uploadid15_profileid07.jpg',
        'Wassermelone, perfekt gekühlt.',
        3500, 30, 30, (:'seed_now')::timestamptz - interval '11 days' + interval '11 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'melonenmaster';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/melone2.jpg',
+SELECT 'https://example.com/uploads/uploadid16_profileid07.jpg',
        'Honigmelone mit intensivem Aroma.',
        2000, 20, 20, (:'seed_now')::timestamptz - interval '9 days' + interval '15 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'melonenmaster';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/melone3.jpg',
+SELECT 'https://example.com/uploads/uploadid17_profileid07.jpg',
        'Zuckermelone mit feiner Schale.',
        1800, 18, 18, (:'seed_now')::timestamptz - interval '1 days' + interval '20 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'melonenmaster';
@@ -359,14 +359,14 @@ FROM PROFILE p WHERE p.UserName = 'melonenmaster';
 -- 8 KartoffelKnight: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/kartoffel1.jpg',
+SELECT 'https://example.com/uploads/uploadid18_profileid08.jpg',
        'Festkochende Kartoffeln.',
        2500, 25, 25, (:'seed_now')::timestamptz - interval '12 days' + interval '07 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'kartoffelknight';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/kartoffel2.jpg',
+SELECT 'https://example.com/uploads/uploadid19_profileid08.jpg',
        'Mehligkochende Kartoffeln für Püree.',
        2600, 25, 25, (:'seed_now')::timestamptz - interval '6 days' + interval '20 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'kartoffelknight';
@@ -374,14 +374,14 @@ FROM PROFILE p WHERE p.UserName = 'kartoffelknight';
 -- 9 KarottenKönigin: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/karotten1.jpg',
+SELECT 'https://example.com/uploads/uploadid20_profileid09.jpg',
        'Bunte Karotten im Bund.',
        800, 10, 25, (:'seed_now')::timestamptz - interval '8 days' + interval '19 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'karottenkönigin';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/karotten2.jpg',
+SELECT 'https://example.com/uploads/uploadid21_profileid09.jpg',
        'Mini-Karotten als Snack.',
        500, 8, 20, (:'seed_now')::timestamptz - interval '3 days' + interval '10 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'karottenkönigin';
@@ -389,7 +389,7 @@ FROM PROFILE p WHERE p.UserName = 'karottenkönigin';
 -- 10 SalatSamurai: 1 Upload
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/salat1.jpg',
+SELECT 'https://example.com/uploads/uploadid22_profileid10.jpg',
        'Knackiger Blattsalat-Mix.',
        400, 20, 20, (:'seed_now')::timestamptz - interval '4 days' + interval '08 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'salatsamurai';
@@ -397,14 +397,14 @@ FROM PROFILE p WHERE p.UserName = 'salatsamurai';
 -- 11 ZwiebelZauberin: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/zwiebel1.jpg',
+SELECT 'https://example.com/uploads/uploadid23_profileid11.jpg',
        'Rote Zwiebeln mit milder Schärfe.',
        700, 15, 15, (:'seed_now')::timestamptz - interval '7 days' + interval '21 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'zwiebelzauberin';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/zwiebel2.jpg',
+SELECT 'https://example.com/uploads/uploadid24_profileid11.jpg',
        'Weiße Küchenzwiebeln für alles.',
        900, 18, 18, (:'seed_now')::timestamptz - interval '2 days' + interval '07 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'zwiebelzauberin';
@@ -412,14 +412,14 @@ FROM PROFILE p WHERE p.UserName = 'zwiebelzauberin';
 -- 12 TraubenTaktiker: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/trauben2.jpg',
+SELECT 'https://example.com/uploads/uploadid25_profileid12.jpg',
        'Grüne Tafeltrauben.',
        600, 15, 15, (:'seed_now')::timestamptz - interval '5 days' + interval '09 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'traubentaktiker';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/trauben3.jpg',
+SELECT 'https://example.com/uploads/uploadid26_profileid12.jpg',
        'Blaue Trauben mit Kernen.',
        650, 15, 15, (:'seed_now')::timestamptz - interval '1 days' + interval '09 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'traubentaktiker';
@@ -427,14 +427,14 @@ FROM PROFILE p WHERE p.UserName = 'traubentaktiker';
 -- 13 ApfelAlchemist: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/aepfel1.jpg',
+SELECT 'https://example.com/uploads/uploadid27_profileid13.jpg',
        'Roter Apfel, sehr knackig.',
        1500, 20, 20, (:'seed_now')::timestamptz - interval '6 days' + interval '10 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'apfelalchemist';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/aepfel2.jpg',
+SELECT 'https://example.com/uploads/uploadid28_profileid13.jpg',
        'Gemischte Apfelsorten aus eigener Zucht.',
        2000, 22, 22, (:'seed_now')::timestamptz - interval '2 days' + interval '20 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'apfelalchemist';
@@ -442,7 +442,7 @@ FROM PROFILE p WHERE p.UserName = 'apfelalchemist';
 -- 14 BirnenBarde: 1 Upload
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/birnen1.jpg',
+SELECT 'https://example.com/uploads/uploadid29_profileid14.jpg',
        'Saftige Birnen, direkt vom Baum.',
        1300, 18, 18, (:'seed_now')::timestamptz - interval '3 days' + interval '08 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'birnenbarde';
@@ -450,14 +450,14 @@ FROM PROFILE p WHERE p.UserName = 'birnenbarde';
 -- 15 PfirsichPilot: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/pfirsiche1.jpg',
+SELECT 'https://example.com/uploads/uploadid30_profileid15.jpg',
        'Reife Pfirsiche mit viel Duft.',
        1400, 18, 18, (:'seed_now')::timestamptz - interval '9 days' + interval '12 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'pfirsichpilot';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/pfirsiche2.jpg',
+SELECT 'https://example.com/uploads/uploadid31_profileid15.jpg',
        'Flache Weinbergpfirsiche.',
        1200, 17, 17, (:'seed_now')::timestamptz - interval '2 days' + interval '12 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'pfirsichpilot';
@@ -465,21 +465,21 @@ FROM PROFILE p WHERE p.UserName = 'pfirsichpilot';
 -- 16 BohnenBaron: 3 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/bohnen1.jpg',
+SELECT 'https://example.com/uploads/uploadid32_profileid16.jpg',
        'Buschbohnen im Hochbeet.',
        900, 20, 20, (:'seed_now')::timestamptz - interval '10 days' + interval '08 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'bohnenbaron';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/bohnen2.jpg',
+SELECT 'https://example.com/uploads/uploadid33_profileid16.jpg',
        'Stangenbohnen entlang eines Rankgitters.',
        1100, 25, 25, (:'seed_now')::timestamptz - interval '6 days' + interval '11 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'bohnenbaron';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/bohnen3.jpg',
+SELECT 'https://example.com/uploads/uploadid34_profileid16.jpg',
        'Bunte Bohnenmischung für Eintöpfe.',
        800, 18, 18, (:'seed_now')::timestamptz - interval '1 days' + interval '18 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'bohnenbaron';
@@ -487,14 +487,14 @@ FROM PROFILE p WHERE p.UserName = 'bohnenbaron';
 -- 17 SpinatSpion: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/spinat1.jpg',
+SELECT 'https://example.com/uploads/uploadid35_profileid17.jpg',
        'Junger Spinat.',
        500, 18, 18, (:'seed_now')::timestamptz - interval '5 days' + interval '21 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'spinatspion';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/spinat2.jpg',
+SELECT 'https://example.com/uploads/uploadid36_profileid17.jpg',
        'Spinatblätter für Pasta-Gerichte.',
        600, 20, 20, (:'seed_now')::timestamptz - interval '1 days' + interval '07 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'spinatspion';
@@ -502,14 +502,14 @@ FROM PROFILE p WHERE p.UserName = 'spinatspion';
 -- 18 RadieschenRocker: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/radieschen1.jpg',
+SELECT 'https://example.com/uploads/uploadid37_profileid18.jpg',
        'Frische Radieschen mit kräftiger Schärfe.',
        300, 15, 15, (:'seed_now')::timestamptz - interval '4 days' + interval '19 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'radieschenrocker';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/radieschen2.jpg',
+SELECT 'https://example.com/uploads/uploadid38_profileid18.jpg',
        'Bunte Radieschenmischung als Dekoration.',
        350, 15, 15, (:'seed_now')::timestamptz - interval '2 days' + interval '10 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'radieschenrocker';
@@ -517,14 +517,14 @@ FROM PROFILE p WHERE p.UserName = 'radieschenrocker';
 -- 19 BrokkoliBoss: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/brokkoli1.jpg',
+SELECT 'https://example.com/uploads/uploadid39_profileid19.jpg',
        'Kräftiger Brokkoli für den Dampfgarer.',
        900, 20, 20, (:'seed_now')::timestamptz - interval '3 days' + interval '22 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'brokkoliboss';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/brokkoli2.jpg',
+SELECT 'https://example.com/uploads/uploadid40_profileid19.jpg',
        'Brokkoliröschen für Wok-Gerichte.',
        850, 18, 18, (:'seed_now')::timestamptz - interval '1 days' + interval '12 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'brokkoliboss';
@@ -532,21 +532,21 @@ FROM PROFILE p WHERE p.UserName = 'brokkoliboss';
 -- 20 MaisMagier: 3 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/mais1.jpg',
+SELECT 'https://example.com/uploads/uploadid41_profileid20.jpg',
        'Maiskolben frisch vom Feld.',
        1200, 25, 25, (:'seed_now')::timestamptz - interval '7 days' + interval '08 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'maismagier';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/mais2.jpg',
+SELECT 'https://example.com/uploads/uploadid42_profileid20.jpg',
        'Maiskolben auf dem Grill.',
        1300, 25, 25, (:'seed_now')::timestamptz - interval '3 days' + interval '16 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'maismagier';
 
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
-SELECT 'https://example.com/uploads/mais3.jpg',
+SELECT 'https://example.com/uploads/uploadid43_profileid20.jpg',
        'Maiskörner für Bowls.',
        700, 18, 18, (:'seed_now')::timestamptz + interval '09 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'maismagier';
