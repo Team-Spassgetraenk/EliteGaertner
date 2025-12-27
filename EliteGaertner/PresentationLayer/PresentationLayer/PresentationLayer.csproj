@@ -17,7 +17,6 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
-      <Content Remove="Components\Pages\Register\RegisterTest.razor" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,0 +1,140 @@
+@page "/ueber-uns"
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="about-page-container">
+    @* --- TOP BAR --- *@
+    <header class="comic-top-bar">
+        <div class="back-button" @onclick='() => Nav.NavigateTo("/startseite", forceLoad: true)'>
+            <i class="bi bi-chevron-left"></i>
+            <span>Zurück</span>
+        </div>
+        <h1 class="page-title">Unsere Wurzeln</h1>
+        <div class="menu-placeholder">☰</div>
+    </header>
+
+    <main class="main-content">
+        <div class="content-wrapper-card">
+            
+            <div class="comic-grid">
+                @* --- Linke Spalte: Video & Sponsoren (Unverändert) --- *@
+                <div class="video-section">
+                    @* Video Karte *@
+                    <div class="comic-video-card">
+                        <video controls class="harvest-video">
+                            <source src="videos/WerbevideoEliteGärtner.mp4" type="video/mp4">
+                        </video>
+                        <div class="card-footer-tag">
+                            <span class="username">EliteGärtner</span>
+                            <span class="status-tag" style="font-style: italic">über uns</span>
+                        </div>
+                    </div>
+                    
+                    @* Haupt-Beschreibung *@
+                    <div class="white-comic-box description mt-4">
+                        <p class="box-title purple-text">Was ist EliteGärtner?</p>
+                        <p class="box-desc">
+                            🌱 <strong>Zeig, was in deinem Garten steckt!</strong><br />
+                            EliteGärtner ist die Plattform für alle, die ihr selbst angebautes
+                            Obst und Gemüse mit Stolz präsentieren wollen.
+                            Entdecke die Ernten anderer, lass dich inspirieren und vernetze dich
+                            mit Gartenbegeisterten aus deiner Region.
+                            <br /><br />
+                            📸 <strong>Hochladen. Bewerten. Matchen.</strong><br />
+                            Teile Bilder deiner Ernte, bewerte andere Gärtnerprofile und finde
+                            Gleichgesinnte – ganz nach dem Prinzip eines „Gardening-Tinders“.
+                            Passt ihr zueinander, entsteht ein Match und ihr könnt euch austauschen.
+                            <br /><br />
+                            🏆 <strong>Werde Teil der Elite.</strong><br />
+                            Ranglisten, Auszeichnungen und ein intelligenter Algorithmus sorgen dafür,
+                            dass hochwertige Inhalte sichtbar werden und Engagement belohnt wird.
+                            Ein integriertes Meldesystem garantiert dabei Qualität und Fairness
+                            innerhalb der Community.
+                        </p>
+                    </div>
+                </div>
+
+                @* --- Rechte Spalte: NEUER ZEITSTRAHL & LOGO --- *@
+                <div class="info-section">
+                    
+                    @* --- LOGO --- *@
+                    <div class="logo-showcase-container">
+                        <img src="pictures/VerziertesEliteGärtnerLogo.png" alt="EliteGärtner Fancy Logo" class="fancy-logo-img" />
+                    </div>
+
+                    @* --- VERTIKALER ZEITSTRAHL (TIMELINE) zur Appfunktion--- *@
+                    <div class="comic-timeline">
+                        
+                        @* Schritt 1: Ernten *@
+                        <div class="timeline-step">
+                            <div class="timeline-marker">
+                                <div class="timeline-icon-circle purple-theme">🍆</div>
+                            </div>
+                            <div class="timeline-content white-comic-box arrow-left">
+                                <p class="box-title">1. Ernten</p>
+                                <p class="box-desc">Genieße die Früchte deiner harten Arbeit im Garten.</p>
+                            </div>
+                        </div>
+
+                        @* Schritt 2: Ernte Hochladen *@
+                        <div class="timeline-step">
+                            <div class="timeline-marker">
+                                <div class="timeline-icon-circle green-theme">📷</div>
+                            </div>
+                            <div class="timeline-content white-comic-box arrow-left">
+                                <p class="box-title">2. Ernte Hochladen</p>
+                                <p class="box-desc">Teile ein Foto deiner Prachtexemplare.</p>
+                            </div>
+                        </div>
+
+                        @* Schritt 3: Vernetzen *@
+                        <div class="timeline-step">
+                            <div class="timeline-marker">
+                                <div class="timeline-icon-circle blue-theme">🌐</div>
+                            </div>
+                            <div class="timeline-content white-comic-box arrow-left">
+                                <p class="box-title">3. Vernetzen</p>
+                                <p class="box-desc">Finde Gleichgesinnte in deiner Region.</p>
+                            </div>
+                        </div>
+                        
+                        @* Schritt 4: Traumgärtner finden *@
+                        <div class="timeline-step">
+                            <div class="timeline-marker">
+                                <div class="timeline-icon-circle yellow-theme">🔍</div>
+                            </div>
+                            <div class="timeline-content white-comic-box arrow-left">
+                                <p class="box-title">4. Traumgärtner finden</p>
+                                <p class="box-desc">Tausche Tipps, Saatgut oder Ernte mit deinem Match!</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            @* Sponsoren Sektion *@
+            <div class="sponsors-container mt-4">
+                <h3 class="sponsor-title">Unsere Partner & Sponsoren</h3>
+                        
+                <div class="comic-banner pimp-theme">
+                    <div class="banner-inner-border">
+                        <span class="sponsor-name">PimpYourBlech</span>
+                        <span class="sponsor-tagline">Personalisiere und Konfiguriere dein Auto.</span>
+                    </div>
+                </div>
+
+                <div class="comic-banner kardei-theme mt-3">
+                    <div class="banner-inner-border">
+                        <span class="sponsor-name">Kardei</span>
+                        <span class="sponsor-tagline">Lernen leicht gemacht.</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+</div>

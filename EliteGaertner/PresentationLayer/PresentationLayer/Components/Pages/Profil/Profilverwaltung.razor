@@ -250,7 +250,7 @@
             </div>
         </div>
 
-        @* --- Änderungen Speichern Button (Lila) --- *@
+        @* --- Änderungen Speichern Button --- *@
         <button class="save-button purple-button"
                 @onclick="SaveChanges"
                 disabled="@(!CanSaveChanges)">
@@ -259,12 +259,21 @@
 
         @if (!CanSaveChanges)
         {
-        <p class="disabled-hint save-hint">
-            @(EmailValid ? "" : "⚠️ Ungültige E-Mail-Adresse. ")
-            @(!PasswordChangeValid ? "⚠️ Bitte korrigieren Sie die Passwortfelder." : "")
-        </p>
+            <div class="disabled-hint save-hint">
+                @if (!HasAtLeastOneContact)
+                {
+                    <p class="error-text">⚠️ Bitte geben Sie mindestens eine Kontaktmöglichkeit an (Email oder Telefon).</p>
+                }
+                @if (!EmailValid)
+                {
+                    <p class="error-text">⚠️ Ungültige E-Mail-Adresse.</p>
+                }
+                @if (!PasswordChangeValid)
+                {
+                    <p class="error-text">⚠️ Bitte korrigieren Sie die Passwortfelder.</p>
+                }
+            </div>
         }
-
     </div>
 
     @* --- Bottom Nav --- *@
@@ -293,10 +302,10 @@ private List<string> _uploadedImages = new List<string>
 {
 "pictures/Testbilder/Gurken_01.jpg",
 "pictures/Testbilder/Tomaten_01.jpg",
-"pictures/Testbilder/harvest_3.jpg",
-"pictures/Testbilder/harvest_4.jpg",
-"pictures/Testbilder/harvest_5.jpg",
-"pictures/Testbilder/harvest_6.jpg"
+"pictures/Testbilder/Mais_02.png",
+"pictures/Testbilder/Melonen_01.jpg",
+"pictures/Testbilder/Karotten_02.png",
+"pictures/Testbilder/Erdbeeren_01.jpg"
 };
 
 // --- Profilbild Karussell Logik ---
@@ -322,7 +331,7 @@ private int? _hoveredIndex = null;
 protected override void OnInitialized()
 {
 // Simuliertes Laden des gespeicherten Profilbildes
-CurrentIndex = 4; // Index von "Profilbild_05.png"
+CurrentIndex = 27; // Index von "Profilbild_05.png"
 SelectedProfile = _availableProfiles[CurrentIndex];
 }
 
@@ -361,28 +370,31 @@ return addr.IsValid(email);
 catch { return false; }
 }
 
+// -- Prüfung ob mind. ein Kontaktfeld aufgewählt ist --
+    private bool HasAtLeastOneContact => !string.IsNullOrWhiteSpace(_email) || !string.IsNullOrWhiteSpace(_fullTelephoneNumber);
+
 // -- Passwort Validierung --
-private bool HasMinimumLength => _newPassword.Length >= 8;
-private bool HasUppercase => Regex.IsMatch(_newPassword, @"[A-Z]");
-private bool HasLowercase => Regex.IsMatch(_newPassword, @"[a-z]");
-private bool HasDigit => Regex.IsMatch(_newPassword, @"[0-9]");
-private bool HasSpecialChar => Regex.IsMatch(_newPassword, @"[#?!@$%^&*-]");
-private bool IsPasswordStrong => HasMinimumLength && HasUppercase && HasLowercase && HasDigit && HasSpecialChar;
+    private bool HasMinimumLength => _newPassword.Length >= 8;
+    private bool HasUppercase => Regex.IsMatch(_newPassword, @"[A-Z]");
+    private bool HasLowercase => Regex.IsMatch(_newPassword, @"[a-z]");
+    private bool HasDigit => Regex.IsMatch(_newPassword, @"[0-9]");
+    private bool HasSpecialChar => Regex.IsMatch(_newPassword, @"[#?!@$%^&*-]");
+    private bool IsPasswordStrong => HasMinimumLength && HasUppercase && HasLowercase && HasDigit && HasSpecialChar;
 
-private bool PasswordMismatch =>
-!string.IsNullOrWhiteSpace(_newPassword) && !string.IsNullOrWhiteSpace(_confirmNewPassword) && (_newPassword != _confirmNewPassword);
+    private bool PasswordMismatch =>
+        !string.IsNullOrWhiteSpace(_newPassword) && !string.IsNullOrWhiteSpace(_confirmNewPassword) && (_newPassword != _confirmNewPassword);
 
-private bool IsNewPasswordSectionActive => !string.IsNullOrWhiteSpace(_newPassword) || !string.IsNullOrWhiteSpace(_confirmNewPassword);
+    private bool IsNewPasswordSectionActive => !string.IsNullOrWhiteSpace(_newPassword) || !string.IsNullOrWhiteSpace(_confirmNewPassword);
 
-private bool PasswordChangeValid =>
-!IsNewPasswordSectionActive || (IsNewPasswordSectionActive && IsPasswordStrong && !PasswordMismatch);
+    private bool PasswordChangeValid => 
+        !IsNewPasswordSectionActive || (IsNewPasswordSectionActive && IsPasswordStrong && !PasswordMismatch);
 
-private MarkupString GetRequirementIcon(bool passed) =>
-passed ? (MarkupString)"<span class=\"check-icon\">✔</span>" : (MarkupString)"<span class=\"fail-icon\">✗</span>";
-private string GetSpecialChars() => "#?!@$%^&*-";
+    private MarkupString GetRequirementIcon(bool passed) =>
+        passed ? (MarkupString)"<span class=\"check-icon\">✔</span>" : (MarkupString)"<span class=\"fail-icon\">✗</span>";
+    private string GetSpecialChars() => "#?!@$%^&*-";
 
 // -- Gesamt Validierung für Speichern Button --
-private bool CanSaveChanges => EmailValid && PasswordChangeValid;
+    private bool CanSaveChanges => EmailValid && PasswordChangeValid && HasAtLeastOneContact;
 
 // ======================================
 // 2. AKTIONEN
@@ -429,517 +441,3 @@ Console.WriteLine("Änderungen gespeichert:");
 Nav.NavigateTo("/ProfilTest", forceLoad: true); // Zurück zum Profil
 }
 }
-
-<style>
-    /* Globale Container und Schrift */
-    .page-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .background-style {
-        background-image: url('pictures/LightIconBackground.jpeg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        width: 100%;
-        min-height: 100vh;
-        font-family: 'Patrick Hand', cursive, sans-serif;
-    }
-
-    /* --- TOP BAR (Unverändert) --- */
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 15px;
-        border-bottom: 3px solid #000;
-        background-color: #fff;
-        z-index: 10;
-        box-shadow: 0 4px 0 0 #000;
-        flex-shrink: 0;
-    }
-
-    .page-title {
-        font-size: 28px;
-        font-weight: bold;
-        margin: 0;
-        flex-grow: 1;
-        text-align: center;
-        color: #000;
-    }
-
-    /* Icon Wrapper (Rangliste) */
-    .icon-wrapper {
-        width: 60px;
-    }
-
-    /* Rechtes Aktionsfeld (Hamburger Menü) */
-    .header-right-action {
-        width: 60px;
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    /* Hamburger Menü und Logout */
-    .menu-wrapper {
-        position: relative;
-    }
-
-    .hamburger-icon {
-        font-size: 30px;
-        line-height: 1;
-        color: #000;
-        cursor: pointer;
-    }
-
-    .logout-menu {
-        position: absolute;
-        top: 45px;
-        right: 0px;
-        width: 150px;
-        z-index: 20;
-        padding: 5px 0;
-    }
-
-    .logout-menu p {
-        padding: 5px 10px;
-        margin: 0;
-        cursor: pointer;
-        font-size: 16px;
-        text-align: right;
-    }
-
-    .logout-menu p:hover {
-        background-color: #eee;
-    }
-
-
-    /* --- CONTENT AREA & BOX STYLING --- */
-    .scroll-content {
-        flex-grow: 1;
-        padding: 20px 15px;
-        overflow-y: auto;
-    }
-
-    .comic-box {
-        border: 5px solid #000;
-        border-radius: 10px;
-        box-shadow: 6px 6px 0 0 #000;
-        background-color: #fff;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    .box-title {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 15px;
-        padding-bottom: 5px;
-        border-bottom: 2px dashed #ccc;
-    }
-
-    /* --- Trennlinie --- */
-    .divider {
-        border-top: 3px solid #000;
-        margin: 20px 0;
-        box-shadow: 0 4px 0 0 #000;
-    }
-
-
-    /* UNVERÄNDERBARE DATEN */
-    .info-box .info-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px dashed #eee;
-        padding: 5px 0;
-    }
-    .info-box label {
-        font-size: 18px;
-        font-weight: bold;
-        color: #555;
-    }
-    .info-box p {
-        font-size: 18px;
-        font-weight: bold;
-        margin: 0;
-        color: #000;
-    }
-
-    /* KONTAKTDATEN & PASSWORT INPUT STYLES (app-input) */
-    .input-group {
-        margin-bottom: 15px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .input-group label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #000;
-        font-size: 1.1rem;
-    }
-
-    .app-input {
-        width: 100%;
-        padding: 10px;
-        font-size: 1.2rem;
-        border: 3px solid #000;
-        border-radius: 5px;
-        box-shadow: 2px 2px 0 0 #000;
-        box-sizing: border-box;
-        font-family: 'Patrick Hand', cursive, sans-serif;
-        transition: box-shadow 0.1s, border-color 0.1s;
-    }
-    .app-input:focus {
-        outline: none;
-        border-color: #8B45B3; /* Lila Fokus */
-        box-shadow: 4px 4px 0 0 #8B45B3;
-    }
-
-    .input-error {
-        border-color: red !important;
-        box-shadow: 4px 4px 0 0 red !important;
-    }
-
-    .inline-error {
-        color: red;
-        font-size: 0.9rem;
-        margin-top: 5px;
-        margin-bottom: 0px;
-        font-style: italic;
-        text-align: left;
-    }
-
-    /* Spezifische Korrektur für Passwort bestätigen */
-    .password-box .confirm-password-group {
-        margin-top: 15px;
-    }
-
-    /* Kontaktfreigabe Styles */
-    .share-title {
-        font-size: 1.3rem;
-        font-weight: bold;
-        color: #000;
-        margin-top: 20px; /* Sicherstellen, dass Abstand da ist */
-        margin-bottom: 10px;
-    }
-    .share-options-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-    }
-    .form-check-group {
-        padding: 10px;
-        border: 2px solid #000;
-        border-radius: 8px;
-        box-shadow: 1px 1px 0 0 #000;
-        background-color: rgba(240, 240, 240, 0.9);
-    }
-    .form-check-custom {
-        display: flex;
-        align-items: center;
-    }
-    .app-check-input {
-        opacity: 0;
-        position: absolute;
-    }
-    .app-check-label {
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: #000;
-        display: block;
-        padding-left: 30px;
-        cursor: pointer;
-        position: relative;
-        line-height: 20px;
-    }
-    .app-check-label::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0px;
-        width: 20px;
-        height: 20px;
-        border: 3px solid #000;
-        border-radius: 4px;
-        background-color: #f0f0f0;
-        transition: all 0.1s;
-    }
-    .app-check-input:checked + .app-check-label::before {
-        background-color: #8B45B3;
-        border-color: #000;
-    }
-    .app-check-input:checked + .app-check-label::after {
-        content: '✔';
-        position: absolute;
-        left: 3px;
-        top: -3px;
-        font-size: 18px;
-        line-height: 1;
-        color: white;
-        font-family: Arial, sans-serif;
-    }
-
-    /* Passwort ändern */
-
-    .password-requirements {
-        margin-top: 7px;
-        padding: 7px;
-        border: 2px dashed #ccc;
-        border-radius: 5px;
-        background-color: #fafafa;
-    }
-    .req-title {
-        font-size: 1.1rem;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #444;
-    }
-    .password-requirements ul {
-        list-style: none;
-        padding-left: 0;
-        margin: 0;
-        font-size: 0.9rem;
-    }
-    .password-requirements li {
-        margin-bottom: 3px;
-        transition: color 0.3s;
-    }
-    .password-requirements li.passed {
-        color: #4CAF50;
-        font-weight: bold;
-    }
-    .check-icon, .fail-icon {
-        display: inline-block;
-        width: 15px;
-        text-align: center;
-        margin-right: 5px;
-        font-size: 1rem;
-    }
-    .check-icon {
-        color: #4CAF50;
-    }
-    .fail-icon {
-        color: #F44336;
-    }
-
-    /* --- Profilbild Karussell Styles --- */
-    .tag-headline {
-        font-weight: bold;
-        font-size: 1.4rem;
-        color: #000;
-        margin-top: 5px;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .profile-carousel-hybrid {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-
-    .profile-main-image-container-hybrid {
-        width: 130px;
-        height: 130px;
-        border: 4px solid #000;
-        box-shadow: 6px 6px 0 0 #000;
-        border-radius: 50%;
-        overflow: hidden;
-        background-color: #f0f0f0;
-        flex-shrink: 0;
-    }
-
-    .selected-outline-hybrid {
-        border: 5px solid #8B45B3;
-        box-shadow: 0 0 0 3px #000, 7px 7px 0 0 #000;
-    }
-
-    .profile-preview-container-hybrid {
-        width: 60px;
-        height: 60px;
-        border: 2px solid #000;
-        box-shadow: 3px 3px 0 0 #000;
-        border-radius: 50%;
-        overflow: hidden;
-        background-color: #fff;
-        opacity: 0.7;
-        flex-shrink: 0;
-    }
-
-    .profile-image-large {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    .profile-image-preview {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    .arrow-nav-button {
-        width: 45px;
-        height: 45px;
-        padding: 0;
-        font-size: 1.5rem;
-        border-radius: 50%;
-        box-shadow: 3px 3px 0 0 #000;
-        margin-top: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-shrink: 0;
-        background-color: #ccc;
-        color: #000;
-        border: 3px solid #000;
-    }
-
-    .arrow-nav-button:active {
-        transform: translate(3px, 3px);
-        box-shadow: 0 0 0 0 #000;
-        background-color: #bbb;
-    }
-
-    /* --- Biografie Sektion (Textarea) --- */
-    .input-label {
-        font-size: 1.3rem;
-    }
-
-    .app-input-comic {
-        width: 100%;
-        padding: 10px;
-        border: 3px solid #000;
-        border-radius: 5px;
-        outline: none;
-        font-size: 1.1rem;
-        box-shadow: 3px 3px 0 0 #000;
-        font-family: 'Patrick Hand', cursive, sans-serif;
-        height: 100px;
-        resize: vertical;
-        box-sizing: border-box;
-    }
-    .app-input-comic:focus {
-        border-color: #8B45B3;
-        box-shadow: 4px 4px 0 0 #8B45B3;
-    }
-
-    .char-counter {
-        text-align: right;
-        font-size: 0.9rem;
-        color: #666;
-        margin-top: 5px;
-    }
-
-    /* --- Fotos Galerie --- */
-    .harvest-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 17px;
-    }
-
-    .grid-item {
-        position: relative;
-        width: 100%;
-        padding-bottom: 177.77%;
-        overflow: visible;
-    }
-
-    .comic-grid-item {
-        background-color: #fff;
-        border: 4px solid #000;
-        border-radius: 8px;
-        box-shadow: 4px 4px 0 0 #000;
-        cursor: pointer;
-    }
-
-    .harvest-photo {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    .delete-overlay {
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        width: 30px;
-        height: 30px;
-        background-color: #D62828;
-        border: 3px solid #000;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10;
-        box-shadow: 2px 2px 0 0 #000;
-        cursor: pointer;
-    }
-
-    .delete-popup {
-        position: absolute;
-        top: 5px;
-        right: 25px;
-        width: 150px;
-        background-color: #fff;
-        color: #D62828;
-        font-weight: bold;
-        font-size: 16px;
-        text-align: center;
-        padding: 10px 5px;
-        z-index: 15;
-        cursor: pointer;
-    }
-    .delete-popup:hover {
-        background-color: #ffe0e0;
-    }
-
-    /* --- SPEICHERN BUTTON (Lila) --- */
-    .save-button {
-        width: calc(100% - 30px);
-        margin: 0 15px 10px 15px;
-        padding: 15px;
-        color: #fff;
-        border: 5px solid #000;
-        border-radius: 10px;
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        box-shadow: 6px 6px 0 0 #000;
-        cursor: pointer;
-        transition: transform 0.1s;
-    }
-
-    .purple-button {
-        background-color: #8B45B3; /* Lila */
-    }
-
-    .save-button:active {
-        transform: translate(6px, 6px);
-        box-shadow: 0 0 0 0 #000;
-    }
-
-    .disabled-hint.save-hint {
-        text-align: center;
-        color: #999;
-        font-size: 1rem;
-        margin-top: 0;
-        margin-bottom: 30px;
-        font-style: italic;
-    }
-
-</style>
