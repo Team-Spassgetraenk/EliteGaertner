@@ -14,8 +14,7 @@ public interface IHarvestDbs
     //Erstell mir eine Repository an HarvestUploadDtos die zum dem Interessensprofil
     //des Users passen. Die Menge der DTOs wird vom preloadCount bestimmt.
     public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount);
-
-    //TODO Nicolas
+    
     bool CreateUploadDbs(HarvestUploadDto uploadDto);
     
     //TODO Nicolas

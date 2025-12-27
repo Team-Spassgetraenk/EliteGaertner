@@ -1,98 +1,113 @@
-using Contracts.Data_Transfer_Objects;
-using DataManagement;
-using DataManagement.Entities;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using AppLogic.Services;
-using Xunit;
-using Assert = Xunit.Assert;
+using DataManagement.Interfaces;
+using Contracts.Data_Transfer_Objects;
+using System;
 
-namespace Tests.UnitTests.AppLogicTests;
-
-public class UploadServiceImplTests : IDisposable
+namespace  Tests.UnitTests.AppLogicTests
 {
-    private readonly EliteGaertnerDbContext _context;
-    private readonly UploadServiceImpl _service;
-
-    public UploadServiceImplTests()
+    [TestClass]
+    public class UploadServiceImplTests
     {
-        var options = new DbContextOptionsBuilder<EliteGaertnerDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
+        private Mock<IHarvestDbs> _mockHarvestDbs;
+        private UploadServiceImpl _uploadService;
 
-        _context = new EliteGaertnerDbContext(options);
-        _context.Database.EnsureCreated();
-        _service = new UploadServiceImpl(_context);
-    }
-
-    public void Dispose()
-    {
-        _context?.Dispose();
-    }
-
-    [Fact]
-    public void CreateUpload_ValidDtoWithExistingProfile_ReturnsTrue()
-    {
-        var testProfile = new Profile
-        { 
-            //Arrange
-            Profileid = 1,
-            Username = "testuser",
-            Firstname = "Test",
-            Lastname = "User",
-            Email = "test@test.com",
-            Passwordhash = "hash",
-            Phonenumber = "123",
-            Profiletext = "test",
-            Sharemail = true,
-            Sharephonenumber = true,
-            Usercreated = DateTime.UtcNow
-        };
-        _context.Profiles.Add(testProfile);
-        _context.SaveChanges();
-
-        var dto = new HarvestUploadDto
+        [TestInitialize]
+        public void TestInitialize()
         {
-            ProfileId = 1,
-            ImageUrl = "https://test.com/tomate.jpg",
-            Description = "Rote Tomaten",
-            WeightGram = 200,
-            WidthCm = 8,
-            LengthCm = 8,
-            UploadDate = DateTime.UtcNow
-        };
+            _mockHarvestDbs = new Mock<IHarvestDbs>();
+            _uploadService = new UploadServiceImpl(_mockHarvestDbs.Object);
+        }
 
-        // Act
-        var result = _service.CreateHarvestUpload(dto);
-
-        // Assert
-        Assert.True(result);
-        var savedUpload = _context.Harvestuploads.FirstOrDefault(u => u.Imageurl == dto.ImageUrl);
-        Assert.NotNull(savedUpload);
-        Assert.Equal(dto.Description, savedUpload.Description);
-        Assert.Equal(dto.WeightGram, savedUpload.Weightgramm);
-        Assert.Equal(dto.ProfileId, savedUpload.Profileid);
-    }
-
-    [Fact]
-    public void CreateUpload_NonExistingProfile_ReturnsFalse()
-    {
-        // Arrange
-        var dto = new HarvestUploadDto
+        [TestMethod]
+        public void CreateHarvestUpload_aus_Dto_Wahr()
         {
-            ProfileId = 999,
-            ImageUrl = "https://test.com/fake.jpg",
-            Description = "Fake",
-            WeightGram = 100f,
-            WidthCm = 5,
-            LengthCm = 5,
-            UploadDate = DateTime.UtcNow
-        };
+            // Arrange Testdaten erstellen
+            var uploadDto = new HarvestUploadDto
+            {
+                ProfileId = 1,
+                ImageUrl = "test.jpg",
+                Description = "Test upload",
+                WeightGram = 500,
+                WidthCm = 10,
+                LengthCm = 20
+            };
+            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(uploadDto)).Returns(true);
 
-        // Act
-        var result = _service.CreateHarvestUpload(dto);
+            // Act = Aufruf
+            bool result = _uploadService.CreateHarvestUpload(uploadDto);
 
-        // Assert
-        Assert.False(result);
-        Assert.Empty(_context.Harvestuploads);
+            // Assert
+            Assert.IsTrue(result);
+            _mockHarvestDbs.Verify(x => x.CreateUploadDbs(uploadDto), Times.Once);
+        }
+
+        [TestMethod]
+        public void CreateHarvestUpload_aus_Dto_ReturnsFalse()
+        {
+            // Arrange
+            var uploadDto = new HarvestUploadDto();
+            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(uploadDto)).Returns(false);
+
+            // Act
+            bool result = _uploadService.CreateHarvestUpload(uploadDto);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockHarvestDbs.Verify(x => x.CreateUploadDbs(uploadDto), Times.Once);
+        }
+
+        [TestMethod]
+        public void CreateHarvestUpload_aus_Paramatern_Wahr()
+        {
+            // Arrange
+            int userId = 1;
+            string imageUrl = "test.jpg";
+            string description = "Test upload";
+            float weight = 500.5f;
+            int width = 10;
+            int length = 20;
+
+            var expectedDto = new HarvestUploadDto
+            {
+                ProfileId = userId,
+                ImageUrl = imageUrl,
+                Description = description,
+                WeightGram = weight,
+                WidthCm = width,
+                LengthCm = length,
+                UploadDate = DateTime.UtcNow
+            };
+
+            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(It.Is<HarvestUploadDto>(dto => 
+                dto.ProfileId == userId &&
+                dto.ImageUrl == imageUrl &&
+                dto.Description == description &&
+                dto.WeightGram == weight &&
+                dto.WidthCm == width &&
+                dto.LengthCm == length))).Returns(true);
+
+            // Act
+            bool result = _uploadService.CreateHarvestUpload(userId, imageUrl, description, weight, width, length);
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockHarvestDbs.Verify(x => x.CreateUploadDbs(It.IsAny<HarvestUploadDto>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void CreateHarvestUpload_WithParameters_Failure_ReturnsFalse()
+        {
+            // Arrange
+            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(It.IsAny<HarvestUploadDto>())).Returns(false);
+
+            // Act
+            bool result = _uploadService.CreateHarvestUpload(1, "test.jpg", "test", 100f, 10, 20);
+
+            // Assert
+            Assert.IsFalse(result);
+            _mockHarvestDbs.Verify(x => x.CreateUploadDbs(It.IsAny<HarvestUploadDto>()), Times.Once);
+        }
     }
 }

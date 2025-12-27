@@ -5,7 +5,6 @@ using Contracts.Enumeration;
 using DataManagement.Entities;
 using DataManagement.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace DataManagement;
 
@@ -44,8 +43,29 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
+    
+    public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+    {
+        var entity = new Harvestupload
+        {
+
+            Imageurl = uploadDto.ImageUrl,
+            Description = uploadDto.Description,
+            Weightgramm = uploadDto.WeightGram,
+            Widthcm = uploadDto.WidthCm,
+            Lengthcm = uploadDto.LengthCm,
+            Uploaddate = uploadDto.UploadDate,
+            Profileid = uploadDto.ProfileId
+        };
+
+        _dbContext.Harvestuploads.Add(entity);
+        var rows = _dbContext.SaveChanges(); //checkt ob db überhaupt schreibt
+        return rows > 0;
+        
+    }
+
     //TODO LÖSCHUNG funktioniert noch nicht, da ich noch nicht die Abhängigkeiten mitlösche
-    public void DeleteHarvestUpload(int uploadId)
+    public bool DeleteHarvestUpload(int uploadId)
     {
         if (uploadId <= 0)
             throw new ArgumentOutOfRangeException(nameof (uploadId), "UploadId muss größer als 0 sein.");
@@ -65,6 +85,7 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         //Lösche es
         _dbContext.Remove(deleteUpload);
         _dbContext.SaveChanges();
+        return true;
     }
     
     public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
@@ -457,6 +478,6 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
             PreferenceDtos = GetUserPreference(profileId).ToList()
         };
 
-        return result;commit 
+        return result;
     }
 }

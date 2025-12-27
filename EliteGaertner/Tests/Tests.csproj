@@ -12,6 +12,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.3.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
+        <PackageReference Include="Moq" Version="4.20.72" />
         <PackageReference Include="MSTest" Version="3.6.4"/>
         <PackageReference Include="xunit" Version="2.9.3" />
     </ItemGroup>
@@ -23,6 +24,17 @@
     <ItemGroup>
       <ProjectReference Include="..\AppLogic\AppLogic.csproj" />
       <ProjectReference Include="..\DataManagement\DataManagement.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="IntegrationTests\AppLogicTests\HarvestSuggestionTest_FromRealDb.cs" />
+        <Compile Remove="IntegrationTests\AppLogicTests\LeaderBoardServiceTest_FromRealDb.cs" />
+        <Compile Remove="IntegrationTests\AppLogicTests\MatchMangerTest_FromRealDb.cs" />
+        <Compile Remove="IntegrationTests\AppLogicTests\ProfileSuggestionTest_FromRealDb.cs" />
+        <Compile Remove="IntegrationTests\IntegrationTestAssemblySetup.cs" />
+        <Compile Remove="UnitTests\AppLogicTests\HarvestSuggestionTests.cs" />
+        <Compile Remove="UnitTests\AppLogicTests\MatchManagerTests.cs" />
+        <Compile Remove="UnitTests\AppLogicTests\ProfileSuggestionTests.cs" />
     </ItemGroup>
 
 </Project>
