@@ -1,11 +1,16 @@
+using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 using DataManagement.Entities;
 using DataManagement.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace DataManagement;
 
+//TODO Reads Prüfungen -> Null zurückgeben, Write Prüfungen -> Exceptions implementieren
+//TODO Prüfungen vielleicht in einer Methode zusammenführen
 public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileDbs
 {
     private readonly EliteGaertnerDbContext _dbContext;
@@ -39,21 +44,73 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    public bool DeleteHarvestUpload(int uploadId)
+    //TODO LÖSCHUNG funktioniert noch nicht, da ich noch nicht die Abhängigkeiten mitlösche
+    public void DeleteHarvestUpload(int uploadId)
     {
-        throw new NotImplementedException();
-    }
+        if (uploadId <= 0)
+            throw new ArgumentOutOfRangeException(nameof (uploadId), "UploadId muss größer als 0 sein.");
+        
+        //Existiert überhaupt Upload?
+        var uploadIdExists = _dbContext.Harvestuploads
+            .AsNoTracking()
+            .Any(h => h.Uploadid == uploadId);
 
-    public void SetReportHarvestUpload(int uploadId, Enum reason)
+        if (!uploadIdExists)
+            throw new ArgumentException("Kein HarvestUpload mit dieser UploadId auffindbar!", nameof(uploadId));
+
+        //Finde das gesuchte Bild
+        var deleteUpload = _dbContext.Harvestuploads
+            .Single(h => h.Uploadid == uploadId);
+
+        //Lösche es
+        _dbContext.Remove(deleteUpload);
+        _dbContext.SaveChanges();
+    }
+    
+    public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
     {
-        throw new NotImplementedException();
-    }
+        if (uploadId <= 0)
+            throw new ArgumentOutOfRangeException(nameof (uploadId), "UploadId muss größer als 0 sein.");
+        
+        //Existiert überhaupt Upload?
+        var uploadIdExists = _dbContext.Harvestuploads
+            .AsNoTracking()
+            .Any(h => h.Uploadid == uploadId);
 
-    public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
+        if (!uploadIdExists)
+            throw new ArgumentException("Kein HarvestUpload mit dieser UploadId auffindbar!", nameof(uploadId));
+
+        var report = new Report
+        {
+            Reason = reason.ToString(),
+            Reportdate = DateTime.UtcNow,
+            Uploadid = uploadId,
+        };
+
+        _dbContext.Reports.Add(report);
+        _dbContext.SaveChanges();
+    }
+    
+    public int GetReportCount(int uploadId)
     {
-        throw new NotImplementedException();
-    }
+        //Falls ungültige ID -> 0 zurück
+        if (uploadId <= 0)
+            return 0;
+        
+        //Existiert überhaupt Upload?
+        var uploadIdExists = _dbContext.Harvestuploads
+            .AsNoTracking()
+            .Any(h => h.Uploadid == uploadId);
 
+        //Falls ungültige ID -> 0 zurück
+        if (!uploadIdExists)
+            return 0;
+
+        //Gib die Anzahl der Reports zurück
+        return _dbContext.Reports
+            .AsNoTracking()
+            .Count(r => r.Uploadid == uploadId);
+    }
     
     //TODO Ich muss den Output randomisieren, sonst findet der irgendwann nicht mehr die richtigen Bilder
     public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
@@ -118,71 +175,9 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+    public void SetHarvestUpload(HarvestUploadDto harvestUpload)
     {
-        var harvestUpload = new Harvestupload
-        {
-            Imageurl = uploadDto.ImageUrl,
-            Description = uploadDto.Description ?? string.Empty,
-            Weightgramm = uploadDto.WeightGram,
-            Widthcm = uploadDto.WidthCm,
-            Lengthcm = uploadDto.LengthCm,
-            Uploaddate = uploadDto.UploadDate,
-            Profileid = uploadDto.ProfileId
-            //UploadID sollte von DB erstellt werden
-        };
-
-        try 
-        {
-            _dbContext.Harvestuploads.Add(harvestUpload);
-            var affectedRows = _dbContext.SaveChanges();
-            return affectedRows > 0; //TEst, wurde geschrieben
-        }
-        catch (Exception)
-        {
-            //TODO Loggen "Fehler beim Erstellen von HarvestUpload" 
-            return false;
-        }
-    }
-
-    public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator)
-    {
-        //Überprüfung, ob ProfileIds unterschiedlich sind und > 0 sind
-        //Falls ja -> gib leere MatchDto zurück
-        if (profileIdReceiver <= 0 || profileIdCreator <= 0 ||
-            profileIdReceiver == profileIdCreator)
-            return new MatchDto();
-
-        var ratings = _dbContext.Ratings
-            .AsNoTracking()
-            .Where(r =>
-                (r.Contentreceiverid == profileIdReceiver && r.Contentcreatorid == profileIdCreator) ||
-                (r.Contentreceiverid == profileIdCreator && r.Contentcreatorid == profileIdReceiver))
-            .ToList();
-        
-        //Gib mir, falls vorhanden, das Rating vom Receiver zurück
-        var receiverRating = _dbContext.Ratings
-            .SingleOrDefault(r =>
-                r.Contentreceiverid == profileIdReceiver && r.Contentcreatorid == profileIdCreator);
-
-        //Gib mir, falls vorhanden, das Rating vom Creator zurück
-        var creatorRating = _dbContext.Ratings
-            .SingleOrDefault(r =>
-                r.Contentreceiverid == profileIdCreator && r.Contentcreatorid == profileIdReceiver);
-        
-        //MatchDto wird erstellt
-        //Falls kein ReceiverRating oder CreatorRating vorhanden ist -> null
-        return new MatchDto()
-        {
-            ContentReceiver = receiverRating?.Contentreceiverid,
-            ContentReceiverValue = receiverRating?.Profilerating ?? false,
-
-            ContentCreator = creatorRating?.Contentreceiverid,
-            ContentCreatorValue = creatorRating?.Profilerating ?? false,
-
-            ContentReceiverRatingDate = receiverRating?.Ratingdate,
-            ContentCreatorRatingDate = creatorRating?.Ratingdate,
-        };
+        throw new NotImplementedException();
     }
 
     public IEnumerable<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
@@ -234,9 +229,53 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    public void SaveMatchInfo(MatchDto matchDto)
+    public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
     {
-        throw new NotImplementedException();
+        return _dbContext.Ratings                    
+            .Any(r =>                               
+                r.Contentreceiverid == profileIdReceiver &&
+                r.Contentcreatorid == profileIdCreator); 
+    }
+    
+    public void SaveMatchInfo(RateDto matchDto)
+    {
+        //Prüfung, ob matchDto null ist -> ArgumentNullException
+        if (matchDto is null)
+            throw new ArgumentNullException(nameof(matchDto), "matchDto darf nicht null sein und kann nicht gespeichert werden.");
+        //Prüfung der Inhalte der MatchDto -> ArgumentException
+        if (matchDto.ContentCreator <= 0 || matchDto.ContentReceiver <= 0 ||
+            matchDto.ContentCreator == matchDto.ContentReceiver)
+            throw new ArgumentException("matchDto hat inhaltliche Fehler und kann nicht gespeichert werden.",
+                nameof(matchDto));
+
+        //Prüft, ob Eintrag bereits vorhanden ist
+        var alreadyRated = _dbContext.Ratings
+            .SingleOrDefault(r => 
+                r.Contentreceiverid == matchDto.ContentReceiver &&
+                r.Contentcreatorid == matchDto.ContentCreator);
+
+        //Falls nicht -> Füge Rating zu Datenbank
+        if (alreadyRated is null)
+        {
+            var rating = new Rating
+            {
+                Contentreceiverid = matchDto.ContentReceiver,
+                Contentcreatorid = matchDto.ContentCreator,
+                Profilerating = matchDto.ContentReceiverValue,
+                Ratingdate = matchDto.ContentReceiverRatingDate,
+            };
+            _dbContext.Ratings.Add(rating);
+        }
+        //Falls schon -> Update die Zeile in der Datenbank
+        //Das kann eigentlich nicht passieren, weil nur User zur Bewertung vorgeschlagen werden, die noch nie 
+        //bewertet worden sind. Aber falls man in Zukunft das doch erlaubt -> Update in der Datenbank
+        else
+        {
+            alreadyRated.Profilerating = matchDto.ContentReceiverValue;
+            alreadyRated.Ratingdate = matchDto.ContentReceiverRatingDate;
+        }
+        
+        _dbContext.SaveChanges();
     }
 
     public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
@@ -265,18 +304,92 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
     {
         throw new NotImplementedException();
     }
-
-
-    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
+    
+    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
     {
-        throw new NotImplementedException();
+        
+        //Es ist nicht möglich, Stand jetzt, eine PrivateProfileDto/CredentialProfileDto
+        //zu übergeben die = null ist. Trotzdem defensive Programmierung.
+        if (privateProfile is null || credentials is null)
+            return new PrivateProfileDto();
+        
+        //UserName und Email normalisieren. Uppercase -> Lowercase
+        var userName = privateProfile.UserName?.Trim().ToLowerInvariant();
+        var eMail = credentials.EMail?.Trim().ToLowerInvariant();
+        
+        //Pflichtfelder vorhanden?
+        if (string.IsNullOrWhiteSpace(userName) ||
+            string.IsNullOrWhiteSpace(eMail) ||
+            string.IsNullOrWhiteSpace(credentials.PasswordHash))
+            //Falls nicht -> return leeres PrivateProfileDto
+            return new PrivateProfileDto();
+        
+        //Prüfe Mail und Username auf Duplikate
+        var userNameExists = _dbContext.Profiles
+            .AsNoTracking()
+            .Any(p => p.Username == userName);
+        var eMailExists = _dbContext.Profiles
+            .AsNoTracking()
+            .Any(p => p.Email == eMail);
+        //Falls UserName oder Passwort schon existiert -> leeres ProfileDto wird zurückgegeben
+        //Nicht in einem Statement zusammengelegt, um für die Zukunft festellen zu können
+        //welcher Wert bereits vorhanden ist
+        if (userNameExists)
+            return new PrivateProfileDto();
+        if (eMailExists)
+            return new PrivateProfileDto();
+        
+        //Dto auf Entity mappen
+        var profileEntity = new Profile()
+        {
+            Profilepictureurl = privateProfile.ProfilepictureUrl,
+            Username = userName,
+            Firstname = privateProfile.FirstName,
+            Lastname = privateProfile.LastName,
+            //Die Email und Passwort kommen aus dem CredentialDto
+            Email = eMail,
+            Passwordhash = credentials.PasswordHash,
+            Phonenumber = privateProfile.Phonenumber,
+            Profiletext = privateProfile.Profiletext,
+            Sharemail = privateProfile.ShareMail,
+            Sharephonenumber = privateProfile.SharePhoneNumber,
+            Usercreated = DateTime.UtcNow
+        };
+
+        //Entity wird in Datenbank gespeichert
+        _dbContext.Profiles.Add(profileEntity);
+        _dbContext.SaveChanges();
+        
+        //Dto wird erstellt und zurückgegeben
+        var result = new PrivateProfileDto()
+        {
+            ProfileId = profileEntity.Profileid,
+            ProfilepictureUrl = profileEntity.Profilepictureurl,
+            UserName = profileEntity.Username,
+            FirstName = profileEntity.Firstname,
+            LastName = profileEntity.Lastname,
+            EMail = profileEntity.Email,
+            Phonenumber = profileEntity.Phonenumber,
+            Profiletext = profileEntity.Profiletext,
+            ShareMail = profileEntity.Sharemail,
+            SharePhoneNumber = profileEntity.Sharephonenumber,
+            UserCreated = profileEntity.Usercreated,
+        };
+
+        return result;
     }
 
+    //TODO Nicolas
     public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
     {
         throw new NotImplementedException();
     }
 
+    public int? CheckPassword(string eMail, string passwordHash)
+    {
+        throw new NotImplementedException();
+    }
+    
     public Profile? GetProfile(int profileId)
     {
         //Falls die profileId <= 0 ist, return ein leeres ProfileDto
@@ -292,7 +405,7 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
 
         return p;
     }
-
+    
     public PublicProfileDto GetPublicProfile(int profileId)
     {
         //Entität Profil wird zurückgegeben
@@ -306,16 +419,12 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         var result = new PublicProfileDto()
         {
             ProfileId = p.Profileid,
+            ProfilepictureUrl = p.Profilepictureurl,
             UserName = p.Username,
-            EMail = p.Email,
-            Phonenumber = p.Phonenumber,
             Profiletext = p.Profiletext,
-            ShareMail = p.Sharemail,
-            SharePhoneNumber = p.Sharephonenumber,
             UserCreated = p.Usercreated,
             //Hol dir die HarvestUploads des Profils
             HarvestUploads = GetProfileHarvestUploads(profileId).ToList(),
-            //Hol dir die UserPreference des Profils
         };
         
         return result;
@@ -338,7 +447,6 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
             FirstName = p.Firstname,
             LastName = p.Lastname,
             EMail = p.Email,
-            PasswordHash = p.Passwordhash,
             Phonenumber = p.Phonenumber,
             Profiletext = p.Profiletext,
             ShareMail = p.Sharemail,
@@ -349,6 +457,6 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
             PreferenceDtos = GetUserPreference(profileId).ToList()
         };
 
-        return result;
+        return result;commit 
     }
 }

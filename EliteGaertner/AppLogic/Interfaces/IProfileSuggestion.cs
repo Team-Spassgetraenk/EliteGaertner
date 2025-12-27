@@ -17,10 +17,6 @@ public interface IProfileSuggestion
     //übergeben, die wir an die CreateUserSuggestions-Methode übergeben
     public List<HarvestUploadDto> CreateHarvestSuggestions(int profileId, List<int> tagIds, int preloadCount);
     
-    //Hier wird überprüft, ob der Content Receiver den Content Creator 
-    //bereits bewertet hat.
-    public bool ProfileAlreadyRated (int profileIdReceiver,  int profileIdCreator);
-    
     //Die Methode gibt eine Dictionary mit den passenden Usern und Harvestuploads zurück.
     public Dictionary<PublicProfileDto, HarvestUploadDto> GetProfileSuggestionList();
 }

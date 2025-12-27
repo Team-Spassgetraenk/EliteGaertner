@@ -2,13 +2,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
+using Contracts.Enumeration;
 
 namespace Tests.UnitTests.AppLogicTests;
 
 //Komplett durch ChatGPT generiert!!!
 [TestClass]
+[TestCategory("Unit")]
 public class ProfileSuggestionTests
 {
     [TestMethod]
@@ -25,7 +25,7 @@ public class ProfileSuggestionTests
 
         var harvestDbs = new HarvestDbsFake(harvestUploads);
 
-        // Profil 2 wurde bereits bewertet
+        // Profil 2 gilt als bereits bewertet und muss deshalb herausgefiltert werden
         var matchesDbs = new MatchesDbsFake(
             ratedPairs: new[] { (receiverId, 2) }
         );
@@ -70,11 +70,10 @@ public class ProfileSuggestionTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => Enumerable.Empty<HarvestUploadDto>();
 
-        public bool SetHarvestUpload(HarvestUploadDto harvestUpload) { }
-        public bool DeleteHarvestUpload(int uploadId) { }
-        public void SetReportHarvestUpload(int uploadId, Enum reason) { }
-        public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
-            => Enumerable.Empty<ReportDto>();
+        public void SetHarvestUpload(HarvestUploadDto harvestUpload) { }
+        public void DeleteHarvestUpload(int uploadId) { }
+        public void SetReportHarvestUpload(int uploadId, ReportReasons reason) { }
+        public int GetReportCount(int uploadId) => 0;
     }
 
     private sealed class MatchesDbsFake : IMatchesDbs
@@ -84,28 +83,18 @@ public class ProfileSuggestionTests
         public MatchesDbsFake(IEnumerable<(int receiver, int creator)> ratedPairs)
             => _ratedPairs = ratedPairs.ToHashSet();
 
-        public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator)
-        {
-            if (_ratedPairs.Contains((profileIdReceiver, profileIdCreator)))
-            {
-                return new MatchDto
-                {
-                    ContentReceiver = profileIdReceiver
-                };
-            }
-
-            return new MatchDto();
-        }
+        public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
+            => _ratedPairs.Contains((profileIdReceiver, profileIdCreator));
 
         public IEnumerable<PublicProfileDto> GetActiveMatches(int profileId)
             => Enumerable.Empty<PublicProfileDto>();
 
-        public void SaveMatchInfo(MatchDto matchDto) { }
+        public void SaveMatchInfo(RateDto matchDto) { }
     }
 
     private sealed class ProfileDbsFake : IProfileDbs
     {
-        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
+        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
             => throw new NotImplementedException();
 
         public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
@@ -125,5 +114,10 @@ public class ProfileSuggestionTests
                 EMail = null,
                 Phonenumber = null
             };
+
+        public int? CheckPassword(string eMail, string passwordHash)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

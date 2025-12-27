@@ -4,12 +4,20 @@ namespace AppLogic.Interfaces;
 
 public interface IProfileMgm
 {
+    public PrivateProfileDto VisitReceiverProfile(int userId);
+
+    public PrivateProfileDto VisitCreatorProfile(int userId);
+
+    public bool UpdateProfile(PrivateProfileDto profile);
+
+    public bool SetContactVisibility(ContactVisibilityDto contactVisibility);
+
+    //TODO
+    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile);
+
+    //TODO
+    public PrivateProfileDto LoginProfile(PrivateProfileDto receiverProfile);
     
-    PrivateProfileDto VisitReceiverProfile(int userId);
-
-    PrivateProfileDto VisitCreatorProfile(int userId);
-
-    bool UpdateProfile(PrivateProfileDto profile);
-
-    bool SetContactVisibility(ContactVisibilityDto contactVisibility);
+    //TODO
+    public List<PreferenceDto> SetPreferences(PreferenceDto profilePreferences);
 }

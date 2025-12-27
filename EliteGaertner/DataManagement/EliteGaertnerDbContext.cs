@@ -121,7 +121,7 @@ public partial class EliteGaertnerDbContext : DbContext
 
             entity.HasOne(d => d.Upload).WithMany(p => p.Reports)
                 .HasForeignKey(d => d.Uploadid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("report_uploadid_fkey");
         });
 
@@ -139,7 +139,7 @@ public partial class EliteGaertnerDbContext : DbContext
                     "Harvesttag",
                     r => r.HasOne<Harvestupload>().WithMany()
                         .HasForeignKey("Uploadid")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("harvesttags_uploadid_fkey"),
                     l => l.HasOne<Tag>().WithMany()
                         .HasForeignKey("Tagid")

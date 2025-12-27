@@ -1,5 +1,6 @@
 using AppLogic.Interfaces;
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 using DataManagement.Interfaces;
 
 namespace AppLogic.Services;
@@ -14,6 +15,7 @@ public class MatchManager : IMatchManager
     private readonly int _preloadCount;
     private readonly Dictionary<PublicProfileDto, HarvestUploadDto> _profileSuggestionList;
     private List<PublicProfileDto> _activeMatchesList;
+    private const int ReportThreshold = 5;
     
     public MatchManager(IMatchesDbs matchesDbs, IProfileDbs profileDbs, IHarvestDbs harvestDbs, 
         PrivateProfileDto contentReceiver, int preloadCount)
@@ -65,22 +67,17 @@ public class MatchManager : IMatchManager
     
     public void RateUser(PublicProfileDto creatorProfile, bool value)
     {
-        //Holt sich MatchDto aus Datenbank
-        var matchDto = _matchesDbs.GetMatchInfo(_profileId, creatorProfile.ProfileId); 
         
         //Erstelle neue MatchDto mit der Bewertung und Zeitpunkt
-        var dto = new MatchDto
+        var dto = new RateDto
         {
             ContentReceiver = _profileId,
+            ContentCreator = creatorProfile.ProfileId,
             ContentReceiverValue = value,
-            ContentCreator = matchDto.ContentCreator,
-            ContentCreatorValue = matchDto.ContentCreatorValue,
-            ContentReceiverRatingDate = DateTime.Now,
-            ContentCreatorRatingDate = matchDto.ContentCreatorRatingDate
+            ContentReceiverRatingDate = DateTime.UtcNow,
         };
         _matchesDbs.SaveMatchInfo(dto);
         
-        //TODO
         //Entferne Profil + HarvestUpload aus der Liste
         var keyToRemove = _profileSuggestionList.Keys
             .SingleOrDefault(p => p.ProfileId == creatorProfile.ProfileId);
@@ -131,4 +128,23 @@ public class MatchManager : IMatchManager
 
     public List<PublicProfileDto> GetActiveMatches()
         => _activeMatchesList;
+
+    
+    public void ReportHarvestUpload(int uploadId, ReportReasons reason)
+    {
+        _harvestDbs.SetReportHarvestUpload(uploadId,reason);
+        //Sobald ein Bild 5 Mal reported worden ist, wird es gelöscht
+        if (_harvestDbs.GetReportCount(uploadId) >= ReportThreshold) 
+            _harvestDbs.DeleteHarvestUpload(uploadId);
+    }
+    
+    public MatchManagerDto GetMatchManager()
+        => new MatchManagerDto
+        {
+            ProfileId = _profileId,
+            TagIds = _tagIds,
+            PreloadCount = _preloadCount,
+            ProfileSuggestionList = _profileSuggestionList,
+            ActiveMatchesList = _activeMatchesList
+        };
 }

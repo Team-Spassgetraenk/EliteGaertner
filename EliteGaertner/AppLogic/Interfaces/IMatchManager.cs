@@ -1,4 +1,5 @@
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 
 namespace AppLogic.Interfaces;
 
@@ -25,10 +26,19 @@ public interface IMatchManager
     //Falls nicht, werden wieder neue Vorschläge generiert.
     public void RateUser(PublicProfileDto targetProfile, bool value);
     
-    //TODO braucht man überhaupt die Methode?
+    //TODO KOMMENTAR FEHLT
     public PublicProfileDto CreateMatch(PublicProfileDto targetProfile);
     
+    //TODO Kommentar fehlt
     public List<PublicProfileDto> UpdateActiveMatches();
 
+    //TODO KOMMENTAR FEHLT
     public List<PublicProfileDto> GetActiveMatches();
+    
+    //TODO KOMMENTAR FEHLT
+    public void ReportHarvestUpload(int uploadId, ReportReasons reason);
+    
+    //TODO METHODE FEHLT!!
+    public MatchManagerDto GetMatchManager();
+
 }

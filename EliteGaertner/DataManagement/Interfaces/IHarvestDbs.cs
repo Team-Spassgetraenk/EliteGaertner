@@ -1,4 +1,5 @@
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 
 namespace DataManagement.Interfaces;
 
@@ -20,9 +21,9 @@ public interface IHarvestDbs
     //TODO Nicolas
     public bool DeleteHarvestUpload(int uploadId);
     
-    //BESCHREIBUNG FEHLT!!!!!
-    public void SetReportHarvestUpload(int uploadId, Enum reason);
+    //TODO
+    public void SetReportHarvestUpload(int uploadId, ReportReasons reason);
 
-    //Beschreibung fehlt
-    public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId);
+    //TODO
+    public int GetReportCount(int uploadId);
 }
