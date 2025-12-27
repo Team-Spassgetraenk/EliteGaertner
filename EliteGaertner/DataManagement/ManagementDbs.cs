@@ -39,7 +39,7 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    public void DeleteHarvestUpload(int uploadId)
+    public bool DeleteHarvestUpload(int uploadId)
     {
         throw new NotImplementedException();
     }
@@ -118,9 +118,31 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    public void SetHarvestUpload(HarvestUploadDto harvestUpload)
+    public bool CreateUploadDbs(HarvestUploadDto uploadDto)
     {
-        throw new NotImplementedException();
+        var harvestUpload = new Harvestupload
+        {
+            Imageurl = uploadDto.ImageUrl,
+            Description = uploadDto.Description ?? string.Empty,
+            Weightgramm = uploadDto.WeightGram,
+            Widthcm = uploadDto.WidthCm,
+            Lengthcm = uploadDto.LengthCm,
+            Uploaddate = uploadDto.UploadDate,
+            Profileid = uploadDto.ProfileId
+            //UploadID sollte von DB erstellt werden
+        };
+
+        try 
+        {
+            _dbContext.Harvestuploads.Add(harvestUpload);
+            var affectedRows = _dbContext.SaveChanges();
+            return affectedRows > 0; //TEst, wurde geschrieben
+        }
+        catch (Exception)
+        {
+            //TODO Loggen "Fehler beim Erstellen von HarvestUpload" 
+            return false;
+        }
     }
 
     public MatchDto GetMatchInfo(int profileIdReceiver, int profileIdCreator)

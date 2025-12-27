@@ -179,8 +179,8 @@ public class MatchManagerTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => Enumerable.Empty<HarvestUploadDto>();
 
-        public void SetHarvestUpload(HarvestUploadDto harvestUpload) { }
-        public void DeleteHarvestUpload(int uploadId) { }
+        public bool SetHarvestUpload(HarvestUploadDto harvestUpload) { }
+        public bool DeleteHarvestUpload(int uploadId) { }
         public void SetReportHarvestUpload(int uploadId, Enum reason) { }
         public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId)
             => Enumerable.Empty<ReportDto>();

@@ -33,10 +33,10 @@ public class HarvestSuggestionTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => throw new NotImplementedException();
 
-        public void SetHarvestUpload(HarvestUploadDto harvestUpload)
+        public bool SetHarvestUpload(HarvestUploadDto harvestUpload)
             => throw new NotImplementedException();
 
-        public void DeleteHarvestUpload(int uploadId)
+        public bool DeleteHarvestUpload(int uploadId)
             => throw new NotImplementedException();
 
         public void SetReportHarvestUpload(int uploadId, Enum reason)

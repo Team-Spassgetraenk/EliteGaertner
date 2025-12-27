@@ -1,119 +1,44 @@
 ﻿using AppLogic.Interfaces;
+using DataManagement.Interfaces;
 using Contracts.Data_Transfer_Objects;
-using DataManagement;
-using DataManagement.Entities;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace AppLogic.Services;
 
 public class UploadServiceImpl : IUploadService
 {
-    //TODO Aleks: Du initialisierst fälschlicherweise die EliteGaertnderDbContext.
-    //TODO Richtig -> IHarvestDbs initialisieren -> die greift auf ManagementDbs zu
-    private readonly EliteGaertnerDbContext _context;
+    private readonly IHarvestDbs _harvestDbs;
     
-    public UploadServiceImpl(EliteGaertnerDbContext context)
+    public UploadServiceImpl(IHarvestDbs harvestDbs)
     {
-        _context = context;
+        _harvestDbs = harvestDbs;
     }
     
-    public bool CreateUpload(int userId, string imageUrl, string description, float weight, int width,  int length)
+    public bool CreateHarvestUpload(HarvestUploadDto uploadDto)
     {
-        Console.WriteLine("Upload angekommen.");
-        try
-        {
-            // Erst Profil mit userId laden (userId == Profileid)
-            var profile = _context.Profiles.Find(userId);
-            if (profile == null)
-                return false;
-
-            //TODO Aleks: Wir erstellen keinen Entitäten, nur DTOs in der AppLogic
-            var entity = new Harvestupload
-            {
-                Imageurl = imageUrl,
-                Description = description,
-                Weightgramm = weight,
-                Widthcm = width,
-                Lengthcm = length,
-                Uploaddate = DateTime.UtcNow,
-                Profileid = userId
-            };
-
-            _context.Harvestuploads.Add(entity);
-            _context.SaveChanges();
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+        var success = _harvestDbs.CreateUploadDbs(uploadDto);
+        Console.WriteLine(success ? "Upload erfolgreich" : "Upload im ManagementDBS fehlgeschlagen"); return success;
     }
-
-    public bool CreateUpload(HarvestUploadDto uploadDto)
-    {
-        Console.WriteLine("Upload angekommen.");
-        try
-        {
-            // Profil prüfen (verhindert ForeignKey-Fehler)
-            var profileExists = _context.Profiles.Any(p => p.Profileid == uploadDto.ProfileId);
-            if (!profileExists)
-            {
-                Console.WriteLine($"Profil mit ID {uploadDto.ProfileId} nicht gefunden.");
-                return false;
-            }
-
-            var entity = new Harvestupload
-            {
-                Imageurl = uploadDto.ImageUrl,
-                Description = uploadDto.Description,
-                Weightgramm = uploadDto.WeightGram,
-                Widthcm = uploadDto.WidthCm,
-                Lengthcm = uploadDto.LengthCm,
-                Uploaddate = uploadDto.UploadDate,
-                Profileid = uploadDto.ProfileId
-            };
-
-            _context.Harvestuploads.Add(entity);
-            _context.SaveChanges();
-            return true;
-        }
-        catch (DbUpdateException ex)
-        {
-            Console.WriteLine($"DB-Fehler: {ex.InnerException?.Message ?? ex.Message}");
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Allgemeiner Fehler: {ex.Message}\nStack: {ex.StackTrace}");
-            return false;
-        }
-        
-    //     try
-    //     {
-    //         var entity = new Harvestupload
-    //         {
-    //             Imageurl = uploadDto.ImageUrl,
-    //             Description = uploadDto.Description,
-    //             Weightgramm = uploadDto.WeightGram,
-    //             Widthcm = uploadDto.WidthCm,
-    //             Lengthcm = uploadDto.LengthCm,
-    //             Uploaddate = uploadDto.UploadDate,
-    //             Profileid = uploadDto.ProfileId
-    //         };
-    //
-    //         _context.Harvestuploads.Add(entity);
-    //         _context.SaveChanges();
-    //         return true;
-    //     }
-    //     catch (Exception)
-    //     {
-    //         Console.WriteLine(Exception.ToString);
-    //         return false;
-    //     }
-     }
-
     
+    
+    public bool CreateHarvestUpload(int userId, string imageUrl, string description, float weight, int width, int length)
+    {
+        var uploadDto = new HarvestUploadDto
+        {
+            ProfileId = userId,
+            ImageUrl = imageUrl,
+            Description = description,
+            WeightGram = weight,
+            WidthCm = width,
+            LengthCm = length,
+            UploadDate = DateTime.UtcNow
+        };
+    
+        bool success = _harvestDbs.CreateUploadDbs(uploadDto);
+        Console.WriteLine(success ? "Upload erfolgreich" : "Upload im ManagementDBS fehlgeschlagen"); 
+        return success;
+    }
+    
+
     public bool DeleteUpload(int uploadId, int userId)
     {
         throw new NotImplementedException();

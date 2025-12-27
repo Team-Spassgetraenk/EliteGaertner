@@ -15,10 +15,10 @@ public interface IHarvestDbs
     public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount);
 
     //TODO Nicolas
-    public void SetHarvestUpload(HarvestUploadDto harvestUpload);
+    bool CreateUploadDbs(HarvestUploadDto uploadDto);
     
     //TODO Nicolas
-    public void DeleteHarvestUpload(int uploadId);
+    public bool DeleteHarvestUpload(int uploadId);
     
     //BESCHREIBUNG FEHLT!!!!!
     public void SetReportHarvestUpload(int uploadId, Enum reason);

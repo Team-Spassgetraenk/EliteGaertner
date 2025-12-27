@@ -189,7 +189,7 @@ _selectedTag = (_selectedTag == tag) ? null : tag;
 
     void Veröffentlichen()
     {
-        if (string.IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild)) return;
+        if (string  .IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild)) return;
 
         // TODO: echten UserId z.B. aus Auth/Context holen
         int userId = 1;
@@ -210,7 +210,7 @@ _selectedTag = (_selectedTag == tag) ? null : tag;
             ProfileId = userId
         };
 
-        bool success = UploadService.CreateUpload(dto);
+        bool success = UploadService.CreateHarvestUpload(dto);
 
         if (success)
         {

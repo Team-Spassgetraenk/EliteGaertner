@@ -62,7 +62,7 @@ public class UploadServiceImplTests : IDisposable
         };
 
         // Act
-        var result = _service.CreateUpload(dto);
+        var result = _service.CreateHarvestUpload(dto);
 
         // Assert
         Assert.True(result);
@@ -89,7 +89,7 @@ public class UploadServiceImplTests : IDisposable
         };
 
         // Act
-        var result = _service.CreateUpload(dto);
+        var result = _service.CreateHarvestUpload(dto);
 
         // Assert
         Assert.False(result);
