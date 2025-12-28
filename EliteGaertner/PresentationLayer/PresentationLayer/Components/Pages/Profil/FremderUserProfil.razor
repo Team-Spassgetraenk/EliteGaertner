@@ -6,81 +6,68 @@
 
 <div class="page-container background-style">
 
-    @* --- TOP BAR: Rangliste und Menü --- *@
+    @* --- TOP BAR --- *@
     <header class="top-bar">
-
-        @* Ranglisten-Icon (links) *@
         <div class="icon-wrapper" @onclick="GoToRanks">
             <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
             <span class="icon-label">Rangliste</span>
         </div>
 
-        @* Titel (Leer, da der Username im Header-Feld steht) *@
-        <h1 class="page-title"></h1>
+        <h1 class="page-title">EliteGärtner.</h1>
 
-        @* Hamburger Menü für Melden/Logout *@
         <div class="header-right-action menu-wrapper">
             <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
             @if (_showLogout)
             {
-            <div class="logout-menu comic-box">
-                <p @onclick="ReportUser">Melden</p> @* Aktion für Fremdprofil *@
-                <p @onclick="NavigateToLogout">Logout &lt;</p>
-            </div>
+                <div class="logout-menu comic-box">
+                    <p @onclick="ReportUser">Melden</p>
+                    <p @onclick="NavigateToLogout">Logout &lt;</p>
+                </div>
             }
         </div>
     </header>
 
-    <div class="scroll-content">
-
-        @* --- Profil-Header Box (Comic-Stil, Dicke Ränder) --- *@
-        <div class="profile-header-box comic-box">
-
-            @* KEIN: Profil Verwalten Button *@
-
-            <div class="profile-info">
-                @* Profilbild (Placeholder) *@
+    @* --- HAUPTBEREICH (Zweispaltig) --- *@
+    <div class="main-profile-layout">
+        
+        @* LINKE SPALTE: Profil-Informationen *@
+        <aside class="left-column">
+            <div class="profile-header-box comic-box">
                 <div class="profile-pic-placeholder">
-                    @* Platzhalter Bild für fremde User *@
                     <img src="pictures/Profil_03.png" alt="Profilbild" class="profile-pic" />
                 </div>
-
-                @* Username *@
                 <h2 class="username-display">@@@UsernameDisplay</h2>
+                <div class="divider"></div>
+                <p class="profile-description">@_bioText</p>
             </div>
+        </aside>
 
-            @* Bio/Beschreibung *@
-            <p class="profile-description">@_bioText</p>
-        </div>
-
-        @* GALERIE: Box im Comic-Stil, die das Grid umschließt *@
-        <div class="harvest-gallery-box comic-box">
-            <div class="harvest-grid">
-
-                @* Statische Bilder (Kein Plus-Icon) *@
-                @foreach (var imgPath in _harvestImages)
-                {
-                <div class="grid-item comic-grid-item">
-                    <img src="@imgPath" alt="Erntebild" class="harvest-photo" />
+        @* RECHTE SPALTE: Scrollbare Galerie (70%) *@
+        <main class="right-column">
+            <div class="harvest-gallery-box comic-box gallery-scroll-container">
+                <div class="harvest-grid">
+                    @foreach (var imgPath in _harvestImages)
+                    {
+                        <div class="grid-item comic-grid-item">
+                            <img src="@imgPath" alt="Erntebild" class="harvest-photo" />
+                        </div>
+                    }
                 </div>
-                }
             </div>
-        </div>
+        </main>
+
     </div>
 
-    @* --- Bottom Nav (Startseite-Stil) --- *@
+    @* --- BOTTOM NAV --- *@
     <footer class="bottom-nav">
         <div class="nav-item" @onclick="GoToMatches">
             <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
             <span>Matches</span>
         </div>
-
         <div class="nav-item" @onclick="GoToMainpage">
             <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
             <span class="elitegaertner-title mt-2">EliteGärtner.</span>
         </div>
-
-        @* Aktives Profil-Icon sollte hier nicht gesetzt sein, da man ein Fremdprofil betrachtet. *@
         <div class="nav-item" @onclick="GoToProfile">
             <img src="pictures/Profil_04.png" alt="Profile" height="40" />
             <span>Profil</span>
@@ -88,288 +75,24 @@
     </footer>
 </div>
 
-<style>
-    /* Globale Container und Schrift */
-    .page-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .background-style {
-        background-image: url('pictures/LightIconBackground.jpeg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        width: 100%;
-        min-height: 100vh;
-        font-family: 'Patrick Hand', cursive, sans-serif;
-    }
-
-    /* --- TOP BAR (Einheitlicher Startseite-Stil) --- */
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 15px;
-        border-bottom: 3px solid #000;
-        background-color: #fff;
-        z-index: 10;
-        box-shadow: 0 4px 0 0 #000;
-        flex-shrink: 0;
-    }
-
-    .page-title {
-        font-size: 28px;
-        font-weight: bold;
-        margin: 0;
-        flex-grow: 1;
-        text-align: center;
-        color: transparent; /* Versteckt den leeren Titel */
-    }
-
-    /* Icon Wrapper (Rangliste) */
-    .icon-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-weight: bold;
-        font-size: 12px;
-        cursor: pointer;
-        width: 60px;
-        transition: transform 0.2s;
-    }
-
-    .icon-wrapper:hover {
-        transform: scale(1.05);
-    }
-
-    .icon-wrapper img {
-        margin-bottom: 2px;
-    }
-
-    /* Rechtes Aktionsfeld (Hamburger Menü) */
-    .header-right-action {
-        width: 60px;
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    /* Hamburger Menü und Logout/Melden */
-    .menu-wrapper {
-        position: relative;
-    }
-
-    .hamburger-icon {
-        font-size: 30px;
-        line-height: 1;
-        color: #000;
-        cursor: pointer;
-    }
-
-    .logout-menu {
-        position: absolute;
-        top: 45px;
-        right: 0px;
-        width: 150px;
-        background-color: #fff;
-        border: 3px solid #000;
-        border-radius: 8px;
-        box-shadow: 3px 3px 0 0 #000;
-        z-index: 20;
-        padding: 5px 0;
-    }
-
-    .logout-menu p {
-        padding: 5px 10px;
-        margin: 0;
-        cursor: pointer;
-        font-size: 16px;
-        text-align: right;
-    }
-
-    .logout-menu p:hover {
-        background-color: #eee;
-    }
-
-    /* --- CONTENT AREA & PROFIL BOX --- */
-    .scroll-content {
-        flex-grow: 1;
-        padding: 20px 15px;
-        overflow-y: auto;
-    }
-
-    .comic-box {
-        /* Dickerer Rand für die Hauptboxen (von ProfilTest übernommen) */
-        border: 5px solid #000;
-        border-radius: 10px;
-        box-shadow: 6px 6px 0 0 #000; /* Größerer Shadow */
-        background-color: #fff;
-    }
-
-    /* Profil Info Box */
-    .profile-header-box {
-        padding: 15px;
-        margin-bottom: 20px;
-        position: relative;
-    }
-
-    .profile-info {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        padding-top: 10px; /* Beibehalten, da es das Layout unter dem (fehlenden) Button ausrichtet */
-    }
-
-    .profile-pic-placeholder {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        border: 2px solid #000;
-        overflow: hidden;
-        margin-right: 15px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #eee;
-    }
-
-    .profile-pic {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .username-display {
-        font-size: 28px;
-        font-weight: bold;
-        margin: 0;
-        color: #000;
-    }
-
-    .profile-description {
-        font-size: 18px;
-        margin-top: 5px;
-        line-height: 1.3;
-        margin-bottom: 0;
-    }
-
-    /* --- UMSCHLIEßENDE GALERIE BOX (von ProfilTest übernommen) --- */
-    .harvest-gallery-box {
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    /* --- BILDER-RASTER (4 Spalten, von ProfilTest übernommen) --- */
-    .harvest-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 17px;
-    }
-
-    .grid-item {
-        position: relative;
-        width: 100%;
-        /* 9:16 Hochformat (von ProfilTest übernommen) */
-        padding-bottom: 177.77%;
-        overflow: hidden;
-    }
-
-    .comic-grid-item {
-        background-color: #fff;
-        /* Dickerer Rand für einzelne Bilder (von ProfilTest übernommen) */
-        border: 4px solid #000;
-        border-radius: 8px;
-        /* Angepasster Shadow (von ProfilTest übernommen) */
-        box-shadow: 4px 4px 0 0 #000;
-    }
-
-    .harvest-photo {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* --- BOTTOM NAV (Startseite-Stil) --- */
-    .bottom-nav {
-        display: flex;
-        justify-content: space-around;
-        padding: 10px 0 20px 0;
-        background: white;
-        border-top: 3px solid #000;
-        z-index: 10;
-        box-shadow: 0 -4px 0 0 #000;
-        flex-shrink: 0;
-    }
-
-    .nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: bold;
-        position: relative;
-        opacity: 1;
-        transition: transform 0.2s;
-        width: 80px;
-        text-align: center;
-    }
-
-    .nav-item:hover {
-        transform: scale(1.05);
-        opacity: 1;
-    }
-
-    /* Der Link zum eigenen Profil wird deaktiviert, da dies das Fremdprofil ist */
-    .nav-item:nth-child(3) {
-        opacity: 0.6;
-    }
-
-    .elitegaertner-title {
-        font-weight: 600;
-        font-size: 1.0rem;
-    }
-</style>
-
 @code {
-[Parameter]
-public string Username { get; set; } = "";
+    [Parameter] public string Username { get; set; } = "";
+    private string _bioText = "Hier steht die Profilbeschreibung des fremden Users... Ein leidenschaftlicher Hobbygärtner, der sich auf seltene Chilisorten spezialisiert hat.";
+    private List<string> _harvestImages = new List<string>
+    {
+        "pictures/Testbilder/Gurken_01.jpg", "pictures/Testbilder/Karotten_01.jpg",
+        "pictures/Testbilder/Kürbisse_01.jpg", "pictures/Testbilder/Auberginen_01.jpg",
+        "pictures/Testbilder/Erdbeeren_01.jpg", "pictures/Testbilder/Trauben_01.jpg",
+        "pictures/Testbilder/Karotten_02.png", "pictures/Testbilder/Tomaten_01.jpg"
+    };
 
-private string _bioText = "Hier steht die Profilbeschreibung des fremden Users... Ein leidenschaftlicher Hobbygärtner, der sich auf seltene Chilisorten spezialisiert hat und regelmäßig an Wettbewerben teilnimmt.";
-private List<string> _harvestImages = new List<string>
-{
-"pictures/Testbilder/Gurken_01.jpg",
-"pictures/Testbilder/Gurken_01.jpg",
-"pictures/Testbilder/Gurken_01.jpg",
-"pictures/Testbilder/Gurken_01.jpg",
-"pictures/Testbilder/Gurken_01.jpg",
-"pictures/Testbilder/Gurken_01.jpg",
-"pictures/Testbilder/Gurken_01.jpg", // Zeige 8 Bilder als Beispiel
-"pictures/Testbilder/Gurken_01.jpg"
-};
-
-private bool _showLogout = false;
-
-public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
-
-private void ToggleLogoutMenu() => _showLogout = !_showLogout;
-private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
-
-private void ReportUser()
-{
-// Logik zum Melden des Benutzers
-Console.WriteLine($"Benutzer {Username} gemeldet.");
-_showLogout = false;
-}
-
-private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
-private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
-private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
-private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+    private bool _showLogout = false;
+    public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
+    private void ToggleLogoutMenu() => _showLogout = !_showLogout;
+    private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
+    private void ReportUser() { _showLogout = false; }
+    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
+    private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
+    private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
+    private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
 }

@@ -5,7 +5,7 @@ using DataManagement.Interfaces;
 using Contracts.Data_Transfer_Objects;
 using System;
 
-namespace  Tests.UnitTests.AppLogicTests
+namespace Tests.UnitTests.AppLogicTests
 {
     [TestClass]
     public class UploadServiceImplTests
@@ -69,18 +69,7 @@ namespace  Tests.UnitTests.AppLogicTests
             int width = 10;
             int length = 20;
 
-            var expectedDto = new HarvestUploadDto
-            {
-                ProfileId = userId,
-                ImageUrl = imageUrl,
-                Description = description,
-                WeightGram = weight,
-                WidthCm = width,
-                LengthCm = length,
-                UploadDate = DateTime.UtcNow
-            };
-
-            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(It.Is<HarvestUploadDto>(dto => 
+            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(It.Is<HarvestUploadDto>(dto =>
                 dto.ProfileId == userId &&
                 dto.ImageUrl == imageUrl &&
                 dto.Description == description &&
@@ -108,6 +97,92 @@ namespace  Tests.UnitTests.AppLogicTests
             // Assert
             Assert.IsFalse(result);
             _mockHarvestDbs.Verify(x => x.CreateUploadDbs(It.IsAny<HarvestUploadDto>()), Times.Once);
+        }
+
+        // NEU: GetUploadDto – gültige Id liefert DTO
+        [TestMethod]
+        public void GetUploadDto_GueltigeId_GibtDtoZurueck()
+        {
+            // Arrange
+            int uploadId = 1;
+            var expectedDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "test.jpg" };
+            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns(expectedDto);
+
+            // Act
+            var result = _uploadService.GetUploadDto(uploadId);
+
+            // Assert
+            Assert.AreEqual(expectedDto, result);
+            _mockHarvestDbs.Verify(x => x.GetUploadDb(uploadId), Times.Once);
+        }
+
+        // NEU: GetUploadDto – ungueltige Id liefert null
+        [TestMethod]
+        public void GetUploadDto_UngueltigeId_GibtNullZurueck()
+        {
+            // Arrange
+            int uploadId = 999;
+            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns((HarvestUploadDto)null);
+
+            // Act
+            var result = _uploadService.GetUploadDto(uploadId);
+
+            // Assert
+            Assert.IsNull(result);
+            _mockHarvestDbs.Verify(x => x.GetUploadDb(uploadId), Times.Once);
+        }
+
+        // NEU: DeleteUpload – gültiger Upload mit ImageUrl
+        [TestMethod]
+        public void DeleteUpload_GueltigerUploadMitImageUrl_GibtDateinameZurueck()
+        {
+            // Arrange
+            int uploadId = 1;
+            int userId = 1;
+            var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "test.jpg" };
+            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns(uploadDto);
+
+            // Act
+            var result = _uploadService.DeleteUpload(uploadId, userId);
+
+            // Assert
+            Assert.AreEqual("test.jpg", result);
+            _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(uploadId), Times.Once);
+        }
+
+        // NEU: DeleteUpload – DTO null
+        [TestMethod]
+        public void DeleteUpload_UploadExistiertNicht_GibtNullZurueck()
+        {
+            // Arrange
+            int uploadId = 999;
+            int userId = 1;
+            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns((HarvestUploadDto)null);
+
+            // Act
+            var result = _uploadService.DeleteUpload(uploadId, userId);
+
+            // Assert
+            Assert.IsNull(result);
+            _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(It.IsAny<int>()), Times.Never);
+        }
+
+        // NEU: DeleteUpload – leere ImageUrl
+        [TestMethod]
+        public void DeleteUpload_LeereImageUrl_GibtNullZurueck()
+        {
+            // Arrange
+            int uploadId = 1;
+            int userId = 1;
+            var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "" };
+            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns(uploadDto);
+
+            // Act
+            var result = _uploadService.DeleteUpload(uploadId, userId);
+
+            // Assert
+            Assert.IsNull(result);
+            _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(It.IsAny<int>()), Times.Never);
         }
     }
 }

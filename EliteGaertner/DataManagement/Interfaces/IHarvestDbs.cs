@@ -19,7 +19,6 @@ public interface IHarvestDbs
     
     public HarvestUploadDto GetUploadDb(int uploadId);
     
-    //TODO Nicolas
     public bool DeleteHarvestUpload(int uploadId);
     
     //TODO

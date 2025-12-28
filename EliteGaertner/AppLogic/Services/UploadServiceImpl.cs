@@ -48,7 +48,7 @@ public class UploadServiceImpl : IUploadService
     {
         var uploadDto = GetUploadDto(uploadId);
         
-        if (uploadDto?.ImageUrl.Length <= 0 )
+        if (uploadDto == null || string.IsNullOrEmpty(uploadDto.ImageUrl))
         {
             Console.WriteLine("Upload oder ImageUrl fehlt");
             return null;

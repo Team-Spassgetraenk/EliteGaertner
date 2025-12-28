@@ -1,0 +1,194 @@
+@page "/RanglisteTest"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght=600&display=swap" rel="stylesheet">
+
+
+<div class="page-container background-style">
+    
+    <header class="top-bar">
+        
+        @* NEU: Titelausrichtung für Rangliste (Kein Link links) *@
+        <div class="icon-wrapper left"></div> @* Abstandshalter für Symmetrie *@
+
+        <h1 class="page-title">Ranglisten</h1>
+
+        <div class="menu-icon-container">
+            <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
+        </div>
+    </header>
+
+    @if (_showLogout)
+    {
+    <div class="logout-menu">
+        <p @onclick="NavigateToLogout">Logout ➜]</p>
+    </div>
+    }
+
+    <div class="scroll-content rangliste-content">
+        
+        <div class="category-selector">
+            <span class="current-category">@_currentCategory.DisplayName</span>
+            <span class="dropdown-arrow" @onclick="ToggleCategoryMenu">▼</span>
+        </div>
+        
+        @if (_showCategoryMenu)
+        {
+            <div class="category-dropdown-menu comic-box-dropdown">
+                @foreach (var cat in _categories)
+                {
+                    <div class="dropdown-item" @onclick="() => SelectCategory(cat)">
+                        @cat.DisplayName
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="rangliste-card comic-box-card">
+            <div class="trophy-icon">
+                <img src="pictures/Rangliste.png" alt="Rangliste" height="80" /> 
+            </div>
+
+            @foreach (var rank in _currentCategory.Ranking)
+            {
+                <div class="rank-entry @GetRankCssClass(rank.Rank)">
+                    <div class="rank-info" @onclick="() => GoToProfile(rank.Username)">
+                        <span class="rank-number">@GetRankPrefix(rank.Username)@rank.Rank</span>
+                        <span class="username-display">@rank.Username</span>
+                    </div>
+                </div>
+            }
+        </div>
+        
+    </div>
+
+    <footer class="bottom-nav">
+        <div class="nav-item" @onclick="GoToMatches">
+            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" /> 
+            <span>Matches</span>
+            @* Roter Punkt (notification-dot) entfernt *@
+        </div>
+        
+        <div class="nav-item" @onclick="GoToMainpage">
+            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" /> 
+            <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
+        </div>
+        
+        <div class="nav-item" @onclick="GoToProfile">
+            <img src="pictures/Profil_04.png" alt="Profile" height="40" /> 
+            <span>Profil</span>
+        </div>
+    </footer>
+</div>
+
+@code {
+    public class RankEntry
+    {
+        public int Rank { get; set; }
+        public string Username { get; set; } = "";
+        public bool IsCurrentUser { get; set; }
+    }
+    
+    public class Category
+    {
+        public string Id { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        public List<RankEntry> Ranking { get; set; } = new();
+    }
+
+    private bool _showLogout = false;
+    private bool _showCategoryMenu = false;
+    private Category _currentCategory = new();
+    
+    private readonly List<Category> _categories = new()
+    {
+        new Category
+        {
+            Id = "gurke",
+            DisplayName = "Längste Gurke",
+            Ranking = new List<RankEntry>
+            {
+                new RankEntry { Rank = 1, Username = "@user_name01" },
+                new RankEntry { Rank = 2, Username = "@user_name02" },
+                new RankEntry { Rank = 3, Username = "@user_name03" },
+                new RankEntry { Rank = 4, Username = "@user_name04" },
+                new RankEntry { Rank = 5, Username = "@user_name05" },
+                new RankEntry { Rank = 17, Username = "Ich", IsCurrentUser = true }, 
+            }
+        },
+        new Category
+        {
+            Id = "aubergine",
+            DisplayName = "Größte Aubergine",
+            Ranking = new List<RankEntry>
+            {
+                new RankEntry { Rank = 1, Username = "@AuberginenKing" },
+                new RankEntry { Rank = 2, Username = "@TomatenMann" },
+                new RankEntry { Rank = 3, Username = "@Gemüsegärtnerin" },
+                new RankEntry { Rank = 4, Username = "@KrautundRüben" },
+                new RankEntry { Rank = 5, Username = "@Karotte33" },
+                new RankEntry { Rank = 12, Username = "Ich", IsCurrentUser = true }, 
+            }
+        }
+    };
+
+    protected override void OnInitialized()
+    {
+        _currentCategory = _categories.First();
+    }
+    
+    private string GetRankCssClass(int rank)
+    {
+        if (rank == 1) return "rank-1";
+        if (rank == 2) return "rank-2";
+        if (rank == 3) return "rank-3";
+        if (_currentCategory.Ranking.Any(r => r.Rank == rank && r.IsCurrentUser)) return "current-user-rank";
+        return "default-rank";
+    }
+
+    private string GetRankPrefix(string username)
+    {
+        return username == "Ich" ? "" : "#";
+    }
+
+    private void ToggleCategoryMenu()
+    {
+        _showCategoryMenu = !_showCategoryMenu;
+    }
+    
+    private void SelectCategory(Category category)
+    {
+        _currentCategory = category;
+        _showCategoryMenu = false;
+    }
+
+    // --- Navigations-Methoden ---
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+    }
+
+    private void NavigateToLogout()
+    {
+        Nav.NavigateTo("/Login", forceLoad: true);
+    }
+
+    private void GoToProfile(string username)
+    {
+        string userUrl = username.TrimStart('@');
+        if (username.ToLower() == "ich")
+        {
+            Nav.NavigateTo("/ProfilTest", forceLoad: true);
+        }
+        else
+        {
+            Nav.NavigateTo($"/profil/{userUrl}", forceLoad: true);
+        }
+    }
+    
+    private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
+    private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
+    private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+}

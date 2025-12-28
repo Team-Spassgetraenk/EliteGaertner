@@ -1,10 +1,11 @@
 @page "/startseite"
 @using Microsoft.AspNetCore.Components.Web
+@using System.Timers
 @inject NavigationManager Nav
+@implements IDisposable
 @rendermode InteractiveServer
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-
 
 <div class="page-container background-style">
     <header class="top-bar">
@@ -21,6 +22,20 @@
             <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
         </div>
     </header>
+    
+    @* --- WERBE-CONTAINER RECHTS --- *@
+    @if (_showAd)
+    {
+        <div class="ad-sidebar">
+            <div class="ad-header">
+                <span class="ad-label">Anzeige</span>
+                <span class="ad-close" @onclick="CloseAd">✖</span>
+            </div>
+            <div class="ad-content">
+                <img src="@_currentAdImage" alt="Werbung" class="ad-image" />
+            </div>
+        </div>
+    }
 
     @* --- NEUES KOMBINIERTES LOGOUT & ADMIN MENÜ --- *@
     @if (_showLogout)
@@ -28,6 +43,11 @@
     <div class="logout-menu admin-menu-ext">
         @* Roter Logout Button *@
         <p class="logout-link" @onclick="NavigateToLogout">Logout ➜]</p>
+        
+        @* Über uns Button *@
+        <div class="admin-header" @onclick="NavigateToAboutUs" style="cursor: pointer; border-bottom: 1px solid #ddd; margin-bottom: 5px;">
+            <span>ℹ️ Über uns</span>
+        </div>
         
         <div class="admin-nav-section">
             <div class="admin-header" @onclick="ToggleAdminNav">
@@ -67,7 +87,7 @@
                 @* --- 1. Linke Spalte: Bild mit kombinierter Username/Tag-Leiste --- *@
                 <div class="tinder-card">
                     <div class="card-image-placeholder">
-                        <img src="pictures/Testbilder/Gurken_01.jpg" alt="Erntebild" class="harvest-image" />
+                        <img src="pictures/Testbilder/Mais_03.png" alt="Erntebild" class="harvest-image" />
                     </div>
 
                     @* Kombiniertes Feld für anklickbaren Username und Tag (Oben links/rechts) *@
@@ -156,31 +176,19 @@
 
                 <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
 
-                <div class="report-reason">
-                    <input type="checkbox" id="abstossende" @onchange="@(e => UpdateReportReason("abstossende Inhalte", e))" checked="@(_selectedReportReason == "abstossende Inhalte")" />
-                    <label for="abstossende">abstossende Inhalte</label>
-                </div>
+                @foreach (var reason in _reportReasons)
+                {
+                    var id = reason.GetHashCode();
 
-                <div class="report-reason">
-                    <input type="checkbox" id="sexuelle" @onchange="@(e => UpdateReportReason("sexuelle Inhalte", e))" checked="@(_selectedReportReason == "sexuelle Inhalte")" />
-                    <label for="sexuelle">sexuelle Inhalte</label>
-                </div>
-
-                <div class="report-reason">
-                    <input type="checkbox" id="gewaltvolle" @onchange="@(e => UpdateReportReason("gewaltvolle Inhalte", e))" checked="@(_selectedReportReason == "gewaltvolle Inhalte")" />
-                    <label for="gewaltvolle">gewaltvolle Inhalte</label>
-                </div>
-
-                <div class="report-reason">
-                    <input type="checkbox" id="catfishing" @onchange="@(e => UpdateReportReason("Catfishing", e))" checked="@(_selectedReportReason == "Catfishing")" />
-                    <label for="catfishing">Catfishing</label>
-                </div>
-
-                <div class="report-reason">
-                    <input type="checkbox" id="spam" @onchange="@(e => UpdateReportReason("Spam", e))" checked="@(_selectedReportReason == "Spam")" />
-                    <label for="spam">Spam</label>
-                </div>
-
+                    <div class="report-reason">
+                        <input type="checkbox"
+                               id="@id"
+                               @onchange="@(e => UpdateReportReason(reason, e))"
+                               checked="@(_selectedReportReason == reason)" />
+                        <label for="@id">@reason</label>
+                    </div>
+                }
+                
                 <div class="modal-actions">
                     <button class="report-button" @onclick="ReportProfile">Melden</button>
                     <div class="close-modal-icon" @onclick="CloseReportModal">
@@ -212,12 +220,70 @@
 </div>
 
 @code {
-private bool _showLogout = false;
-private bool _showAdminNav = false; 
-private bool _showReportModal = false;
-private bool _isProfileVisible = true;
-private string _selectedReportReason = "";
-private string _userName1 = "@user_name1";
+    private bool _showLogout = false;
+    private bool _showAboutUs = false;
+    private bool _showAdminNav = false; 
+    private bool _showReportModal = false;
+    private bool _isProfileVisible = true;
+    private string _selectedReportReason = "";
+    private string _userName1 = "@user_name1";
+    private readonly string[] _reportReasons =
+    {
+        "Sieht aus wie ein Stockfoto.",
+        "Beschreibung passt nicht zum Bild.",
+        "Verdacht auf Fake-Upload.",
+        "Mehrfach hochgeladenes Bild.",
+        "Zu dunkel aufgenommen, schwer erkennbar.",
+        "Kategorie wirkt unpassend für das Bild.", 
+        "Text enthält unpassende Formulierungen.", 
+        "Bildqualität ist zu niedrig.", 
+        "Vermutlich nicht selbst angebaut.", 
+        "Kein Obst, gehört eher in Gemüse-Kategorie."
+    };
+
+    /* Werbe-Logik */
+    private bool _showAd = true;
+    private string _currentAdImage = "pictures/ads/pimpyourblechad02.jpg";
+    private int _adCounter = 0;
+    private Timer? _adTimer;
+    private string[] _adImages = new[] 
+    { 
+        "pictures/ads/pimpyourblechad02.jpg",
+        "pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg",
+        "pictures/ads/GrukenStandAd.jpg",
+        "pictures/ads/OBI_werbung.jpg",
+        "pictures/ads/ralphschumacherad.png",
+        "pictures/ads/werbeplakat-leberkaessemmel.jpg",
+        "pictures/ads/DieLilaVersuchung.jpg",
+        "pictures/ads/pimpyourblech01.jpg",
+        "pictures/ads/werbeplakat-leberkassemmel02.jpg",
+        "pictures/ads/WürstlStandAd.jpg",
+        "pictures/ads/pimpyourblechad03.jpg"
+    };
+
+    protected override void OnInitialized()
+    {
+        _currentAdImage = _adImages[0];
+        _adTimer = new Timer(6000); //6 sekunden pause zwischen jeder werbung
+        _adTimer.Elapsed += async (sender, e) =>
+        {
+            _adCounter++;
+            _currentAdImage = _adImages[_adCounter % _adImages.Length];
+            await InvokeAsync(StateHasChanged);
+        };
+        _adTimer.AutoReset = true;
+        _adTimer.Enabled = true;
+    }
+
+    private async Task CloseAd() 
+    { 
+        _showAd = false; 
+        await Task.Delay(10000); // 10 Sek Pause
+        _showAd = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => _adTimer?.Dispose();
 
 private void ToggleLogoutMenu()
 {
@@ -233,6 +299,7 @@ private void NavTo(string path)
     Nav.NavigateTo(path, forceLoad: true);
 }
 
+private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns", forceLoad: true);
 private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
 private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
 private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
@@ -261,284 +328,3 @@ private void DislikeProfile() => Console.WriteLine("0");
 private void LikeProfile() => Console.WriteLine("1");
 private string GetUsernameUrl() => _userName1.TrimStart('@');
 }
-
-<style>
-    .page-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .background-style {
-        background-image: url('pictures/LightIconBackground.jpeg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        width: 100%;
-        min-height: 100vh;
-        font-family: 'Patrick Hand', cursive, sans-serif;
-        padding-top: 1px;
-    }
-
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 15px;
-        border-bottom: 3px solid #000;
-        background-color: #fff;
-        z-index: 10;
-        box-shadow: 0 4px 0 0 #000;
-    }
-
-    .page-title {
-        font-size: 1.8rem;
-        margin: 0;
-        font-weight: bold;
-        color: black;
-    }
-
-    .icon-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-weight: bold;
-        font-size: 12px;
-        cursor: pointer;
-        transition: transform 0.2s;
-    }
-
-    .icon-wrapper:hover { transform: scale(1.05); }
-    .icon-wrapper img { margin-bottom: 2px; }
-    .menu-icon-container { cursor: pointer; }
-    .menu-icon { font-size: 30px; line-height: 1; color: #000; }
-
-    /* --- Logout-Menü (Dropdown) --- */
-    .logout-menu {
-        position: absolute;
-        top: 60px;
-        right: 15px;
-        width: 180px; 
-        background-color: #fff;
-        border: 3px solid #000;
-        border-radius: 8px;
-        box-shadow: 3px 3px 0 0 #000;
-        z-index: 20;
-        padding: 0;
-        overflow: hidden;
-    }
-
-    /* Logout Styling: Hellroter Hintergrund, rote Schrift */
-    .logout-link {
-        padding: 8px 10px;
-        margin: 0;
-        cursor: pointer;
-        font-size: 18px;
-        text-align: right;
-        border-bottom: 2px solid #000;
-        background-color: #fff0f0; 
-        color: #D62828; 
-        font-weight: bold;
-    }
-
-    .logout-link:hover {
-        background-color: #ffdada;
-    }
-
-    .admin-header {
-        background-color: #f0f0f0;
-        padding: 8px 10px;
-        font-size: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #000;
-    }
-
-    .admin-scroll-area {
-        max-height: 200px;
-        overflow-y: auto;
-        background-color: #fff;
-    }
-
-    .admin-link {
-        padding: 6px 10px;
-        font-size: 14px;
-        border-bottom: 1px solid #ddd;
-        cursor: pointer;
-    }
-
-    .admin-link:hover {
-        background-color: #8B45B3;
-        color: white;
-    }
-
-    /* --- Restliche Tinder-Card Styles (Unverändert) --- */
-    .tinder-card-area {
-        flex-grow: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        position: relative;
-    }
-
-    .tinder-wrapper-card {
-        width: 100%;
-        max-width: 700px;
-        height: 90vh;
-        max-height: 600px;
-        background-color: #ffffff;
-        border: 3px solid #000;
-        border-radius: 15px;
-        box-shadow: 5px 5px 0 0 #000;
-        position: relative;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .main-content-flex { display: flex; width: 100%; height: 100%; gap: 20px; }
-
-    .tinder-card {
-        flex: 1.5;
-        border: 3px solid #000;
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 3px 3px 0 0 #000;
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    .card-image-placeholder { width: 100%; flex-grow: 1; background-color: #eee; overflow: hidden; }
-    .harvest-image { width: 100%; height: 100%; object-fit: cover; }
-
-    .username-tag-combo {
-        position: absolute;
-        bottom: 26px;
-        left: 15px;
-        right: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #ffffff;
-        color: #000000;
-        padding: 8px 10px;
-        border-radius: 5px;
-        border: 3px solid #000000;
-        box-shadow: 3px 3px 0 0 #000;
-        font-size: 24px;
-        z-index: 5;
-        line-height: 1;
-    }
-
-    .username-link { color: #000; text-decoration: none; font-weight: bold; cursor: pointer; }
-    .tag-label span { color: #000000; padding: 5px 5px; font-weight: bold; white-space: nowrap; }
-
-    .right-info-stack {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        height: 100%;
-        border: 3px solid #000;
-        border-radius: 8px;
-        background-color: rgba(255, 255, 255, 0.95);
-        box-shadow: 3px 3px 0 0 #000;
-        padding: 15px;
-    }
-
-    .white-comic-box {
-        background-color: #fff;
-        color: #000;
-        padding: 10px;
-        border-radius: 8px;
-        border: 3px solid #000;
-        box-shadow: 3px 3px 0 0 #000;
-    }
-
-    .param-icon-circle {
-        width: 35px; height: 35px; min-width: 35px;
-        border-radius: 50%; border: 3px solid #000;
-        background-color: #eee; box-shadow: 1px 1px 0 0 #000;
-        display: flex; justify-content: center; align-items: center;
-        font-size: 19px; margin-right: 15px;
-    }
-
-    .param-content-wrapper { flex-grow: 1; }
-    .parameter-wrapper-vertical { display: flex; flex-direction: column; gap: 10px; flex: 0 0 auto; }
-    .parameter-wrapper-vertical .white-comic-box { width: 100%; padding: 8px 10px; display: flex; align-items: center; }
-    .param-title { font-weight: bold; margin: 0; font-size: 19px; line-height: 1.2; }
-    .param-value { font-size: 21px; font-weight: 800; margin: 0; line-height: 1.2; }
-
-    .comment-box { flex: 1; overflow-y: auto; }
-    .comment-label { font-weight: bold; margin-top: 0; margin-bottom: 5px; color: #000000; font-size: 23px; }
-    .comment-text { font-size: 17px; margin-bottom: 0; }
-
-    .rating-icons-in-stack {
-        margin-top: auto;
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        padding-top: 15px;
-        border-top: 2px dashed #000;
-    }
-
-    .rating-icon {
-        width: 55px; height: 55px; border-radius: 50%;
-        display: flex; justify-content: center; align-items: center;
-        cursor: pointer; border: 3px solid #000;
-        position: relative; box-shadow: 3px 3px 0 0 #000;
-        transition: transform 0.1s ease;
-    }
-
-    .rating-icon:active { transform: translate(3px, 3px) scale(0.95); box-shadow: 0 0 0 0 #000; }
-    .dislike-icon { background-color: #D62828; font-size: 28px !important; }
-    .like-icon { background-color: #4CAF50; font-size: 28px !important; }
-    .flag-icon, .settings-icon { background-color: #fff; }
-
-    .bottom-nav {
-        display: flex;
-        justify-content: space-around;
-        padding: 10px 0 20px 0;
-        background: white;
-        border-top: 3px solid #000;
-        z-index: 10;
-        box-shadow: 0 -4px 0 0 #000;
-        flex-shrink: 0;
-    }
-
-    .nav-item {
-        display: flex; flex-direction: column; align-items: center;
-        cursor: pointer; font-size: 0.9rem; width: 80px;
-        text-align: center; color: black; transition: transform 0.2s;
-        opacity: 1; font-weight: bold;
-    }
-
-    .nav-item:hover { transform: scale(1.05); }
-
-    .report-modal-overlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        display: flex; justify-content: center; align-items: center;
-        background-color: rgba(0, 0, 0, 0.5); z-index: 50;
-    }
-
-    .report-modal {
-        width: 80%; max-width: 300px; background-color: #fff; padding: 20px;
-        border: 3px solid #000; border-radius: 10px; box-shadow: 5px 5px 0 0 #000;
-    }
-
-    .report-button {
-        background-color: #D62828; color: white; border: 3px solid #000;
-        border-radius: 8px; padding: 8px 15px; font-weight: bold;
-        cursor: pointer; box-shadow: 3px 3px 0 0 #000;
-    }
-</style>
