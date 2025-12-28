@@ -108,7 +108,7 @@
             };
 
             // Direkt ans Interface weitergeben
-            bool success = ProfileMgm.SetContactVisibility(contactDto);
+            bool success = ProfileMgm.UpdateContactVisibility(contactDto); //Jonas, falls hier mergeconflict entsteht - übernehmen, methodenname hat sich geändert
 
             if (success)
             {

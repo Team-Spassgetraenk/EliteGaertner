@@ -9,7 +9,7 @@ public interface IUploadService
 
    bool CreateHarvestUpload(HarvestUploadDto uploadDto);
     
-    bool DeleteUpload(int uploadId, int userId);
+    string DeleteUpload(int uploadId, int userId);
 
     List<HarvestUploadDto> GetUserUploads(int userId);
 }

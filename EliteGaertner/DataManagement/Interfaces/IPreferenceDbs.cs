@@ -10,6 +10,6 @@ public interface IPreferenceDbs
 
     
     //Änder die Preference des Users
-    public void SetUserPreference(int profileId, PreferenceDto newUserPreference);
+    public bool SetUserPreference(List<PreferenceDto> preferences);
 
 }

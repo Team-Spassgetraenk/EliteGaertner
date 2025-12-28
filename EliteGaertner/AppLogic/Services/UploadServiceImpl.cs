@@ -37,11 +37,28 @@ public class UploadServiceImpl : IUploadService
         Console.WriteLine(success ? "Upload erfolgreich" : "Upload im ManagementDBS fehlgeschlagen"); 
         return success;
     }
-    
 
-    public bool DeleteUpload(int uploadId, int userId)
+    public HarvestUploadDto GetUploadDto(int uploadId)
     {
-        throw new NotImplementedException();
+       return _harvestDbs.GetUploadDb(uploadId);
+    }
+
+    public string DeleteUpload(int uploadId, int userId) //Hier wird null zurückgegeben, wenn nicht existiert löschung
+                                                         // des Bildes muss architekturwegens in .razor abgehandelt werden
+    {
+        var uploadDto = GetUploadDto(uploadId);
+        
+        if (uploadDto?.ImageUrl.Length <= 0 )
+        {
+            Console.WriteLine("Upload oder ImageUrl fehlt");
+            return null;
+        }
+
+        var fileName = uploadDto.ImageUrl;
+        
+        _harvestDbs.DeleteHarvestUpload(uploadId);
+
+        return fileName;
     }
 
     public List<HarvestUploadDto> GetUserUploads(int userId)

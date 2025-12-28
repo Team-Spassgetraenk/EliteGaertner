@@ -9,21 +9,26 @@ public interface IProfileDbs
     //WICHTIG: Hier gibt die Methode eine DTO zurück, in der die HarvestUpload und PreferenceDtos
     //null sind! In der AppLogic muss man dann zu der PrivateProfileDto die HarvestUploads und PreferenceTags
     //mit einem neuinitialisierten PrivateProfileDto hinzufügen, die man dann in den Presentation Layer übergibt.
+    
+    public bool CheckUsernameExists(string username);
+    
     public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials);
+    
+    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile);
 
-    //TODO Nicolas
     public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile);
     
-    //Gibt die Entität des Profils zurück
     public Profile? GetProfile(int profileId);
     
-    //Erstellt aus der Entität Profil ein PrivateProfileDto
     public PrivateProfileDto GetPrivateProfile(int profileId);
     
-    //Erstellt aus der Entität Profil ein PublicProfileDto
     public PublicProfileDto GetPublicProfile(int profileId);
     
-
-    //TODO Nicolas
+    public bool UpdateContactVisibility(ContactVisibilityDto dto);
+    
     public int? CheckPassword( string eMail, string passwordHash);
+    
+    public IEnumerable<PreferenceDto> GetUserPreference(int profileId);
+    
+    public bool SetUserPreference(List<PreferenceDto> preferences);
 }

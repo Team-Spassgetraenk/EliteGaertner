@@ -1,5 +1,4 @@
-using System.Diagnostics.Tracing;
-using System.Runtime.CompilerServices;
+
 using Contracts.Data_Transfer_Objects;
 using Contracts.Enumeration;
 using DataManagement.Entities;
@@ -62,6 +61,30 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         var rows = _dbContext.SaveChanges(); //checkt ob db überhaupt schreibt
         return rows > 0;
         
+    }
+
+    public HarvestUploadDto GetUploadDb(int uploadId)
+    {
+        if (uploadId <= 0)
+            return new HarvestUploadDto();
+
+        var dto = _dbContext.Harvestuploads
+            .AsNoTracking()
+            .Where(h => h.Uploadid == uploadId)
+            .Select(h => new HarvestUploadDto()
+            {
+                UploadId = h.Uploadid,
+                ImageUrl = h.Imageurl,
+                Description = h.Description,
+                WeightGram = h.Weightgramm,
+                WidthCm = h.Widthcm,
+                LengthCm = h.Lengthcm,
+                UploadDate = h.Uploaddate,
+                ProfileId = h.Profileid
+            })
+            .SingleOrDefault();
+
+        return dto ?? new HarvestUploadDto();
     }
 
     //TODO LÖSCHUNG funktioniert noch nicht, da ich noch nicht die Abhängigkeiten mitlösche
@@ -195,12 +218,8 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
 
         return result;
     }
-
-    public void SetHarvestUpload(HarvestUploadDto harvestUpload)
-    {
-        throw new NotImplementedException();
-    }
-
+    
+    
     public IEnumerable<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
     {
         //Überprüfe, ob ProfileId <= 0 ist. Falls ja -> Gib leere Liste zurück 
@@ -299,6 +318,21 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         _dbContext.SaveChanges();
     }
 
+    public int? CheckPassword(string eMail, string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(eMail) || string.IsNullOrWhiteSpace(passwordHash))
+            return null;
+        
+        var normalizedEmail = eMail.Trim().ToLowerInvariant();
+        var profile = _dbContext.Profiles
+            .AsNoTracking()
+            .SingleOrDefault(p => 
+                p.Email == normalizedEmail && 
+                p.Passwordhash == passwordHash);
+        
+        return profile?.Profileid;
+    }
+
     public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
     {
         //Falls die profileId <= 0 ist, return ein leeres PreferenceDto Enumerable 
@@ -321,11 +355,59 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    public void SetUserPreference(int userId, PreferenceDto newUserPreference)
+    public bool SetUserPreference(List<PreferenceDto> preferences) //Wichtiger Hinweis: Methode kann bei Aufruf nur für
+                                                                   //eine ProfileID (die erste in der Liste) überschreiben, damit
+                                                                   //werden nicht ausversehen andere Nutzer editiert
     {
-        throw new NotImplementedException();
-    }
+        // Input-Validierung (Write-Operation -> Exceptions)
+        if (preferences == null || preferences.Count <= 0)
+        {
+            Console.WriteLine("Keine Perferences Ausgewählt mindestens 1");
+            return false;   //Fehler aus PresLayer abfangen
+        }
+
+        //ProfileId muss bei allen gleich sein
+        var profileId = preferences.First().Profileid;
+        if (profileId <= 0)
+        {throw new ArgumentException("ProfileId muss größer als 0 sein.", nameof(preferences));}
+        
+        // 1. Bestehende Preferences dieses Profils löschen
+        var existingPreferences = _dbContext.Profilepreferences
+            .Where(pp => pp.Profileid == profileId);
     
+        _dbContext.Profilepreferences.RemoveRange(existingPreferences);
+    
+        // 2. Neue Preferences hinzufügen
+        var newPreferences = preferences.Select(p => new Profilepreference
+        {
+            Tagid = p.TagId,
+            Profileid = p.Profileid,
+            Dateupdated = p.DateUpdated == default 
+                ? DateTime.UtcNow 
+                : p.DateUpdated
+        }).ToList();
+    
+        _dbContext.Profilepreferences.AddRange(newPreferences);
+        
+        var rowsAffected = _dbContext.SaveChanges();
+    
+        return rowsAffected > 0;
+    }
+
+    public bool CheckUsernameExists(string username)
+    {
+        // Falls username null oder leer -> true keine Vergabe
+        if (string.IsNullOrWhiteSpace(username))
+            return false;
+    
+        // Normalisiere username (wie in SetNewProfile)
+        var normalizedUsername = username.Trim().ToLowerInvariant();
+        
+        return _dbContext.Profiles
+            .AsNoTracking()
+            .Any(p => p.Username == normalizedUsername);
+    }
+
     public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
     {
         
@@ -400,15 +482,58 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         return result;
     }
 
-    //TODO Nicolas
-    public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
+    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
     {
-        throw new NotImplementedException();
+        if (privateProfile == null)
+            return new PrivateProfileDto();
+        
+        // Credential DTO aus PrivateProfileDto kopieren
+        var credentials = new CredentialProfileDto
+        {
+            EMail = privateProfile.EMail,
+            PasswordHash = privateProfile.PasswordHash
+        };
+    
+        return SetNewProfile(privateProfile, credentials);
     }
 
-    public int? CheckPassword(string eMail, string passwordHash)
+
+    public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
     {
-        throw new NotImplementedException();
+        if (privateProfile == null || privateProfile.ProfileId <= 0)
+            throw new ArgumentNullException(nameof(privateProfile), "Dto darf nicht null sein, oder ID negativ");
+   
+        // Profil aus Datenbank laden 
+        var profile = _dbContext.Profiles
+            .SingleOrDefault(p => p.Profileid == privateProfile.ProfileId);
+
+        if (profile == null)
+            throw new ArgumentException($"Profil mit ID {privateProfile.ProfileId} nicht gefunden.", nameof(privateProfile.ProfileId));
+
+        // DTO-Werte auf Entity mappen (alle editierbaren Felder)
+        profile.Profilepictureurl = privateProfile.ProfilepictureUrl;
+        profile.Username = privateProfile.UserName?.Trim().ToLowerInvariant();
+        profile.Firstname = privateProfile.FirstName?.Trim();
+        profile.Lastname = privateProfile.LastName?.Trim();
+        profile.Profiletext = privateProfile.Profiletext;
+        profile.Sharemail = privateProfile.ShareMail;
+        profile.Sharephonenumber = privateProfile.SharePhoneNumber;
+    
+        // Email und PhoneNumber nur bei Nicht-Null überschreiben
+        if (!string.IsNullOrWhiteSpace(privateProfile.EMail))
+            profile.Email = privateProfile.EMail.Trim().ToLowerInvariant();
+        if (!string.IsNullOrWhiteSpace(privateProfile.Phonenumber))
+            profile.Phonenumber = privateProfile.Phonenumber?.Trim();
+
+        // Änderungen persistieren
+        var rowsAffected = _dbContext.SaveChanges();
+        if (rowsAffected > 0)
+        {
+            return GetPrivateProfile(privateProfile.ProfileId);
+        }
+    
+        // Fallback: Leeres DTO bei keinem Update
+        return new PrivateProfileDto();
     }
     
     public Profile? GetProfile(int profileId)
@@ -465,6 +590,7 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
         {
             ProfileId = p.Profileid,
             UserName = p.Username,
+            ProfilepictureUrl = p.Profilepictureurl,
             FirstName = p.Firstname,
             LastName = p.Lastname,
             EMail = p.Email,
@@ -480,4 +606,29 @@ public class ManagementDbs : IHarvestDbs, IMatchesDbs, IPreferenceDbs, IProfileD
 
         return result;
     }
+
+    public bool UpdateContactVisibility(ContactVisibilityDto dto)
+    {
+        if (dto == null || dto.UserId <= 0)
+            throw new ArgumentException("Ungültiges DTO.");
+
+        var workingcopy = GetProfile(dto.UserId);
+        if (workingcopy == null)
+            throw new ArgumentException("Profil nicht gefunden.");
+
+        // Nur bei Nicht-Null überschreiben
+        if (!string.IsNullOrWhiteSpace(dto.EMail))
+            workingcopy.Email = dto.EMail.Trim().ToLowerInvariant();
+        
+        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
+            workingcopy.Phonenumber = dto.PhoneNumber;
+    
+        workingcopy.Sharemail = dto.ShareMail;
+        workingcopy.Sharephonenumber = dto.SharePhoneNumber;
+    
+        var rowsAffected = _dbContext.SaveChanges();
+        return rowsAffected > 0;
+    }
+    
+    
 }
