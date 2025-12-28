@@ -9,153 +9,123 @@
 
 <div class="page-container background-style">
     <header class="top-bar">
-
         <div class="icon-wrapper left" @onclick="GoToRanks">
             <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
             <span class="icon-label">Rangliste</span>
         </div>
-        
         <h1 class="page-title">EliteGärtner.</h1>
-
-
         <div class="menu-icon-container">
             <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
         </div>
     </header>
-    
-    @* --- WERBE-CONTAINER RECHTS --- *@
+
     @if (_showAd)
     {
-        <div class="ad-sidebar">
-            <div class="ad-header">
-                <span class="ad-label">Anzeige</span>
-                <span class="ad-close" @onclick="CloseAd">✖</span>
-            </div>
-            <div class="ad-content">
-                <img src="@_currentAdImage" alt="Werbung" class="ad-image" />
-            </div>
+    <div class="ad-sidebar">
+        <div class="ad-header">
+            <span class="ad-label">Anzeige</span>
+            <span class="ad-close" @onclick="CloseAd">✖</span>
         </div>
+        <div class="ad-content">
+            <img src="@_currentAdImage" alt="Werbung" class="ad-image" />
+        </div>
+    </div>
     }
 
-    @* --- NEUES KOMBINIERTES LOGOUT & ADMIN MENÜ --- *@
     @if (_showLogout)
     {
     <div class="logout-menu admin-menu-ext">
-        @* Roter Logout Button *@
-        <p class="logout-link" @onclick="NavigateToLogout">Logout ➜]</p>
-        
-        @* Über uns Button *@
-        <div class="admin-header" @onclick="NavigateToAboutUs" style="cursor: pointer; border-bottom: 1px solid #ddd; margin-bottom: 5px;">
+        <p class="logout-link" @onclick="NavigateToLogout">Logout ➜</p>
+        <div class="admin-header" @onclick="NavigateToAboutUs">
             <span>ℹ️ Über uns</span>
         </div>
-        
         <div class="admin-nav-section">
             <div class="admin-header" @onclick="ToggleAdminNav">
                 <span>🛠 Admin-Navigation</span>
                 <span style="font-size: 12px;">@(_showAdminNav ? " ▲" : " ▼")</span>
             </div>
-            
             @if (_showAdminNav)
             {
-                <div class="admin-scroll-area">
-                    <div class="admin-link" @onclick='() => NavTo("/")'>Login</div>
-                    <div class="admin-link" @onclick='() => NavTo("/registrierung")'>Registrierung</div>
-                    <div class="admin-link" @onclick='() => NavTo("/registrierung/interessen")'>Interessen</div>
-                    <div class="admin-link" @onclick='() => NavTo("/registrierung/profilerstellung")'>Profilerstellung</div>
-                    <div class="admin-link" @onclick='() => NavTo("/ernte-hochladen")'>Ernte Upload</div>
-                    <div class="admin-link" @onclick='() => NavTo("/profiltest")'>Profil (Eigen)</div>
-                    <div class="admin-link" @onclick='() => NavTo("/profil/profilverwaltung")'>Verwaltung</div>
-                    <div class="admin-link" @onclick='() => NavTo("/profil/fremder-user")'>Profil (Fremd)</div>
-                    <div class="admin-link" @onclick='() => NavTo("/startseite")'>Startseite</div>
-                    <div class="admin-link" @onclick='() => NavTo("/präferenzeinstellungen")'>Präferenzen</div>
-                    <div class="admin-link" @onclick='() => NavTo("/ranglistetest")'>Rangliste</div>
-                    <div class="admin-link" @onclick='() => NavTo("/matchestest")'>Matches</div>
-                </div>
+            <div class="admin-scroll-area">
+                <div class="admin-link" @onclick='() => NavTo("/")'>Login</div>
+                <div class="admin-link" @onclick='() => NavTo("/registrierung")'>Registrierung</div>
+                <div class="admin-link" @onclick='() => NavTo("/registrierung/interessen")'>Interessen</div>
+                <div class="admin-link" @onclick='() => NavTo("/registrierung/profilerstellung")'>Profilerstellung</div>
+                <div class="admin-link" @onclick='() => NavTo("/ernte-hochladen")'>Ernte Upload</div>
+                <div class="admin-link" @onclick='() => NavTo("/profiltest")'>Profil (Eigen)</div>
+                <div class="admin-link" @onclick='() => NavTo("/profil/profilverwaltung")'>Verwaltung</div>
+                <div class="admin-link" @onclick='() => NavTo("/profil/fremder-user")'>Profil (Fremd)</div>
+                <div class="admin-link" @onclick='() => NavTo("/startseite")'>Startseite</div>
+                <div class="admin-link" @onclick='() => NavTo("/präferenzeinstellungen")'>Präferenzen</div>
+                <div class="admin-link" @onclick='() => NavTo("/ranglistetest")'>Rangliste</div>
+                <div class="admin-link" @onclick='() => NavTo("/matchestest")'>Matches</div>
+            </div>
             }
         </div>
     </div>
     }
 
     <div class="tinder-card-area">
-        @if (_isProfileVisible)
+        @if (_isProfileVisible && _currentHarvest != null)
         {
-        <div class="tinder-wrapper-card">
-
-            @* Bild und Info-Spalte nebeneinander *@
+        <div class="tinder-wrapper-card @_animationClass" @key="_harvestIndex">
             <div class="main-content-flex">
-
-                @* --- 1. Linke Spalte: Bild mit kombinierter Username/Tag-Leiste --- *@
                 <div class="tinder-card">
                     <div class="card-image-placeholder">
-                        <img src="pictures/Testbilder/Mais_03.png" alt="Erntebild" class="harvest-image" />
+                        <img src="@_currentHarvest.ImageUrl" alt="Erntebild" class="harvest-image" />
                     </div>
-
-                    @* Kombiniertes Feld für anklickbaren Username und Tag (Oben links/rechts) *@
                     <div class="username-tag-combo">
-                        @* ANKLICKBARER USERNAME *@
                         <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
-                            <span class="username-label">@_userName1</span>
+                            <span class="username-label">@_currentHarvest.Username</span>
                         </a>
-
                         <div class="tag-label">
-                            <span>Gurken 🥒</span>
+                            <span>@_currentHarvest.Tag</span>
                         </div>
                     </div>
                 </div>
 
-                @* 2. Rechte Spalte: Parameter (gestapelt), Kommentar und Buttons *@
                 <div class="right-info-stack">
-
-                    @* Parameter Felder (Gewicht & Größe) *@
                     <div class="parameter-wrapper-vertical">
                         <div class="white-comic-box">
-                            <div class="param-icon-circle">
-                                <span>⚖️</span>
-                            </div>
+                            <div class="param-icon-circle">⚖️</div>
                             <div class="param-content-wrapper">
                                 <p class="param-title">Gewicht</p>
-                                <p class="param-value">300 g</p>
+                                <p class="param-value">@_currentHarvest.Weight</p>
                             </div>
                         </div>
                         <div class="white-comic-box">
-                            <div class="param-icon-circle">
-                                <span>📏</span>
-                            </div>
+                            <div class="param-icon-circle">📏</div>
                             <div class="param-content-wrapper">
                                 <p class="param-title">Länge</p>
-                                <p class="param-value">25 cm</p>
+                                <p class="param-value">@_currentHarvest.Length</p>
                             </div>
                         </div>
                         <div class="white-comic-box">
-                            <div class="param-icon-circle">
-                                <span>📐</span>
-                            </div>
+                            <div class="param-icon-circle">📐</div>
                             <div class="param-content-wrapper">
                                 <p class="param-title">Breite</p>
-                                <p class="param-value">67 cm</p>
+                                <p class="param-value">@_currentHarvest.Width</p>
                             </div>
                         </div>
                     </div>
 
-                    @* Beschreibung *@
                     <div class="comment-box white-comic-box">
                         <p class="comment-label">Erntebeschreibung</p>
-                        <p class="comment-text">Hier könnte ein Kommentar zur Ernte stehen, der maximal 150 Zeichen umfasst und alle relevanten Infos kurz, präzise und übersichtlich vermittelt...</p>
+                        <p class="comment-text">@_currentHarvest.Description</p>
                     </div>
 
-                    @* Bewertungs-Icons *@
                     <div class="rating-icons-in-stack">
                         <div class="rating-icon flag-icon" @onclick="FlagProfile">
                             <span style="font-size: 20px;">🚩</span>
                         </div>
-                        <div class="rating-icon dislike-icon" @onclick="DislikeProfile">
+                        <div class="rating-icon dislike-icon" @onclick="() => HandleSwipe(false)">
                             <span style="font-size: 24px;">❌</span>
                         </div>
-                        <div class="rating-icon like-icon" @onclick="LikeProfile">
+                        <div class="rating-icon like-icon" @onclick="() => HandleSwipe(true)">
                             <span style="font-size: 24px;">💚</span>
                         </div>
                         <div class="rating-icon settings-icon" @onclick="NavigateToPreferences">
-                            <img src="pictures/EinstellungenIcon.png" alt="Matches" height="27" />
+                            <img src="pictures/EinstellungenIcon.png" alt="Einstellungen" height="27" />
                         </div>
                     </div>
                 </div>
@@ -173,22 +143,16 @@
         {
         <div class="report-modal-overlay">
             <div class="report-modal">
-
                 <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
-
                 @foreach (var reason in _reportReasons)
                 {
-                    var id = reason.GetHashCode();
-
-                    <div class="report-reason">
-                        <input type="checkbox"
-                               id="@id"
-                               @onchange="@(e => UpdateReportReason(reason, e))"
-                               checked="@(_selectedReportReason == reason)" />
-                        <label for="@id">@reason</label>
-                    </div>
+                var id = reason.GetHashCode();
+                <div class="report-reason">
+                    <input type="checkbox" id="@id" @onchange="@(e => UpdateReportReason(reason, e))"
+                           checked="@(_selectedReportReason == reason)" />
+                    <label for="@id">@reason</label>
+                </div>
                 }
-                
                 <div class="modal-actions">
                     <button class="report-button" @onclick="ReportProfile">Melden</button>
                     <div class="close-modal-icon" @onclick="CloseReportModal">
@@ -198,7 +162,6 @@
             </div>
         </div>
         }
-
     </div>
 
     <footer class="bottom-nav">
@@ -209,7 +172,7 @@
 
         <div class="nav-item" @onclick="GoToMainpage">
             <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
-            <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
+            <span>EliteGärtner.</span>
         </div>
 
         <div class="nav-item" @onclick="GoToProfile">
@@ -220,13 +183,25 @@
 </div>
 
 @code {
+    private string _animationClass = "";
+    private bool _isAnimating = false;
+    private int _harvestIndex = 0;
+    private HarvestModel? _currentHarvest;
+
+    private List<HarvestModel> _harvests = new()
+    {
+        new() { Username="@MaisMeister", Tag="Mais 🌽", ImageUrl="pictures/Testbilder/Mais_03.png", Weight="450 g", Length="22 cm", Width="5 cm", Description="Mein ganzer Stolz aus dem Hochbeet!" },
+        new() { Username="@GrukenGanove", Tag="Gurken 🥒", ImageUrl="pictures/Testbilder/Gurken_01.jpg", Weight="300 g", Length="25 cm", Width="6 cm", Description="Knackig und frisch geerntet." },
+        new() { Username="@KürbisKontrolleur", Tag="Kürbis 🎃", ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", Weight="1200 g", Length="40 cm", Width="45 cm", Description="Fast zu schwer zum Tragen!" },
+        new() { Username="@WerbeWalter", Tag="Werbung", ImageUrl="pictures/Ads/pimpyourblechad02.jpg", Weight="deine Mom", Length="k.A", Width="ah lol", Description="Hä lol wtf, die Folie ist im Arsch!!!!" }
+
+    };
+
     private bool _showLogout = false;
-    private bool _showAboutUs = false;
-    private bool _showAdminNav = false; 
+    private bool _showAdminNav = false;
     private bool _showReportModal = false;
     private bool _isProfileVisible = true;
     private string _selectedReportReason = "";
-    private string _userName1 = "@user_name1";
     private readonly string[] _reportReasons =
     {
         "Sieht aus wie ein Stockfoto.",
@@ -246,8 +221,8 @@
     private string _currentAdImage = "pictures/ads/pimpyourblechad02.jpg";
     private int _adCounter = 0;
     private Timer? _adTimer;
-    private string[] _adImages = new[] 
-    { 
+    private string[] _adImages = new[]
+    {
         "pictures/ads/pimpyourblechad02.jpg",
         "pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg",
         "pictures/ads/GrukenStandAd.jpg",
@@ -263,8 +238,10 @@
 
     protected override void OnInitialized()
     {
+        _currentHarvest = _harvests[0];
+
         _currentAdImage = _adImages[0];
-        _adTimer = new Timer(6000); //6 sekunden pause zwischen jeder werbung
+        _adTimer = new Timer(6000);
         _adTimer.Elapsed += async (sender, e) =>
         {
             _adCounter++;
@@ -275,56 +252,86 @@
         _adTimer.Enabled = true;
     }
 
-    private async Task CloseAd() 
-    { 
-        _showAd = false; 
-        await Task.Delay(10000); // 10 Sek Pause
+    private async Task HandleSwipe(bool like)
+    {
+        if (_isAnimating) return;
+        _isAnimating = true;
+
+        _animationClass = like ? "swipe-right" : "swipe-left";
+        StateHasChanged();
+
+        await Task.Delay(600);
+
+        _harvestIndex = (_harvestIndex + 1) % _harvests.Count;
+        _currentHarvest = _harvests[_harvestIndex];
+
+        _animationClass = "fade-in";
+        StateHasChanged();
+
+        await Task.Delay(400);
+        _animationClass = "";
+        _isAnimating = false;
+    }
+
+    private async Task CloseAd()
+    {
+        _showAd = false;
+        await Task.Delay(10000);
         _showAd = true;
         await InvokeAsync(StateHasChanged);
     }
 
     public void Dispose() => _adTimer?.Dispose();
 
-private void ToggleLogoutMenu()
-{
-    _showLogout = !_showLogout;
-    if (!_showLogout) _showAdminNav = false;
-}
-
-private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
-
-private void NavTo(string path)
-{
-    _showLogout = false;
-    Nav.NavigateTo(path, forceLoad: true);
-}
-
-private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns", forceLoad: true);
-private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
-private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
-private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
-private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
-private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
-private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
-private void FlagProfile() => _showReportModal = true;
-private void CloseReportModal() => _showReportModal = false;
-
-private void UpdateReportReason(string reason, ChangeEventArgs e)
-{
-    if ((bool)e.Value) _selectedReportReason = reason;
-    else if (_selectedReportReason == reason) _selectedReportReason = string.Empty;
-}
-
-private void ReportProfile()
-{
-    if (!string.IsNullOrEmpty(_selectedReportReason))
+    private void ToggleLogoutMenu()
     {
-        _isProfileVisible = false;
-        _showReportModal = false;
+        _showLogout = !_showLogout;
+        if (!_showLogout) _showAdminNav = false;
     }
-}
 
-private void DislikeProfile() => Console.WriteLine("0");
-private void LikeProfile() => Console.WriteLine("1");
-private string GetUsernameUrl() => _userName1.TrimStart('@');
+    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
+
+    private void NavTo(string path)
+    {
+        _showLogout = false;
+        Nav.NavigateTo(path, forceLoad: true);
+    }
+
+    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns", forceLoad: true);
+    private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
+    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
+    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
+    private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
+    private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
+    private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+    private void FlagProfile() => _showReportModal = true;
+    private void CloseReportModal() => _showReportModal = false;
+
+    private void UpdateReportReason(string reason, ChangeEventArgs e)
+    {
+        if ((bool)e.Value) _selectedReportReason = reason;
+        else if (_selectedReportReason == reason) _selectedReportReason = string.Empty;
+    }
+
+    private void ReportProfile()
+    {
+        if (!string.IsNullOrEmpty(_selectedReportReason))
+        {
+            _isProfileVisible = false;
+            _showReportModal = false;
+        }
+    }
+
+    private string GetUsernameUrl() => _currentHarvest?.Username.TrimStart('@') ?? "";
+
+    private class HarvestModel
+    {
+        public string Username { get; set; } = "";
+        public string Tag { get; set; } = "";
+        public string ImageUrl { get; set; } = "";
+        public string Weight { get; set; } = "";
+        public string Length { get; set; } = "";
+        public string Width { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
 }
