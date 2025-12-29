@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @using System.Timers
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 @implements IDisposable
 @rendermode InteractiveServer
 
@@ -9,13 +10,26 @@
 
 <div class="page-container background-style">
     <header class="top-bar">
+        @* Linke Seite *@
         <div class="icon-wrapper left" @onclick="GoToRanks">
             <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
             <span class="icon-label">Rangliste</span>
         </div>
+
+        @* Mitte (wird durch CSS absolut zentriert) *@
         <h1 class="page-title">EliteGärtner.</h1>
-        <div class="menu-icon-container">
-            <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
+
+        @* Rechte Seite *@
+        <div class="header-right-group" style="display: flex; align-items: center; gap: 20px;">
+            @if (!string.IsNullOrEmpty(_loggedInUserName))
+            {
+                <span class="logged-in-user" style="font-weight: bold; font-size: 1.5rem;">
+                    👤 @_loggedInUserName
+                </span>
+            }
+            <div class="menu-icon-container" @onclick="ToggleLogoutMenu">
+                <span class="menu-icon">☰</span>
+            </div>
         </div>
     </header>
 
@@ -32,10 +46,44 @@
     </div>
     }
 
+    @if (_showMatchOverlay)
+    {
+        <div class="match-overlay">
+            @* Konfetti-Loop *@
+            @for (int i = 0; i < 60; i++)
+            {
+                // Zufällige Flugrichtung in alle Richtungen
+                var x = Random.Shared.Next(-500, 500);
+                var y = Random.Shared.Next(-500, 500);
+                <div class="confetti" style="--x: @(x)px; --y: @(y)px; background-color: @(_confettiColors[Random.Shared.Next(0, _confettiColors.Length)])"></div>
+            }
+
+            <div class="match-content">
+                <h2 class="match-title">IT'S A MATCH!</h2>
+                <p class="match-subtitle">Glückwunsch!!! 
+                    Du und @_matchedUser?.Username seid jetzt ein Team!</p>
+
+                <div class="match-images">
+                    <div class="match-photo-circle left-photo">
+                        <img src="pictures/Profilbilder/Profilbild_27.png" alt="Dein Profil" style="width:100%; height:100%; object-fit:cover;" />
+                    </div>
+                    <div class="match-photo-circle right-photo">
+                        <img src="@_matchedUser?.ProfileImageUrl" alt="Match Profil" style="width:100%; height:100%; object-fit:cover;" />
+                    </div>
+                </div>
+
+                <div class="match-actions">
+                    <button class="match-btn contact-btn" @onclick='() => NavTo("/matchestest")'>Kontakt aufnehmen</button>
+                    <button class="match-btn continue-btn" @onclick="CloseMatchOverlay">Weiter gärtnern</button>
+                </div>
+            </div>
+        </div>
+    }
+
     @if (_showLogout)
     {
     <div class="logout-menu admin-menu-ext">
-        <p class="logout-link" @onclick="NavigateToLogout">Logout ➜</p>
+        <p class="logout-link" @onclick="NavigateToLogout">Logout ➜]</p>
         <div class="admin-header" @onclick="NavigateToAboutUs">
             <span>ℹ️ Über uns</span>
         </div>
@@ -73,6 +121,10 @@
                 <div class="tinder-card">
                     <div class="card-image-placeholder">
                         <img src="@_currentHarvest.ImageUrl" alt="Erntebild" class="harvest-image" />
+                    </div>
+                    @* --- Profilbild des fremden Users auf der Karte --- *@
+                    <div class="user-avatar-on-card">
+                        <img src="@_currentHarvest.ProfileImageUrl" alt="User Avatar" />
                     </div>
                     <div class="username-tag-combo">
                         <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
@@ -132,35 +184,35 @@
             </div>
         </div>
         }
-        else
+        else if (!_isProfileVisible)
         {
-        <p style="font-size: 18px; font-weight: bold; text-align: center;">
-            Profil wurde gemeldet und ausgeblendet.
-        </p>
+            <div class="white-comic-box" style="text-align: center; padding: 20px;">
+                <p>Profil wurde gemeldet und ausgeblendet.</p>
+                <button class="report-button" @onclick="() => _isProfileVisible = true">Weiter</button>
+            </div>
         }
 
+        @* --- REPORT MODAL --- *@
         @if (_showReportModal)
         {
-        <div class="report-modal-overlay">
-            <div class="report-modal">
-                <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
-                @foreach (var reason in _reportReasons)
-                {
-                var id = reason.GetHashCode();
-                <div class="report-reason">
-                    <input type="checkbox" id="@id" @onchange="@(e => UpdateReportReason(reason, e))"
-                           checked="@(_selectedReportReason == reason)" />
-                    <label for="@id">@reason</label>
-                </div>
-                }
-                <div class="modal-actions">
-                    <button class="report-button" @onclick="ReportProfile">Melden</button>
-                    <div class="close-modal-icon" @onclick="CloseReportModal">
-                        <span style="font-size: 10px;">❌</span>
+            <div class="report-modal-overlay">
+                <div class="report-modal">
+                    <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
+                    <div style="max-height: 200px; overflow-y: auto; text-align: left; margin-bottom: 15px;">
+                        @foreach (var reason in _reportReasons)
+                        {
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                <input type="checkbox" @onchange="@(e => UpdateReportReason(reason,e))" checked="@(_selectedReportReason == reason)" />
+                                <label>@reason</label>
+                            </div>
+                        }
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <button class="report-button" @onclick="ReportProfile">Melden</button>
+                        <span class="close-x" @onclick="CloseReportModal">✖</span>
                     </div>
                 </div>
             </div>
-        </div>
         }
     </div>
 
@@ -183,155 +235,166 @@
 </div>
 
 @code {
+    private string _loggedInUserName = "@MaisMädrescher";
     private string _animationClass = "";
     private bool _isAnimating = false;
     private int _harvestIndex = 0;
     private HarvestModel? _currentHarvest;
 
+/* Match Variablen */
+    private bool _showMatchOverlay = false;
+    private HarvestModel? _matchedUser;
+    private string[] _confettiColors = { "#FFC107", "#2196F3", "#FF5722", "#4CAF50", "#E91E63" };
+
     private List<HarvestModel> _harvests = new()
-    {
-        new() { Username="@MaisMeister", Tag="Mais 🌽", ImageUrl="pictures/Testbilder/Mais_03.png", Weight="450 g", Length="22 cm", Width="5 cm", Description="Mein ganzer Stolz aus dem Hochbeet!" },
-        new() { Username="@GrukenGanove", Tag="Gurken 🥒", ImageUrl="pictures/Testbilder/Gurken_01.jpg", Weight="300 g", Length="25 cm", Width="6 cm", Description="Knackig und frisch geerntet." },
-        new() { Username="@KürbisKontrolleur", Tag="Kürbis 🎃", ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", Weight="1200 g", Length="40 cm", Width="45 cm", Description="Fast zu schwer zum Tragen!" },
-        new() { Username="@WerbeWalter", Tag="Werbung", ImageUrl="pictures/Ads/pimpyourblechad02.jpg", Weight="deine Mom", Length="k.A", Width="ah lol", Description="Hä lol wtf, die Folie ist im Arsch!!!!" }
-
-    };
-
-    private bool _showLogout = false;
-    private bool _showAdminNav = false;
-    private bool _showReportModal = false;
-    private bool _isProfileVisible = true;
-    private string _selectedReportReason = "";
-    private readonly string[] _reportReasons =
-    {
-        "Sieht aus wie ein Stockfoto.",
-        "Beschreibung passt nicht zum Bild.",
-        "Verdacht auf Fake-Upload.",
-        "Mehrfach hochgeladenes Bild.",
-        "Zu dunkel aufgenommen, schwer erkennbar.",
-        "Kategorie wirkt unpassend für das Bild.", 
-        "Text enthält unpassende Formulierungen.", 
-        "Bildqualität ist zu niedrig.", 
-        "Vermutlich nicht selbst angebaut.", 
-        "Kein Obst, gehört eher in Gemüse-Kategorie."
-    };
-
-    /* Werbe-Logik */
-    private bool _showAd = true;
-    private string _currentAdImage = "pictures/ads/pimpyourblechad02.jpg";
-    private int _adCounter = 0;
-    private Timer? _adTimer;
-    private string[] _adImages = new[]
-    {
-        "pictures/ads/pimpyourblechad02.jpg",
-        "pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg",
-        "pictures/ads/GrukenStandAd.jpg",
-        "pictures/ads/OBI_werbung.jpg",
-        "pictures/ads/ralphschumacherad.png",
-        "pictures/ads/werbeplakat-leberkaessemmel.jpg",
-        "pictures/ads/DieLilaVersuchung.jpg",
-        "pictures/ads/pimpyourblech01.jpg",
-        "pictures/ads/werbeplakat-leberkassemmel02.jpg",
-        "pictures/ads/WürstlStandAd.jpg",
-        "pictures/ads/pimpyourblechad03.jpg"
-    };
-
-    protected override void OnInitialized()
-    {
-        _currentHarvest = _harvests[0];
-
-        _currentAdImage = _adImages[0];
-        _adTimer = new Timer(6000);
-        _adTimer.Elapsed += async (sender, e) =>
         {
-            _adCounter++;
-            _currentAdImage = _adImages[_adCounter % _adImages.Length];
-            await InvokeAsync(StateHasChanged);
-        };
-        _adTimer.AutoReset = true;
-        _adTimer.Enabled = true;
-    }
+            new() { Username="@MaisMeister", Tag="Mais 🌽", ImageUrl="pictures/Testbilder/Mais_03.png", ProfileImageUrl="pictures/Profilbilder/Profilbild_07.png", Weight="450 g", Length="22 cm", Width="5 cm", Description="Mein ganzer Stolz aus dem Hochbeet!" }, 
+            new() { Username="@GrukenGanove", Tag="Gurken 🥒", ImageUrl="pictures/Testbilder/Gurken_01.jpg", ProfileImageUrl="pictures/Profilbilder/Profilbild_26.png", Weight="300 g", Length="25 cm", Width="6 cm", Description="Knackig und frisch geerntet." }, 
+            new() { Username="@KürbisKontrolleur", Tag="Kürbis 🎃", ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", ProfileImageUrl="pictures/Profilbilder/Profilbild_12.png", Weight="1200 g", Length="40 cm", Width="45 cm", Description="Fast zu schwer zum Tragen!" }
+};
 
-    private async Task HandleSwipe(bool like)
-    {
-        if (_isAnimating) return;
-        _isAnimating = true;
+private bool _showLogout = false;
+private bool _showAdminNav = false;
+private bool _showReportModal = false;
+private bool _isProfileVisible = true;
+private string _selectedReportReason = "";
+private readonly string[] _reportReasons = 
+{   "abstossende Inhalte", "sexuelle Inhalte", "gewaltvolle Inhalte", "'Catfishing' - nicht selbst angebaut", "Spam",};
 
-        _animationClass = like ? "swipe-right" : "swipe-left";
-        StateHasChanged();
+/* Werbe-Logik */
+private bool _showAd = true;
+private string _currentAdImage = "pictures/ads/pimpyourblechad02.jpg";
+private int _adCounter = 0;
+private Timer? _adTimer;
+private string[] _adImages = new[]
+{
+"pictures/ads/pimpyourblechad02.jpg",
+"pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg",
+"pictures/ads/GurkenStandAd.jpg",
+"pictures/ads/OBI_werbung.jpg",
+"pictures/ads/ralphschuhmacherad.png",
+"pictures/ads/werbeplakat-leberkaessemmel.jpg",
+"pictures/ads/DieLilaVersuchung.jpg",
+"pictures/ads/pimpyourblech01.jpg",
+"pictures/ads/werbeplakat-leberkassemmel02.jpg",
+"pictures/ads/WürstlStandAd.jpg",
+"pictures/ads/pimpyourblechad03.jpg"
+};
 
-        await Task.Delay(600);
+protected override void OnInitialized()
+{
+_currentHarvest = _harvests[0];
 
-        _harvestIndex = (_harvestIndex + 1) % _harvests.Count;
-        _currentHarvest = _harvests[_harvestIndex];
+_currentAdImage = _adImages[0];
+_adTimer = new Timer(6000);
+_adTimer.Elapsed += async (sender, e) =>
+{
+_adCounter++;
+_currentAdImage = _adImages[_adCounter % _adImages.Length];
+await InvokeAsync(StateHasChanged);
+};
+_adTimer.AutoReset = true;
+_adTimer.Enabled = true;
+}
 
-        _animationClass = "fade-in";
-        StateHasChanged();
+private async Task HandleSwipe(bool like)
+{
+// Task-Logik: Sperre, wenn Animation läuft ODER Match-Overlay offen ist
+if (_isAnimating || _showMatchOverlay) return;
+_isAnimating = true;
 
-        await Task.Delay(400);
-        _animationClass = "";
-        _isAnimating = false;
-    }
+_animationClass = like ? "swipe-right" : "swipe-left";
+StateHasChanged();
 
-    private async Task CloseAd()
-    {
-        _showAd = false;
-        await Task.Delay(10000);
-        _showAd = true;
-        await InvokeAsync(StateHasChanged);
-    }
+await Task.Delay(600);
 
-    public void Dispose() => _adTimer?.Dispose();
+// temporäre Test-Match-Logik: 30% Chance auf ein Match bei Like
+if (like && Random.Shared.Next(1, 101) <= 30)
+{
+_matchedUser = _currentHarvest;
+_showMatchOverlay = true;
+await PlayMatchSound();
+}
 
-    private void ToggleLogoutMenu()
-    {
-        _showLogout = !_showLogout;
-        if (!_showLogout) _showAdminNav = false;
-    }
+_harvestIndex = (_harvestIndex + 1) % _harvests.Count;
+_currentHarvest = _harvests[_harvestIndex];
 
-    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
+_animationClass = "fade-in";
+StateHasChanged();
 
-    private void NavTo(string path)
-    {
-        _showLogout = false;
-        Nav.NavigateTo(path, forceLoad: true);
-    }
+await Task.Delay(400);
+_animationClass = "";
+_isAnimating = false;
+}
 
-    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns", forceLoad: true);
-    private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
-    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
-    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
-    private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
-    private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
-    private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
-    private void FlagProfile() => _showReportModal = true;
-    private void CloseReportModal() => _showReportModal = false;
+private async Task PlayMatchSound()
+{
+// Spielt Konfetti-Sound ab bei Match
+await JS.InvokeVoidAsync("eval", "new Audio('sounds/itsamatch.mp3').play()");
+}
 
-    private void UpdateReportReason(string reason, ChangeEventArgs e)
-    {
-        if ((bool)e.Value) _selectedReportReason = reason;
-        else if (_selectedReportReason == reason) _selectedReportReason = string.Empty;
-    }
+private void CloseMatchOverlay() => _showMatchOverlay = false;
 
-    private void ReportProfile()
-    {
-        if (!string.IsNullOrEmpty(_selectedReportReason))
-        {
-            _isProfileVisible = false;
-            _showReportModal = false;
-        }
-    }
+private async Task CloseAd()
+{
+_showAd = false;
+await Task.Delay(10000);
+_showAd = true;
+await InvokeAsync(StateHasChanged);
+}
 
-    private string GetUsernameUrl() => _currentHarvest?.Username.TrimStart('@') ?? "";
+public void Dispose() => _adTimer?.Dispose();
 
-    private class HarvestModel
-    {
-        public string Username { get; set; } = "";
-        public string Tag { get; set; } = "";
-        public string ImageUrl { get; set; } = "";
-        public string Weight { get; set; } = "";
-        public string Length { get; set; } = "";
-        public string Width { get; set; } = "";
-        public string Description { get; set; } = "";
-    }
+private void ToggleLogoutMenu()
+{
+_showLogout = !_showLogout;
+if (!_showLogout) _showAdminNav = false;
+}
+
+private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
+
+private void NavTo(string path)
+{
+_showLogout = false;
+Nav.NavigateTo(path, forceLoad: true);
+}
+
+private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns", forceLoad: true);
+private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
+private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
+private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
+private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
+private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
+private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+private void FlagProfile() => _showReportModal = true;
+private void CloseReportModal() => _showReportModal = false;
+
+private void UpdateReportReason(string reason, ChangeEventArgs e)
+{
+if ((bool)e.Value) _selectedReportReason = reason;
+else if (_selectedReportReason == reason) _selectedReportReason = string.Empty;
+}
+
+private void ReportProfile()
+{
+if (!string.IsNullOrEmpty(_selectedReportReason))
+{
+_isProfileVisible = false;
+_showReportModal = false;
+}
+}
+
+private string GetUsernameUrl() => _currentHarvest?.Username.TrimStart('@') ?? "";
+
+private class HarvestModel
+{
+public string Username { get; set; } = "";
+public string Tag { get; set; } = "";
+public string ImageUrl { get; set; } = "";
+public string ProfileImageUrl { get; set; } = "";
+public string Weight { get; set; } = "";
+public string Length { get; set; } = "";
+public string Width { get; set; } = "";
+public string Description { get; set; } = "";
+}
 }

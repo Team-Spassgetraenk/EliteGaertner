@@ -21,7 +21,7 @@
             @if (_showLogout)
             {
             <div class="logout-menu comic-box">
-                <p @onclick="NavigateToLogout">Logout &lt;</p>
+                <p @onclick="NavigateToLogout">Logout ➜]</p>
             </div>
             }
         </div>
@@ -51,31 +51,100 @@
             </div>
         </aside>
 
-        @* RECHTE SPALTE: Meine Galerie (Scrollbar) *@
+        @* RECHTE SPALTE: Meine HarvestUploads *@
         <main class="right-column">
             <div class="harvest-gallery-box comic-box gallery-scroll-container">
                 <div class="harvest-grid">
-                    @foreach (var item in GetGridItems())
-                    {
-                    <div class="grid-item comic-grid-item">
-                        @if (item.IsImage)
-                        {
-                        <img src="@item.Path" alt="Erntebild" class="harvest-photo" />
-                        }
-                        else if (item.IsAddButton)
-                        {
-                        <div class="add-photo-box" @onclick="AddPhoto">
-                                    <span class="plus-icon-circle">
-                                        <span class="plus-icon">+</span>
-                                    </span>
+                    
+                    @* --- neue Ernte Hochladen --- *@
+                    <div class="grid-item comic-grid-item upload-btn-container" @onclick="AddPhoto">
+                        <div class="upload-btn-content">
+                            <span class="plus-emoji">➕</span>
+                            <span class="upload-text">Neue Ernte hochladen</span>
                         </div>
-                        }
                     </div>
+                    
+                    @* --- HarvestUploads ---  *@
+                    @for (int i = 0; i < _harvestDetails.Count; i++)
+                    {
+                        // Lokale Kopie des Index für Lambda-Ausdrücke (wichtig in Blazor!)
+                        int index = i;
+                        var h = _harvestDetails[i];
+
+                        <div class="grid-item comic-grid-item" style="position: relative;">
+                            @* HarvestUpload *@
+                            <img src="@h.ImageUrl" alt="Erntebild" class="harvest-photo"
+                                 @onclick="() => _selectedHarvest = h" style="cursor: pointer;"/>
+
+                            @* Lösch-Icon (Oben rechts im Eck des Bildes) *@
+                            <div class="delete-overlay" @onclick="() => ToggleDeletePopup(index)">
+                                <span class="delete-icon" style="color: #FFFFFF">✖</span>
+                            </div>
+
+                            @* Das Lösch-Bestätigungs-Popup *@
+                            @if (_showDeletePopupIndex == index)
+                            {
+                                <div class="delete-popup comic-box" @onclick="() => DeletePhoto(h)">
+                                    Bild löschen
+                                </div>
+                            }
+                        </div>
                     }
                 </div>
             </div>
         </main>
     </div>
+
+    @* --- DETAILANSICHT DER HARVESTUPLOADS --- *@
+    @if (_selectedHarvest != null)
+    {
+        <div class="detail-overlay-backdrop" @onclick="() => _selectedHarvest = null">
+            <div class="tinder-wrapper-card" @onclick:stopPropagation="true">
+                <span class="close-x" @onclick="() => _selectedHarvest = null">✖</span>
+                <div class="main-content-flex">
+                    <div class="tinder-card">
+                        <div class="card-image-placeholder">
+                            <img src="@_selectedHarvest.ImageUrl" alt="Ernte" class="harvest-image" />
+                        </div>
+                        <div class="username-tag-combo">
+                            <span class="username-label">@_selectedHarvest.Tag</span>
+                        </div>
+                    </div>
+
+                    <div class="right-info-stack">
+                        <div class="parameter-wrapper-vertical">
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">⚖️</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Gewicht</p>
+                                    <p class="param-value">@_selectedHarvest.Weight</p>
+                                </div>
+                            </div>
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">📏</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Länge</p>
+                                    <p class="param-value">@_selectedHarvest.Length</p>
+                                </div>
+                            </div>
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">📐</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Breite</p>
+                                    <p class="param-value">@_selectedHarvest.Width</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comment-box white-comic-box">
+                            <p class="comment-label">Erntebeschreibung</p>
+                            <p class="comment-text">@_selectedHarvest.Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     @* --- BOTTOM NAV --- *@
     <footer class="bottom-nav">
@@ -87,7 +156,7 @@
             <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
             <span class="elitegaertner-title mt-2">EliteGärtner.</span>
         </div>
-        <div class="nav-item active" @onclick="GoToProfile">
+        <div class="nav-item" @onclick="GoToProfile">
             <img src="pictures/Profil_04.png" alt="Profile" height="40" />
             <span>Profil</span>
         </div>
@@ -95,16 +164,51 @@
 </div>
 
 @code {
-private string _bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit 2020.";
-private List<string> _uploadedImages = new List<string>
+    private int? _showDeletePopupIndex = null;
+    private int? _hoveredIndex = null;
+    
+    private string _bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit Anbeginn der Zeit.";
+
+// Bild-Lösch Logik
+private void SetHoveredIndex(int index) => _hoveredIndex = index;
+private void ResetHoveredIndex() => _hoveredIndex = null;
+
+private void ToggleDeletePopup(int index)
 {
-    "pictures/Testbilder/Mais_01.png", 
-    "pictures/Testbilder/Mais_02.png",
-    "pictures/Testbilder/Mais_03.png"
+    if (_showDeletePopupIndex == index)
+    {
+        _showDeletePopupIndex = null;
+    }
+    else
+    {
+        _showDeletePopupIndex = index;
+    }
+}
+
+private void DeletePhoto(HarvestDetail item)
+{
+    if (item != null)
+    {
+        _harvestDetails.Remove(item);
+        _showDeletePopupIndex = null; // Popup schließen
+        StateHasChanged(); // UI aktualisieren
+    }
+}
+
+// Detailansicht HarvestUploads
+private List<HarvestDetail> _harvestDetails = new()
+{
+    new() { ImageUrl="pictures/Testbilder/Gurken_01.jpg", Tag="Gurken 🥒", Weight="320g", Length="22cm", Width="5cm", Description="Sehr knackig dieses Jahr!" },
+    new() { ImageUrl="pictures/Testbilder/Karotten_01.jpg", Tag="Karotten 🥕", Weight="150g", Length="18cm", Width="3cm", Description="Direkt aus dem Hochbeet." },
+    new() { ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", Tag="Kürbis 🎃", Weight="4.2kg", Length="35cm", Width="40cm", Description="Prachtexemplar für Halloween." },
+    new() { ImageUrl="pictures/Testbilder/Auberginen_01.jpg", Tag="Auberginen 🍆", Weight="400g", Length="15cm", Width="8cm", Description="Viel Sonne getankt." },
+    new() { ImageUrl="pictures/Testbilder/Erdbeeren_01.jpg", Tag="Erdbeeren 🍓", Weight="45g", Length="5cm", Width="4cm", Description="Zuckersüß!" },
+    new() { ImageUrl="pictures/Testbilder/Trauben_01.jpg", Tag="Trauben 🍇", Weight="600g", Length="20cm", Width="12cm", Description="Sorte: Muskat." }
 };
 
+private HarvestDetail? _selectedHarvest;
+
 private bool _showLogout = false;
-private const int MaxContentItems = 8;
 
 public class GridItem {
 public bool IsImage { get; set; }
@@ -112,11 +216,6 @@ public bool IsAddButton { get; set; }
 public string Path { get; set; } = "";
 }
 
-private List<GridItem> GetGridItems() {
-var items = _uploadedImages.Select(path => new GridItem { IsImage = true, Path = path }).ToList();
-if (items.Count < MaxContentItems) { items.Add(new GridItem { IsAddButton = true }); }
-return items.Take(MaxContentItems).ToList();
-}
 
 private void ToggleLogoutMenu() => _showLogout = !_showLogout;
 private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
@@ -126,4 +225,13 @@ private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
 private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
 private void GoToManageProfile() => Nav.NavigateTo("/profil/profilverwaltung", forceLoad: true);
 private void AddPhoto() => Nav.NavigateTo("/ernte-hochladen", forceLoad: true);
+
+private class HarvestDetail {
+    public string ImageUrl { get; set; } = "";
+    public string Tag { get; set; } = "";
+    public string Weight { get; set; } = "";
+    public string Length { get; set; } = "";
+    public string Width { get; set; } = "";
+    public string Description { get; set; } = "";
+}
 }

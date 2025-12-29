@@ -124,32 +124,89 @@
     border: 4px solid #000;
     border-radius: 10px;
     box-shadow: 4px 4px 0 0 #000;
-    overflow: hidden;
 }
 
 .harvest-photo {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+    border-radius: 6px;
 }
 
-/* Plus-Symbol */
-.add-photo-box {
+/* Bilder hinzufügen */
+.upload-btn-container {
+    cursor: pointer;
+    background-color: lightgrey;
+    border: 4px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.upload-btn-content {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-color: #f9f9f9;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.plus-emoji {
+    font-size: 50px;
+    line-height: 1;
+}
+
+.upload-text {
+    margin: 5px;
+    font-size: 21px;
+    font-weight: bold;
+    text-align: center;
+    padding: 0 10px;
+    color: #000;
+}
+
+.upload-btn-container:hover {
+    background-color: #f0f0f0 !important;
+    transform: scale(0.98);
+}
+
+/* Bilder löschen */
+.delete-overlay {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    background-color: #D62828;
+    border: 3px solid #000;
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 10;
+    box-shadow: 2px 2px 0 0 #000;
+    cursor: pointer;
 }
 
-.plus-icon-circle {
-    width: 60px; height: 60px;
-    border-radius: 50%; border: 3px solid #000;
-    background: #fff; box-shadow: 3px 3px 0 0 #000;
-    display: flex; justify-content: center; align-items: center;
+.delete-popup {
+    position: absolute;
+    top: 5px;
+    right: 25px;
+    width: 150px;
+    background-color: #fff;
+    color: #D62828;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    padding: 10px 5px;
+    z-index: 15;
+    cursor: pointer;
 }
-
-.plus-icon { font-size: 40px; font-weight: bold; }
+.delete-popup:hover {
+    background-color: #ffe0e0;
+}
 
 /* --- BOTTOM NAV --- */
 .bottom-nav {
@@ -163,4 +220,23 @@
 }
 
 .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-weight: bold; }
-.nav-item.active { color: #8B45B3; }
+
+/* TINDER-CARD CSS (VON DER STARTSEITE ÜBERNOMMEN) */
+.detail-overlay-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+.tinder-wrapper-card { width: 100%; max-width: 850px; height: 600px; background-color: #ffffff; border: 3px solid #000; border-radius: 15px; box-shadow: 5px 5px 0 0 #000; position: relative; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+.main-content-flex { display: flex; width: 100%; height: 100%; gap: 20px; }
+.tinder-card { flex: 1.5; border: 3px solid #000; border-radius: 8px; background-color: #fff; box-shadow: 3px 3px 0 0 #000; position: relative; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+.card-image-placeholder { width: 100%; flex-grow: 1; background-color: #eee; overflow: hidden; }
+.harvest-image { width: 100%; height: 100%; object-fit: cover; }
+.username-tag-combo { position: absolute; bottom: 20px; left: 15px; right: 15px; display: flex; justify-content: center; background-color: #ffffff; padding: 8px 10px; border-radius: 5px; border: 3px solid #000; box-shadow: 3px 3px 0 0 #000; font-size: 24px; font-weight: bold; }
+.right-info-stack { flex: 1; display: flex; flex-direction: column; gap: 15px; height: 100%; border: 3px solid #000; border-radius: 8px; background-color: rgba(255, 255, 255, 0.95); box-shadow: 3px 3px 0 0 #000; padding: 15px; }
+.white-comic-box { background-color: #fff; color: #000; padding: 10px; border-radius: 8px; border: 3px solid #000; box-shadow: 3px 3px 0 0 #000; }
+.param-icon-circle { width: 35px; height: 35px; min-width: 35px; border-radius: 50%; border: 3px solid #000; background-color: #eee; box-shadow: 1px 1px 0 0 #000; display: flex; justify-content: center; align-items: center; font-size: 19px; margin-right: 15px; }
+.parameter-wrapper-vertical { display: flex; flex-direction: column; gap: 8px; }
+.parameter-wrapper-vertical .white-comic-box { display: flex; align-items: center; padding: 5px 10px; }
+.param-title { font-weight: bold; margin: 0; font-size: 16px; }
+.param-value { font-size: 18px; font-weight: 800; margin: 0; }
+.comment-box { flex: 1; overflow-y: auto; }
+.comment-label { font-weight: bold; margin: 0 0 5px 0; font-size: 20px; }
+.comment-text { font-size: 16px; margin: 0; }
+.close-x { color: white; position: absolute; top: -15px; right: -15px; background: #D62828; border: 3px solid #000; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: bold; box-shadow: 3px 3px 0 0 #000; z-index: 2100; }

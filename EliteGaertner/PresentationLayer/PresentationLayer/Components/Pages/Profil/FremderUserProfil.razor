@@ -16,21 +16,18 @@
         <h1 class="page-title">EliteGärtner.</h1>
 
         <div class="header-right-action menu-wrapper">
-            <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
+            <span class="hamburger-icon" @onclick="ToggleLogoutMenu" style="cursor:pointer; font-size:30px;">☰</span>
             @if (_showLogout)
             {
                 <div class="logout-menu comic-box">
-                    <p @onclick="ReportUser">Melden</p>
-                    <p @onclick="NavigateToLogout">Logout &lt;</p>
+                    <p @onclick="NavigateToLogout" style="cursor:pointer; padding: 5px 10px; margin:0;">Logout &lt;</p>
                 </div>
             }
         </div>
     </header>
 
-    @* --- HAUPTBEREICH (Zweispaltig) --- *@
+    @* --- HAUPTBEREICH --- *@
     <div class="main-profile-layout">
-        
-        @* LINKE SPALTE: Profil-Informationen *@
         <aside class="left-column">
             <div class="profile-header-box comic-box">
                 <div class="profile-pic-placeholder">
@@ -42,21 +39,70 @@
             </div>
         </aside>
 
-        @* RECHTE SPALTE: Scrollbare Galerie (70%) *@
         <main class="right-column">
             <div class="harvest-gallery-box comic-box gallery-scroll-container">
                 <div class="harvest-grid">
-                    @foreach (var imgPath in _harvestImages)
+                    @foreach (var h in _harvestDetails)
                     {
-                        <div class="grid-item comic-grid-item">
-                            <img src="@imgPath" alt="Erntebild" class="harvest-photo" />
+                        <div class="grid-item comic-grid-item" @onclick="() => _selectedHarvest = h" style="cursor: pointer;">
+                            <img src="@h.ImageUrl" alt="Erntebild" class="harvest-photo" />
                         </div>
                     }
                 </div>
             </div>
         </main>
-
     </div>
+
+    @* --- DETAILANSICHT DER HARVESTUPLOADS --- *@
+    @if (_selectedHarvest != null)
+    {
+        <div class="detail-overlay-backdrop" @onclick="() => _selectedHarvest = null">
+            <div class="tinder-wrapper-card" @onclick:stopPropagation="true">
+                <span class="close-x" @onclick="() => _selectedHarvest = null">✖</span>
+                <div class="main-content-flex">
+                    <div class="tinder-card">
+                        <div class="card-image-placeholder">
+                            <img src="@_selectedHarvest.ImageUrl" alt="Ernte" class="harvest-image" />
+                        </div>
+                        <div class="username-tag-combo">
+                            <span class="username-label">@_selectedHarvest.Tag</span>
+                        </div>
+                    </div>
+
+                    <div class="right-info-stack">
+                        <div class="parameter-wrapper-vertical">
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">⚖️</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Gewicht</p>
+                                    <p class="param-value">@_selectedHarvest.Weight</p>
+                                </div>
+                            </div>
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">📏</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Länge</p>
+                                    <p class="param-value">@_selectedHarvest.Length</p>
+                                </div>
+                            </div>
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">📐</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Breite</p>
+                                    <p class="param-value">@_selectedHarvest.Width</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comment-box white-comic-box">
+                            <p class="comment-label">Erntebeschreibung</p>
+                            <p class="comment-text">@_selectedHarvest.Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     @* --- BOTTOM NAV --- *@
     <footer class="bottom-nav">
@@ -78,21 +124,34 @@
 @code {
     [Parameter] public string Username { get; set; } = "";
     private string _bioText = "Hier steht die Profilbeschreibung des fremden Users... Ein leidenschaftlicher Hobbygärtner, der sich auf seltene Chilisorten spezialisiert hat.";
-    private List<string> _harvestImages = new List<string>
+    
+    private List<HarvestDetail> _harvestDetails = new()
     {
-        "pictures/Testbilder/Gurken_01.jpg", "pictures/Testbilder/Karotten_01.jpg",
-        "pictures/Testbilder/Kürbisse_01.jpg", "pictures/Testbilder/Auberginen_01.jpg",
-        "pictures/Testbilder/Erdbeeren_01.jpg", "pictures/Testbilder/Trauben_01.jpg",
-        "pictures/Testbilder/Karotten_02.png", "pictures/Testbilder/Tomaten_01.jpg"
+        new() { ImageUrl="pictures/Testbilder/Gurken_01.jpg", Tag="Gurken 🥒", Weight="320g", Length="22cm", Width="5cm", Description="Sehr knackig dieses Jahr!" },
+        new() { ImageUrl="pictures/Testbilder/Karotten_01.jpg", Tag="Karotten 🥕", Weight="150g", Length="18cm", Width="3cm", Description="Direkt aus dem Hochbeet." },
+        new() { ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", Tag="Kürbis 🎃", Weight="4.2kg", Length="35cm", Width="40cm", Description="Prachtexemplar für Halloween." },
+        new() { ImageUrl="pictures/Testbilder/Auberginen_01.jpg", Tag="Auberginen 🍆", Weight="400g", Length="15cm", Width="8cm", Description="Viel Sonne getankt." },
+        new() { ImageUrl="pictures/Testbilder/Erdbeeren_01.jpg", Tag="Erdbeeren 🍓", Weight="45g", Length="5cm", Width="4cm", Description="Zuckersüß!" },
+        new() { ImageUrl="pictures/Testbilder/Trauben_01.jpg", Tag="Trauben 🍇", Weight="600g", Length="20cm", Width="12cm", Description="Sorte: Muskat." }
     };
 
+    private HarvestDetail? _selectedHarvest;
     private bool _showLogout = false;
     public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
+    
     private void ToggleLogoutMenu() => _showLogout = !_showLogout;
     private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
-    private void ReportUser() { _showLogout = false; }
     private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
     private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
     private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
     private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+
+    private class HarvestDetail {
+        public string ImageUrl { get; set; } = "";
+        public string Tag { get; set; } = "";
+        public string Weight { get; set; } = "";
+        public string Length { get; set; } = "";
+        public string Width { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
 }
