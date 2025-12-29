@@ -67,7 +67,6 @@ public class MatchManager : IMatchManager
     
     public void RateUser(PublicProfileDto creatorProfile, bool value)
     {
-        
         //Erstelle neue MatchDto mit der Bewertung und Zeitpunkt
         var dto = new RateDto
         {

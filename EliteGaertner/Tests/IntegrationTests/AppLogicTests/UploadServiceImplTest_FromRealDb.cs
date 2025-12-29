@@ -1,6 +1,6 @@
 namespace Tests.IntegrationTests.AppLogicTests;
 
-public class HarvestUploadTest_FromRealDB
+public class UploadServiceImplTest_FromRealDb
 {
     
 }

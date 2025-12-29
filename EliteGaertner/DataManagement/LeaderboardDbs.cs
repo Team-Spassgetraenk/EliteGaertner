@@ -47,7 +47,7 @@ public class LeaderboardDbs : ILeaderBoardDbs
         if (tagId is null)
             return goal == LeaderboardSearchGoal.MostLikes;
 
-        //Überprüfe, ob tagId >= 1 ist
+        //Überprüfe, ob tagId <= 0
         if (tagId <= 0)
             return false;
 
