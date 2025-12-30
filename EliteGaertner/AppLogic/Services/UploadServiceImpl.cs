@@ -20,11 +20,11 @@ public class UploadServiceImpl : IUploadService
     }
     
     
-    public bool CreateHarvestUpload(int userId, string imageUrl, string description, float weight, int width, int length)
+    public bool CreateHarvestUpload(int profileId, string imageUrl, string description, float weight, int width, int length)
     {
         var uploadDto = new HarvestUploadDto
         {
-            ProfileId = userId,
+            ProfileId = profileId,
             ImageUrl = imageUrl,
             Description = description,
             WeightGram = weight,
@@ -43,7 +43,7 @@ public class UploadServiceImpl : IUploadService
        return _harvestDbs.GetUploadDb(uploadId);
     }
 
-    public string DeleteUpload(int uploadId, int userId) //Hier wird null zurückgegeben, wenn nicht existiert löschung
+    public string DeleteUpload(int uploadId, int profileId) //Hier wird null zurückgegeben, wenn nicht existiert löschung
                                                          // des Bildes muss architekturwegens in .razor abgehandelt werden
     {
         var uploadDto = GetUploadDto(uploadId);
@@ -61,7 +61,7 @@ public class UploadServiceImpl : IUploadService
         return fileName;
     }
 
-    public List<HarvestUploadDto> GetUserUploads(int userId)
+    public List<HarvestUploadDto> GetUserUploads(int profileId)
     {
         throw new NotImplementedException();
     }

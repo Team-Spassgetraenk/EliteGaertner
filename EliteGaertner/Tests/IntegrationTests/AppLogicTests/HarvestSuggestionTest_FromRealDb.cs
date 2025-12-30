@@ -1,8 +1,11 @@
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppLogic.Services;
-using Microsoft.EntityFrameworkCore;
-using DataManagement;
 using Contracts.Data_Transfer_Objects;
+using DataManagement;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.IntegrationTests.AppLogicTests;
 
@@ -10,7 +13,7 @@ namespace Tests.IntegrationTests.AppLogicTests;
 [TestClass]
 [DoNotParallelize]
 [TestCategory("Integration")]
-public class HarvestSuggestionTest_FromRealDb
+public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
 {
     public TestContext TestContext { get; set; } = null!;
     private const string ConnectionString =
@@ -42,8 +45,8 @@ public class HarvestSuggestionTest_FromRealDb
         TestContext.WriteLine($"Reports: {db.Reports.Count()}");
         TestContext.WriteLine("------------------------------------");
 
-        // Repo muss DbContext annehmen 
-        var repo = new ManagementDbs(db);
+        // Nach dem Split: HarvestDbs übernimmt die Harvest-spezifischen DB-Zugriffe
+        var harvestDbs = new HarvestDbs(db);
         
         //TestUser DTO erstellen (TomatenTiger)
         var testDto = new PrivateProfileDto()
@@ -74,7 +77,7 @@ public class HarvestSuggestionTest_FromRealDb
         
         
         //Testdaten werden jetzt an die Klasse übergeben
-        var testSuggestions = new HarvestSuggestion(repo, profileId, tagIds, 10);
+        var testSuggestions = new HarvestSuggestion(harvestDbs, profileId, tagIds, 10);
         var result = testSuggestions.GetHarvestSuggestionList();
         
         //Logging der Testresult

@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.IntegrationTests.AppLogicTests;
 
@@ -9,7 +13,7 @@ namespace Tests.IntegrationTests.AppLogicTests;
 [TestClass]
 [DoNotParallelize]
 [TestCategory("Integration")]
-public class ProfileSuggestionTest_FromRealDb
+public class ProfileSuggestionTest_FromRealDb : IntegrationTestBase
 {
     public TestContext TestContext { get; set; } = null!;
 
@@ -38,8 +42,10 @@ public class ProfileSuggestionTest_FromRealDb
         TestContext.WriteLine($"Reports: {db.Reports.Count()}");
         TestContext.WriteLine("------------------------------------");
 
-        // ManagementDbs muss IMatchesDbs + IProfileDbs + IHarvestDbs erfüllen
-        var repo = new ManagementDbs(db);
+        // Nach dem Split: separate DB-Klassen pro Interface
+        var matchesDbs = new MatchesDbs(db);
+        var profileDbs = new ProfileDbs(db);
+        var harvestDbs = new HarvestDbs(db);
 
         var testDto = new PrivateProfileDto
         {
@@ -65,7 +71,7 @@ public class ProfileSuggestionTest_FromRealDb
         const int preloadCount = 10;
 
         // 1) HarvestSuggestions als Basis
-        var harvestSuggestion = new HarvestSuggestion(repo, profileId, tagIds, preloadCount);
+        var harvestSuggestion = new HarvestSuggestion(harvestDbs, profileId, tagIds, preloadCount);
         var harvestResults = harvestSuggestion.GetHarvestSuggestionList();
 
         Assert.IsNotNull(harvestResults);
@@ -76,13 +82,13 @@ public class ProfileSuggestionTest_FromRealDb
 
         foreach (var hu in harvestResults)
         {
-            var notYetRated = !repo.ProfileAlreadyRated(profileId, hu.ProfileId);
+            var notYetRated = !matchesDbs.ProfileAlreadyRated(profileId, hu.ProfileId);
             if (notYetRated)
                 expectedPairs.Add((hu.ProfileId, hu.UploadId));
         }
 
         // Act
-        var profileSuggestion = new ProfileSuggestion(repo, repo, repo, profileId, tagIds, preloadCount);
+        var profileSuggestion = new ProfileSuggestion(matchesDbs, profileDbs, harvestDbs, profileId, tagIds, preloadCount);
         var resultDict = profileSuggestion.GetProfileSuggestionList();
 
         // Assert – Basis
@@ -102,7 +108,7 @@ public class ProfileSuggestionTest_FromRealDb
             Assert.AreEqual(harvestUpload.ProfileId, publicProfile.ProfileId,
                 "PublicProfileDto.ProfileId muss mit HarvestUploadDto.ProfileId übereinstimmen.");
 
-            var alreadyRated = repo.ProfileAlreadyRated(profileId, harvestUpload.ProfileId);
+            var alreadyRated = matchesDbs.ProfileAlreadyRated(profileId, harvestUpload.ProfileId);
             Assert.IsFalse(alreadyRated,
                 $"Returned suggestion must be NOT yet rated, but ProfileAlreadyRated was true. Receiver={profileId}, Creator={harvestUpload.ProfileId}, UploadId={harvestUpload.UploadId}.");
         }

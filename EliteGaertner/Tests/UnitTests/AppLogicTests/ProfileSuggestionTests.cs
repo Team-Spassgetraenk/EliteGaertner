@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
@@ -70,8 +73,15 @@ public class ProfileSuggestionTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => Enumerable.Empty<HarvestUploadDto>();
 
-        public void SetHarvestUpload(HarvestUploadDto harvestUpload) { }
-        public void DeleteHarvestUpload(int uploadId) { }
+        public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+            => throw new NotImplementedException();
+
+        public HarvestUploadDto GetUploadDb(int uploadId)
+            => throw new NotImplementedException();
+
+        public bool DeleteHarvestUpload(int uploadId)
+            => true;
+
         public void SetReportHarvestUpload(int uploadId, ReportReasons reason) { }
         public int GetReportCount(int uploadId) => 0;
     }
@@ -94,7 +104,13 @@ public class ProfileSuggestionTests
 
     private sealed class ProfileDbsFake : IProfileDbs
     {
+        public bool CheckUsernameExists(string username)
+            => throw new NotImplementedException();
+
         public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
+            => throw new NotImplementedException();
+
+        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
             => throw new NotImplementedException();
 
         public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
@@ -115,9 +131,16 @@ public class ProfileSuggestionTests
                 Phonenumber = null
             };
 
+        public bool UpdateContactVisibility(ContactVisibilityDto dto)
+            => throw new NotImplementedException();
+
+        public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
+            => throw new NotImplementedException();
+
+        public bool SetUserPreference(List<PreferenceDto> preferences)
+            => throw new NotImplementedException();
+
         public int? CheckPassword(string eMail, string passwordHash)
-        {
-            throw new NotImplementedException();
-        }
+            => throw new NotImplementedException();
     }
 }

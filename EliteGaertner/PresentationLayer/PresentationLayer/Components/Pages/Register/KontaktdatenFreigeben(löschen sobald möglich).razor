@@ -73,7 +73,7 @@
 </div>
 
 @code {
-    int _userId = 123;
+    int _profileId = 123;
     string _email = "";
     string _telephone = "";
     bool _shareEmail = false;
@@ -100,7 +100,7 @@
         {
             var contactDto = new ContactVisibilityDto
             {
-                UserId = 123, // Fester UserId (später dynamisch)
+                profileId = 123, // Fester profileId (später dynamisch)
                 EMail = _email,
                 PhoneNumber = _telephone,
                 ShareMail = _shareEmail,

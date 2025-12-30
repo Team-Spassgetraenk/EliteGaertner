@@ -1,6 +1,104 @@
+using System;
+using System.Linq;
+using AppLogic.Services;
+using Contracts.Data_Transfer_Objects;
+using DataManagement;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace Tests.IntegrationTests.AppLogicTests;
 
-public class UploadServiceImplTest_FromRealDb
+
+//Komplett durch ChatGPT generiert!!!
+[TestClass]
+[DoNotParallelize]
+[TestCategory("Integration")]
+public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
 {
-    
+    public TestContext TestContext { get; set; } = null!;
+
+    private const string ConnectionString =
+        "Host=localhost;Port=5432;Database=elitegaertner_test;Username=postgres;Password=postgres";
+
+    private static EliteGaertnerDbContext CreateDb()
+    {
+        var options = new DbContextOptionsBuilder<EliteGaertnerDbContext>()
+            .UseNpgsql(ConnectionString)
+            .Options;
+
+        return new EliteGaertnerDbContext(options);
+    }
+
+    [TestMethod]
+    public void Create_Get_Delete_Upload_ShouldWorkAgainstRealDb()
+    {
+        using var db = CreateDb();
+        using var tx = db.Database.BeginTransaction(); // rollback am Ende
+
+        var harvestDbs = new HarvestDbs(db);
+        var sut = new UploadServiceImpl(harvestDbs);
+
+        // Arrange
+        const int profileId = 1; // Seed: tomatentiger hat i.d.R. ProfileId=1
+        var uniqueUrl = $"https://example.com/uploads/it_{Guid.NewGuid():N}.jpg";
+        var description = "IntegrationTest UploadServiceImpl";
+        const float weight = 123f;
+        const int width = 4;
+        const int length = 5;
+
+        // Act 1: Create
+        var created = sut.CreateHarvestUpload(profileId, uniqueUrl, description, weight, width, length);
+        Assert.IsTrue(created, "CreateHarvestUpload sollte true liefern.");
+
+        // UploadId aus DB holen (über unique URL)
+        var createdEntity = db.Harvestuploads
+            .AsNoTracking()
+            .SingleOrDefault(h => h.Imageurl == uniqueUrl);
+
+        Assert.IsNotNull(createdEntity, "Upload muss in der DB vorhanden sein.");
+        var uploadId = createdEntity!.Uploadid;
+
+        TestContext.WriteLine($"Created UploadId={uploadId}, ProfileId={profileId}, Url={uniqueUrl}");
+
+        // Act 2: Get
+        var dto = sut.GetUploadDto(uploadId);
+
+        // Assert Get
+        Assert.IsNotNull(dto);
+        Assert.AreEqual(uploadId, dto.UploadId);
+        Assert.AreEqual(profileId, dto.ProfileId);
+        Assert.AreEqual(uniqueUrl, dto.ImageUrl);
+        Assert.AreEqual(description, dto.Description);
+        Assert.AreEqual(weight, dto.WeightGram);
+        Assert.AreEqual(width, dto.WidthCm);
+        Assert.AreEqual(length, dto.LengthCm);
+
+        // Act 3: Delete (liefert filename/url zurück)
+        var returnedFileName = sut.DeleteUpload(uploadId, profileId);
+
+        // Assert Delete
+        Assert.AreEqual(uniqueUrl, returnedFileName, "DeleteUpload soll die ImageUrl zurückgeben.");
+
+        var stillExists = db.Harvestuploads.AsNoTracking().Any(h => h.Uploadid == uploadId);
+        Assert.IsFalse(stillExists, "Upload muss nach DeleteUpload aus der DB entfernt sein.");
+
+        tx.Rollback(); // Datenbank bleibt wie Seed
+    }
+
+    [TestMethod]
+    public void DeleteUpload_ShouldReturnNull_WhenUploadDoesNotExist()
+    {
+        using var db = CreateDb();
+        var harvestDbs = new HarvestDbs(db);
+        var sut = new UploadServiceImpl(harvestDbs);
+
+        // Arrange
+        const int nonExistingUploadId = -999; // führt in HarvestDbs.GetUploadDb zu "new HarvestUploadDto()"
+
+        // Act
+        var result = sut.DeleteUpload(nonExistingUploadId, profileId: 1);
+
+        // Assert
+        Assert.IsNull(result, "Wenn Upload nicht existiert, soll DeleteUpload null zurückgeben.");
+    }
 }

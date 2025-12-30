@@ -11,7 +11,7 @@ class Match {
 }
 
 class Gaertner {
-  +<u>userId : Int
+  +<u>profileId : Int
   +name : String
   +email : String
   +passwordHash : String

@@ -6,9 +6,9 @@ public interface IProfileMgm
 {
     public bool CheckUsernameExists (string username);
     
-    public PublicProfileDto VisitReceiverProfile(int userId); //Für Besucher
+    public PublicProfileDto VisitPublicProfile(int profileId); //Für Besucher
 
-    public PrivateProfileDto VisitCreatorProfile(int userId); //Für das eigene
+    public PrivateProfileDto VisitPrivateProfile(int profileId); //Für das eigene
 
     public bool UpdateProfile(PrivateProfileDto profile);
 

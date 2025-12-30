@@ -167,7 +167,8 @@ public class LeaderboardDbs : ILeaderBoardDbs
                 join p in _dbContext.Profiles.AsNoTracking()
                     //Item1 = ProfileId, Item2 = Value
                     on b.ProfileId equals p.Profileid
-                orderby b.Value descending, p.Username
+                // Tie-breaker: bei gleichem Wert gewinnt der alphabetisch höhere Username (Z → A)
+                orderby b.Value descending, p.Username descending
                 select new
                 {
                     p.Profileid,
@@ -299,7 +300,8 @@ public class LeaderboardDbs : ILeaderBoardDbs
                 from b in bestPerCreator
                 join p in _dbContext.Profiles.AsNoTracking()
                     on b.ProfileId equals p.Profileid
-                orderby b.Value descending, p.Username
+                // Tie-breaker: bei gleichem Wert gewinnt der alphabetisch höhere Username (Z → A)
+                orderby b.Value descending, p.Username descending
                 select new { p.Profileid, p.Username, b.Value })
             .ToList();
 

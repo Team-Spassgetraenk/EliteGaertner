@@ -62,7 +62,7 @@ namespace Tests.UnitTests.AppLogicTests
         public void CreateHarvestUpload_aus_Paramatern_Wahr()
         {
             // Arrange
-            int userId = 1;
+            int profileId = 1;
             string imageUrl = "test.jpg";
             string description = "Test upload";
             float weight = 500.5f;
@@ -70,7 +70,7 @@ namespace Tests.UnitTests.AppLogicTests
             int length = 20;
 
             _mockHarvestDbs.Setup(x => x.CreateUploadDbs(It.Is<HarvestUploadDto>(dto =>
-                dto.ProfileId == userId &&
+                dto.ProfileId == profileId &&
                 dto.ImageUrl == imageUrl &&
                 dto.Description == description &&
                 dto.WeightGram == weight &&
@@ -78,7 +78,7 @@ namespace Tests.UnitTests.AppLogicTests
                 dto.LengthCm == length))).Returns(true);
 
             // Act
-            bool result = _uploadService.CreateHarvestUpload(userId, imageUrl, description, weight, width, length);
+            bool result = _uploadService.CreateHarvestUpload(profileId, imageUrl, description, weight, width, length);
 
             // Assert
             Assert.IsTrue(result);
@@ -138,12 +138,12 @@ namespace Tests.UnitTests.AppLogicTests
         {
             // Arrange
             int uploadId = 1;
-            int userId = 1;
+            int profileId = 1;
             var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "test.jpg" };
             _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns(uploadDto);
 
             // Act
-            var result = _uploadService.DeleteUpload(uploadId, userId);
+            var result = _uploadService.DeleteUpload(uploadId, profileId);
 
             // Assert
             Assert.AreEqual("test.jpg", result);
@@ -156,11 +156,11 @@ namespace Tests.UnitTests.AppLogicTests
         {
             // Arrange
             int uploadId = 999;
-            int userId = 1;
+            int profileId = 1;
             _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns((HarvestUploadDto)null);
 
             // Act
-            var result = _uploadService.DeleteUpload(uploadId, userId);
+            var result = _uploadService.DeleteUpload(uploadId, profileId);
 
             // Assert
             Assert.IsNull(result);
@@ -173,12 +173,12 @@ namespace Tests.UnitTests.AppLogicTests
         {
             // Arrange
             int uploadId = 1;
-            int userId = 1;
+            int profileId = 1;
             var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "" };
             _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns(uploadDto);
 
             // Act
-            var result = _uploadService.DeleteUpload(uploadId, userId);
+            var result = _uploadService.DeleteUpload(uploadId, profileId);
 
             // Assert
             Assert.IsNull(result);

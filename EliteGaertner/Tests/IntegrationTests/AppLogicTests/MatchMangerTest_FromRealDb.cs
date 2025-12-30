@@ -1,9 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using Contracts.Enumeration;
 using DataManagement;
 using DataManagement.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.IntegrationTests.AppLogicTests;
 
@@ -11,7 +15,7 @@ namespace Tests.IntegrationTests.AppLogicTests;
 [TestClass]
 [DoNotParallelize]
 [TestCategory("Integration")]
-public class MatchManagerTest_FromRealDb
+public class MatchManagerTest_FromRealDb : IntegrationTestBase
 {
     public TestContext TestContext { get; set; } = null!;
     private const string ConnectionString =
@@ -27,7 +31,9 @@ public class MatchManagerTest_FromRealDb
 
         using var db = new EliteGaertnerDbContext(options);
 
-        var repo = new ManagementDbs(db);
+        var matchesDbs = new MatchesDbs(db);
+        var profileDbs = new ProfileDbs(db);
+        var harvestDbs = new HarvestDbs(db);
 
         var receiver = new PrivateProfileDto
         {
@@ -49,7 +55,7 @@ public class MatchManagerTest_FromRealDb
         };
 
         const int preloadCount = 10;
-        var manager = new MatchManager(repo, repo, repo, receiver, preloadCount);
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount);
 
         var suggestionsBefore = manager.GetProfileSuggestionList();
         Assert.IsNotNull(suggestionsBefore);
@@ -83,7 +89,7 @@ public class MatchManagerTest_FromRealDb
 
         // Assert 3: ActiveMatches wurden refresht und entsprechen DB
         var activeMatchesFromManager = manager.GetActiveMatches();
-        var activeMatchesFromDb = repo.GetActiveMatches(receiver.ProfileId).ToList();
+        var activeMatchesFromDb = matchesDbs.GetActiveMatches(receiver.ProfileId).ToList();
 
         // Vergleich über ProfileIds (Reihenfolge egal)
         var managerIds = activeMatchesFromManager.Select(p => p.ProfileId).ToList();
@@ -107,7 +113,9 @@ public class MatchManagerTest_FromRealDb
             .Options;
 
         using var db = new EliteGaertnerDbContext(options);
-        var repo = new ManagementDbs(db);
+        var matchesDbs = new MatchesDbs(db);
+        var profileDbs = new ProfileDbs(db);
+        var harvestDbs = new HarvestDbs(db);
 
         var receiver = new PrivateProfileDto
         {
@@ -118,7 +126,7 @@ public class MatchManagerTest_FromRealDb
             }
         };
 
-        var manager = new MatchManager(repo, repo, repo, receiver, preloadCount: 10);
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
 
         var uploadId = CreateTestUpload(db, profileId: 1);
 
@@ -132,7 +140,7 @@ public class MatchManagerTest_FromRealDb
         Assert.IsTrue(db.Harvestuploads.AsNoTracking().Any(h => h.Uploadid == uploadId),
             "Der Upload darf vor Erreichen des Report-Thresholds nicht gelöscht werden.");
 
-        var count = repo.GetReportCount(uploadId);
+        var count = harvestDbs.GetReportCount(uploadId);
         Assert.AreEqual(4, count, "Es müssen genau 4 Reports gezählt werden.");
     }
 
@@ -145,7 +153,9 @@ public class MatchManagerTest_FromRealDb
             .Options;
 
         using var db = new EliteGaertnerDbContext(options);
-        var repo = new ManagementDbs(db);
+        var matchesDbs = new MatchesDbs(db);
+        var profileDbs = new ProfileDbs(db);
+        var harvestDbs = new HarvestDbs(db);
 
         var receiver = new PrivateProfileDto
         {
@@ -156,7 +166,7 @@ public class MatchManagerTest_FromRealDb
             }
         };
 
-        var manager = new MatchManager(repo, repo, repo, receiver, preloadCount: 10);
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
 
         var uploadId = CreateTestUpload(db, profileId: 1);
 

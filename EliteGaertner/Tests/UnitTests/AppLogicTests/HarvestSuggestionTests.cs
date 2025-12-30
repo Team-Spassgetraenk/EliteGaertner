@@ -1,12 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using Contracts.Enumeration;
 using DataManagement.Interfaces;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.UnitTests.AppLogicTests;
 
-
-//Komplett von ChatGPT erstellt!
+// Komplett von ChatGPT erstellt!
 [TestClass]
 [TestCategory("Unit")]
 public class HarvestSuggestionTests
@@ -34,7 +37,10 @@ public class HarvestSuggestionTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => throw new NotImplementedException();
 
-        public bool SetHarvestUpload(HarvestUploadDto harvestUpload)
+        public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+            => throw new NotImplementedException();
+
+        public HarvestUploadDto GetUploadDb(int uploadId)
             => throw new NotImplementedException();
 
         public bool DeleteHarvestUpload(int uploadId)

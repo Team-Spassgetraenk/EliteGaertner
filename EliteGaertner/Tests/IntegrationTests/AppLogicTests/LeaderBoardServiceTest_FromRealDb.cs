@@ -12,7 +12,7 @@ namespace Tests.IntegrationTests.AppLogicTests;
 [TestClass]
 [DoNotParallelize]
 [TestCategory("Integration")]
-public class LeaderboardServiceTest_FromRealDb
+public class LeaderboardServiceTest_FromRealDb : IntegrationTestBase
 {
     private static string ConnectionString =>
         // Falls du den Test-Postgres auf 5433 laufen lässt:

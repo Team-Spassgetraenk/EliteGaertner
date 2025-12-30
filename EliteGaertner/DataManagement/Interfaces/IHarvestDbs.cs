@@ -4,7 +4,7 @@ using Contracts.Enumeration;
 namespace DataManagement.Interfaces;
 
 
-//Dieses Interface implementiert
+//TODO Kommentare fehlen
 public interface IHarvestDbs
 {
 
@@ -21,9 +21,7 @@ public interface IHarvestDbs
     
     public bool DeleteHarvestUpload(int uploadId);
     
-    //TODO
     public void SetReportHarvestUpload(int uploadId, ReportReasons reason);
-
-    //TODO
+    
     public int GetReportCount(int uploadId);
 }

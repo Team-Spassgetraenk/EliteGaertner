@@ -209,8 +209,8 @@ _selectedTag = (_selectedTag == tag) ? null : tag;
     {
         if (string  .IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild)) return;
 
-        // TODO: echten UserId z.B. aus Auth/Context holen
-        int userId = 1;
+        // TODO: echten profileId z.B. aus Auth/Context holen
+        int profileId = 1;
 
         float weightGram = (Gewicht ?? 0);
         float lengthCm = Laenge ?? 0;
@@ -225,7 +225,7 @@ _selectedTag = (_selectedTag == tag) ? null : tag;
             WidthCm = widthCm,
             LengthCm = lengthCm,
             UploadDate = DateTime.UtcNow,
-            ProfileId = userId
+            ProfileId = profileId
         };
 
         bool success = UploadService.CreateHarvestUpload(dto);

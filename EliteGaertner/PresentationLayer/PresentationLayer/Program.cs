@@ -15,10 +15,10 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
 builder.Services.AddDbContext<EliteGaertnerDbContext>(options =>
     options.UseNpgsql(connectionString));
 //Hier wird definiert welche Interfaces ManagementDbs implementieren
-builder.Services.AddScoped<IHarvestDbs, ManagementDbs>();
-builder.Services.AddScoped<IMatchesDbs, ManagementDbs>();
-builder.Services.AddScoped<IPreferenceDbs, ManagementDbs>();
-builder.Services.AddScoped<IProfileDbs, ManagementDbs>();
+builder.Services.AddScoped<IHarvestDbs, HarvestDbs>();
+builder.Services.AddScoped<IMatchesDbs, MatchesDbs>();
+builder.Services.AddScoped<ILeaderBoardDbs, LeaderboardDbs>();
+builder.Services.AddScoped<IProfileDbs, ProfileDbs>();
 
 
 // Add services to the container.
@@ -35,6 +35,15 @@ builder.Services.AddScoped<IUploadService, UploadServiceImpl>();
 builder.Services.AddScoped<IProfileMgm, ProfileMgm>();
 
 var app = builder.Build();
+
+//Überprüft, ob Datenbankschema vorhanden ist
+//Falls nicht -> Datenbankschema wird implementiert
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<EliteGaertnerDbContext>();
+    db.Database.Migrate();
+}
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

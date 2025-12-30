@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
@@ -5,7 +9,7 @@ using Contracts.Enumeration;
 
 namespace Tests.UnitTests.AppLogicTests;
 
-//Komplett durch ChatGPT generiert!!!!!!
+// Komplett durch ChatGPT generiert!!!!!!
 [TestClass]
 [TestCategory("Unit")]
 public class MatchManagerTests
@@ -241,7 +245,13 @@ public class MatchManagerTests
 
     private sealed class ProfileDbsFake : IProfileDbs
     {
+        public bool CheckUsernameExists(string username)
+            => throw new NotImplementedException();
+
         public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
+            => throw new NotImplementedException();
+
+        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
             => throw new NotImplementedException();
 
         public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
@@ -260,10 +270,17 @@ public class MatchManagerTests
                 UserName = $"User{profileId}"
             };
 
+        public bool UpdateContactVisibility(ContactVisibilityDto dto)
+            => throw new NotImplementedException();
+
         public int? CheckPassword(string eMail, string passwordHash)
-        {
-            throw new NotImplementedException();
-        }
+            => throw new NotImplementedException();
+
+        public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
+            => throw new NotImplementedException();
+
+        public bool SetUserPreference(List<PreferenceDto> preferences)
+            => throw new NotImplementedException();
     }
 
     private sealed class HarvestDbsFake : IHarvestDbs
@@ -284,13 +301,21 @@ public class MatchManagerTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => Enumerable.Empty<HarvestUploadDto>();
 
-        public void DeleteHarvestUpload(int uploadId) => DeleteCalls.Add(uploadId);
+        public bool DeleteHarvestUpload(int uploadId)
+        {
+            DeleteCalls.Add(uploadId);
+            return true;
+        }
 
         public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
             => SetReportCalls.Add((uploadId, reason));
 
         public int GetReportCount(int uploadId) => ReportCountToReturn;
 
-        public void SetHarvestUpload(HarvestUploadDto harvestUpload) { }
+        public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+            => throw new NotImplementedException();
+
+        public HarvestUploadDto GetUploadDb(int uploadId)
+            => throw new NotImplementedException();
     }
 }
