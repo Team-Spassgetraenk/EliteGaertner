@@ -40,7 +40,7 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
 
         // Arrange
         const int profileId = 1; // Seed: tomatentiger hat i.d.R. ProfileId=1
-        var uniqueUrl = $"https://example.com/uploads/it_{Guid.NewGuid():N}.jpg";
+        var uniqueUrl = $"/uploads/it_{Guid.NewGuid():N}.jpg";
         var description = "IntegrationTest UploadServiceImpl";
         const float weight = 123f;
         const int width = 4;

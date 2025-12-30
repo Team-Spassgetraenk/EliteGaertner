@@ -186,7 +186,7 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
     {
         var upload = new Harvestupload
         {
-            Imageurl = "https://example.com/uploads/test_report.jpg",
+            Imageurl = "/uploads/test_report.jpg",
             Description = "IntegrationTest Upload for ReportHarvestUpload",
             Weightgramm = 123,
             Widthcm = 4,
