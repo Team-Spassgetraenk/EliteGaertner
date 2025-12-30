@@ -1,30 +1,23 @@
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AppLogic.Services;
-using Microsoft.EntityFrameworkCore;
-using DataManagement;
 using Contracts.Data_Transfer_Objects;
+using DataManagement;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.IntegrationTests.AppLogicTests;
 
-//Die Test Klasse ist ein Integrationstest der Harvest Suggestions
-//Wir geben der Klasse den User Tomatentiger mit der UserId 1 und ein Interessensprofil (Details siehe in der Methode)
-//Am Ende erwarten wir ein passendes Bild pro User. Die neuesten sollten zuerst angezeigt werden.
+//Durch ChatGPT generiert!!!
 [TestClass]
-public class HarvestSuggestionTest_FromRealDb
+[DoNotParallelize]
+[TestCategory("Integration")]
+public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
 {
     public TestContext TestContext { get; set; } = null!;
-    private static readonly string ComposeFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../SetUp/docker-compose.yaml"));
     private const string ConnectionString =
         "Host=localhost;Port=5432;Database=elitegaertner_test;Username=postgres;Password=postgres";
-
-    [ClassInitialize]
-    public static void ClassInit(TestContext _)
-    {
-        Run("docker", "compose", "-f", ComposeFile, "down", "-v");
-        Run("docker", "compose", "-f", ComposeFile, "up", "-d");
-        //Kurze Pause, damit die Datenbank Zeit hat hochzufahren.
-        Thread.Sleep(15000);
-    }
 
     [TestMethod]
     public void HarvestSuggestionTest()
@@ -52,8 +45,8 @@ public class HarvestSuggestionTest_FromRealDb
         TestContext.WriteLine($"Reports: {db.Reports.Count()}");
         TestContext.WriteLine("------------------------------------");
 
-        // Repo muss DbContext annehmen 
-        var repo = new ManagementDbs(db);
+        // Nach dem Split: HarvestDbs übernimmt die Harvest-spezifischen DB-Zugriffe
+        var harvestDbs = new HarvestDbs(db);
         
         //TestUser DTO erstellen (TomatenTiger)
         var testDto = new PrivateProfileDto()
@@ -84,7 +77,7 @@ public class HarvestSuggestionTest_FromRealDb
         
         
         //Testdaten werden jetzt an die Klasse übergeben
-        var testSuggestions = new HarvestSuggestion(repo, profileId, tagIds, 10);
+        var testSuggestions = new HarvestSuggestion(harvestDbs, profileId, tagIds, 10);
         var result = testSuggestions.GetHarvestSuggestionList();
         
         //Logging der Testresult
@@ -104,37 +97,5 @@ public class HarvestSuggestionTest_FromRealDb
         var resultIds = result.Select(r => r.UploadId).ToList();
         
         CollectionAssert.AreEquivalent( new[] {43, 17, 34, 26, 36, 31, 24, 10, 21, 22}, resultIds );
-    }
-    
-    
-    //MUSS NOCH FERTIG KOMMENTIERT WERDEN
-    private static void Run(string file, params string[] args)
-    {
-        //Definition wie der Prozess gestartet werden soll
-        var psi = new ProcessStartInfo
-        {
-            FileName = file,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false
-        };
-        
-        //Setzt die Argumente in einer 
-        foreach (var a in args)
-            psi.ArgumentList.Add(a);
-
-        using var p = Process.Start(psi);
-        if (p == null)
-            throw new AssertFailedException($"Failed to start process: {file}");
-        
-        //Wartet bis der Prozess fertig ist
-        p.WaitForExit();
-
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-
-        if (p.ExitCode != 0)
-            throw new AssertFailedException(
-                $"Command failed: {file} {string.Join(" ", args)}\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}");
     }
 }

@@ -1,0 +1,33 @@
+.speech-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin: 20px;
+}
+
+.avatar {
+    height: 120px;
+}
+
+.speech-bubble {
+    padding: 15px;
+    border: 2px solid #000000;
+    border-radius: 8px;          /* <--- eckige Sprechblase */
+    background: #6a6969;
+    max-width: 300px;
+    position: relative;
+    font-size: 1.1rem;
+    line-height: 1.4rem;
+}
+
+/* Dreieck */
+.speech-bubble::after {
+    content: "";
+    position: absolute;
+    left: -15px;
+    top: 25px;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-right: 10px solid #000000;
+}

@@ -1,0 +1,65 @@
+﻿@page "/"
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<div class="login-page-container">
+    <div class="login-center">
+        
+
+        <div class="login-card">
+
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo"/>
+                <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
+            </div>
+
+            <div class="input-group">
+                <label for="email-input">Email</label>
+                <input id="email-input" class="app-input" placeholder="Email eingeben..." @bind="_email" @bind:event="oninput"/>
+            </div>
+
+            <div class="input-group">
+                <label for="password-input">Passwort</label>
+                <input id="password-input" class="app-input" type="password" placeholder="Passwort eingeben..." @bind="_password" @bind:event="oninput"/>
+            </div>
+
+            <button class="app-button primary-button"
+                    @onclick="Einloggen"
+                    disabled="@(!LoginEnabled)">
+                Anmelden
+            </button>
+
+            @if (!LoginEnabled)
+            {
+                <p class="disabled-hint">Bitte zuerst E-Mail und Passwort eingeben.</p>
+            }
+
+            <div class="register-text">
+                <p>Ich habe noch keinen Account?</p>
+                <a href="/registrierung" class="register-link">Jetzt registrieren</a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@code {
+    string _email = "";
+    string _password = "";
+
+    // Berechnete Eigenschaft, die überprüft, ob beide Felder gefüllt sind
+    private bool LoginEnabled => !string.IsNullOrWhiteSpace(_email) && !string.IsNullOrWhiteSpace(_password);
+
+    void Einloggen()
+    {
+        // Diese Prüfung stellt sicher, dass LoginEnabled true ist, bevor navigiert wird
+        if (LoginEnabled)
+        {
+            Nav.NavigateTo("/startseite", forceLoad: true);
+            Console.WriteLine($"Eingegeben: {_email} / {_password}");
+        }
+    }
+}

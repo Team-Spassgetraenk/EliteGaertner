@@ -1,196 +1,219 @@
 @page "/startseite"
 @using Microsoft.AspNetCore.Components.Web
+@using System.Timers
 @inject NavigationManager Nav
+@inject IJSRuntime JS
+@implements IDisposable
 @rendermode InteractiveServer
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
-
 <div class="page-container background-style">
     <header class="top-bar">
-
+        @* Linke Seite *@
         <div class="icon-wrapper left" @onclick="GoToRanks">
             <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
             <span class="icon-label">Rangliste</span>
         </div>
-        
+
+        @* Mitte (wird durch CSS absolut zentriert) *@
         <h1 class="page-title">EliteGärtner.</h1>
 
-
-        <div class="menu-icon-container">
-            <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
+        @* Rechte Seite *@
+        <div class="header-right-group" style="display: flex; align-items: center; gap: 20px;">
+            @if (!string.IsNullOrEmpty(_loggedInUserName))
+            {
+                <span class="logged-in-user" style="font-weight: bold; font-size: 1.5rem;">
+                    👤 @_loggedInUserName
+                </span>
+            }
+            <div class="menu-icon-container" @onclick="ToggleLogoutMenu">
+                <span class="menu-icon">☰</span>
+            </div>
         </div>
     </header>
 
-    @* --- NEUES KOMBINIERTES LOGOUT & ADMIN MENÜ --- *@
+    @if (_showAd)
+    {
+    <div class="ad-sidebar">
+        <div class="ad-header">
+            <span class="ad-label">Anzeige</span>
+            <span class="ad-close" @onclick="CloseAd">✖</span>
+        </div>
+        <div class="ad-content">
+            <img src="@_currentAdImage" alt="Werbung" class="ad-image" />
+        </div>
+    </div>
+    }
+
+    @if (_showMatchOverlay)
+    {
+        <div class="match-overlay">
+            @* Konfetti-Loop *@
+            @for (int i = 0; i < 60; i++)
+            {
+                // Zufällige Flugrichtung in alle Richtungen
+                var x = Random.Shared.Next(-500, 500);
+                var y = Random.Shared.Next(-500, 500);
+                <div class="confetti" style="--x: @(x)px; --y: @(y)px; background-color: @(_confettiColors[Random.Shared.Next(0, _confettiColors.Length)])"></div>
+            }
+
+            <div class="match-content">
+                <h2 class="match-title">IT'S A MATCH!</h2>
+                <p class="match-subtitle">Glückwunsch!!! 
+                    Du und @_matchedUser?.Username seid jetzt ein Team!</p>
+
+                <div class="match-images">
+                    <div class="match-photo-circle left-photo">
+                        <img src="pictures/Profilbilder/Profilbild_27.png" alt="Dein Profil" style="width:100%; height:100%; object-fit:cover;" />
+                    </div>
+                    <div class="match-photo-circle right-photo">
+                        <img src="@_matchedUser?.ProfileImageUrl" alt="Match Profil" style="width:100%; height:100%; object-fit:cover;" />
+                    </div>
+                </div>
+
+                <div class="match-actions">
+                    <button class="match-btn contact-btn" @onclick='() => NavTo("/matchestest")'>Kontakt aufnehmen</button>
+                    <button class="match-btn continue-btn" @onclick="CloseMatchOverlay">Weiter gärtnern</button>
+                </div>
+            </div>
+        </div>
+    }
+
     @if (_showLogout)
     {
     <div class="logout-menu admin-menu-ext">
-        @* Roter Logout Button *@
         <p class="logout-link" @onclick="NavigateToLogout">Logout ➜]</p>
-        
+        <div class="admin-header" @onclick="NavigateToAboutUs">
+            <span>ℹ️ Über uns</span>
+        </div>
         <div class="admin-nav-section">
             <div class="admin-header" @onclick="ToggleAdminNav">
                 <span>🛠 Admin-Navigation</span>
                 <span style="font-size: 12px;">@(_showAdminNav ? " ▲" : " ▼")</span>
             </div>
-            
             @if (_showAdminNav)
             {
-                <div class="admin-scroll-area">
-                    <div class="admin-link" @onclick='() => NavTo("/")'>Login</div>
-                    <div class="admin-link" @onclick='() => NavTo("/registrierung")'>Registrierung</div>
-                    <div class="admin-link" @onclick='() => NavTo("/registrierung/interessen")'>Interessen</div>
-                    <div class="admin-link" @onclick='() => NavTo("/registrierung/profilerstellung")'>Profilerstellung</div>
-                    <div class="admin-link" @onclick='() => NavTo("/ernte-hochladen")'>Ernte Upload</div>
-                    <div class="admin-link" @onclick='() => NavTo("/profiltest")'>Profil (Eigen)</div>
-                    <div class="admin-link" @onclick='() => NavTo("/profil/profilverwaltung")'>Verwaltung</div>
-                    <div class="admin-link" @onclick='() => NavTo("/profil/fremder-user")'>Profil (Fremd)</div>
-                    <div class="admin-link" @onclick='() => NavTo("/startseite")'>Startseite</div>
-                    <div class="admin-link" @onclick='() => NavTo("/präferenzeinstellungen")'>Präferenzen</div>
-                    <div class="admin-link" @onclick='() => NavTo("/ranglistetest")'>Rangliste</div>
-                    <div class="admin-link" @onclick='() => NavTo("/matchestest")'>Matches</div>
-                </div>
+            <div class="admin-scroll-area">
+                <div class="admin-link" @onclick='() => NavTo("/")'>Login</div>
+                <div class="admin-link" @onclick='() => NavTo("/registrierung")'>Registrierung</div>
+                <div class="admin-link" @onclick='() => NavTo("/registrierung/interessen")'>Interessen</div>
+                <div class="admin-link" @onclick='() => NavTo("/registrierung/profilerstellung")'>Profilerstellung</div>
+                <div class="admin-link" @onclick='() => NavTo("/ernte-hochladen")'>Ernte Upload</div>
+                <div class="admin-link" @onclick='() => NavTo("/profiltest")'>Profil (Eigen)</div>
+                <div class="admin-link" @onclick='() => NavTo("/profil/profilverwaltung")'>Verwaltung</div>
+                <div class="admin-link" @onclick='() => NavTo("/profil/fremder-user")'>Profil (Fremd)</div>
+                <div class="admin-link" @onclick='() => NavTo("/startseite")'>Startseite</div>
+                <div class="admin-link" @onclick='() => NavTo("/präferenzeinstellungen")'>Präferenzen</div>
+                <div class="admin-link" @onclick='() => NavTo("/ranglistetest")'>Rangliste</div>
+                <div class="admin-link" @onclick='() => NavTo("/matchestest")'>Matches</div>
+            </div>
             }
         </div>
     </div>
     }
 
     <div class="tinder-card-area">
-        @if (_isProfileVisible)
+        @if (_isProfileVisible && _currentHarvest != null)
         {
-        <div class="tinder-wrapper-card">
-
-            @* Bild und Info-Spalte nebeneinander *@
+        <div class="tinder-wrapper-card @_animationClass" @key="_harvestIndex">
             <div class="main-content-flex">
-
-                @* --- 1. Linke Spalte: Bild mit kombinierter Username/Tag-Leiste --- *@
                 <div class="tinder-card">
                     <div class="card-image-placeholder">
-                        <img src="pictures/Testbilder/Gurken_01.jpg" alt="Erntebild" class="harvest-image" />
+                        <img src="@_currentHarvest.ImageUrl" alt="Erntebild" class="harvest-image" />
                     </div>
-
-                    @* Kombiniertes Feld für anklickbaren Username und Tag (Oben links/rechts) *@
+                    @* --- Profilbild des fremden Users auf der Karte --- *@
+                    <div class="user-avatar-on-card">
+                        <img src="@_currentHarvest.ProfileImageUrl" alt="User Avatar" />
+                    </div>
                     <div class="username-tag-combo">
-                        @* ANKLICKBARER USERNAME *@
                         <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
-                            <span class="username-label">@_userName1</span>
+                            <span class="username-label">@_currentHarvest.Username</span>
                         </a>
-
                         <div class="tag-label">
-                            <span>Gurken 🥒</span>
+                            <span>@_currentHarvest.Tag</span>
                         </div>
                     </div>
                 </div>
 
-                @* 2. Rechte Spalte: Parameter (gestapelt), Kommentar und Buttons *@
                 <div class="right-info-stack">
-
-                    @* Parameter Felder (Gewicht & Größe) *@
                     <div class="parameter-wrapper-vertical">
                         <div class="white-comic-box">
-                            <div class="param-icon-circle">
-                                <span>⚖️</span>
-                            </div>
+                            <div class="param-icon-circle">⚖️</div>
                             <div class="param-content-wrapper">
                                 <p class="param-title">Gewicht</p>
-                                <p class="param-value">300 g</p>
+                                <p class="param-value">@_currentHarvest.Weight</p>
                             </div>
                         </div>
                         <div class="white-comic-box">
-                            <div class="param-icon-circle">
-                                <span>📏</span>
-                            </div>
+                            <div class="param-icon-circle">📏</div>
                             <div class="param-content-wrapper">
                                 <p class="param-title">Länge</p>
-                                <p class="param-value">25 cm</p>
+                                <p class="param-value">@_currentHarvest.Length</p>
                             </div>
                         </div>
                         <div class="white-comic-box">
-                            <div class="param-icon-circle">
-                                <span>📐</span>
-                            </div>
+                            <div class="param-icon-circle">📐</div>
                             <div class="param-content-wrapper">
                                 <p class="param-title">Breite</p>
-                                <p class="param-value">67 cm</p>
+                                <p class="param-value">@_currentHarvest.Width</p>
                             </div>
                         </div>
                     </div>
 
-                    @* Beschreibung *@
                     <div class="comment-box white-comic-box">
                         <p class="comment-label">Erntebeschreibung</p>
-                        <p class="comment-text">Hier könnte ein Kommentar zur Ernte stehen, der maximal 150 Zeichen umfasst und alle relevanten Infos kurz, präzise und übersichtlich vermittelt...</p>
+                        <p class="comment-text">@_currentHarvest.Description</p>
                     </div>
 
-                    @* Bewertungs-Icons *@
                     <div class="rating-icons-in-stack">
                         <div class="rating-icon flag-icon" @onclick="FlagProfile">
                             <span style="font-size: 20px;">🚩</span>
                         </div>
-                        <div class="rating-icon dislike-icon" @onclick="DislikeProfile">
+                        <div class="rating-icon dislike-icon" @onclick="() => HandleSwipe(false)">
                             <span style="font-size: 24px;">❌</span>
                         </div>
-                        <div class="rating-icon like-icon" @onclick="LikeProfile">
+                        <div class="rating-icon like-icon" @onclick="() => HandleSwipe(true)">
                             <span style="font-size: 24px;">💚</span>
                         </div>
                         <div class="rating-icon settings-icon" @onclick="NavigateToPreferences">
-                            <img src="pictures/EinstellungenIcon.png" alt="Matches" height="27" />
+                            <img src="pictures/EinstellungenIcon.png" alt="Einstellungen" height="27" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         }
-        else
+        else if (!_isProfileVisible)
         {
-        <p style="font-size: 18px; font-weight: bold; text-align: center;">
-            Profil wurde gemeldet und ausgeblendet.
-        </p>
+            <div class="white-comic-box" style="text-align: center; padding: 20px;">
+                <p>Profil wurde gemeldet und ausgeblendet.</p>
+                <button class="report-button" @onclick="() => _isProfileVisible = true">Weiter</button>
+            </div>
         }
 
+        @* --- REPORT MODAL --- *@
         @if (_showReportModal)
         {
-        <div class="report-modal-overlay">
-            <div class="report-modal">
-
-                <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
-
-                <div class="report-reason">
-                    <input type="checkbox" id="abstossende" @onchange="@(e => UpdateReportReason("abstossende Inhalte", e))" checked="@(_selectedReportReason == "abstossende Inhalte")" />
-                    <label for="abstossende">abstossende Inhalte</label>
-                </div>
-
-                <div class="report-reason">
-                    <input type="checkbox" id="sexuelle" @onchange="@(e => UpdateReportReason("sexuelle Inhalte", e))" checked="@(_selectedReportReason == "sexuelle Inhalte")" />
-                    <label for="sexuelle">sexuelle Inhalte</label>
-                </div>
-
-                <div class="report-reason">
-                    <input type="checkbox" id="gewaltvolle" @onchange="@(e => UpdateReportReason("gewaltvolle Inhalte", e))" checked="@(_selectedReportReason == "gewaltvolle Inhalte")" />
-                    <label for="gewaltvolle">gewaltvolle Inhalte</label>
-                </div>
-
-                <div class="report-reason">
-                    <input type="checkbox" id="catfishing" @onchange="@(e => UpdateReportReason("Catfishing", e))" checked="@(_selectedReportReason == "Catfishing")" />
-                    <label for="catfishing">Catfishing</label>
-                </div>
-
-                <div class="report-reason">
-                    <input type="checkbox" id="spam" @onchange="@(e => UpdateReportReason("Spam", e))" checked="@(_selectedReportReason == "Spam")" />
-                    <label for="spam">Spam</label>
-                </div>
-
-                <div class="modal-actions">
-                    <button class="report-button" @onclick="ReportProfile">Melden</button>
-                    <div class="close-modal-icon" @onclick="CloseReportModal">
-                        <span style="font-size: 10px;">❌</span>
+            <div class="report-modal-overlay">
+                <div class="report-modal">
+                    <p style="font-weight: bold; margin-bottom: 10px;">Post Melden</p>
+                    <div style="max-height: 200px; overflow-y: auto; text-align: left; margin-bottom: 15px;">
+                        @foreach (var reason in _reportReasons)
+                        {
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                <input type="checkbox" @onchange="@(e => UpdateReportReason(reason,e))" checked="@(_selectedReportReason == reason)" />
+                                <label>@reason</label>
+                            </div>
+                        }
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <button class="report-button" @onclick="ReportProfile">Melden</button>
+                        <span class="close-x" @onclick="CloseReportModal">✖</span>
                     </div>
                 </div>
             </div>
-        </div>
         }
-
     </div>
 
     <footer class="bottom-nav">
@@ -201,7 +224,7 @@
 
         <div class="nav-item" @onclick="GoToMainpage">
             <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
-            <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
+            <span>EliteGärtner.</span>
         </div>
 
         <div class="nav-item" @onclick="GoToProfile">
@@ -212,27 +235,131 @@
 </div>
 
 @code {
+    private string _loggedInUserName = "@MaisMädrescher";
+    private string _animationClass = "";
+    private bool _isAnimating = false;
+    private int _harvestIndex = 0;
+    private HarvestModel? _currentHarvest;
+
+/* Match Variablen */
+    private bool _showMatchOverlay = false;
+    private HarvestModel? _matchedUser;
+    private string[] _confettiColors = { "#FFC107", "#2196F3", "#FF5722", "#4CAF50", "#E91E63" };
+
+    private List<HarvestModel> _harvests = new()
+        {
+            new() { Username="@MaisMeister", Tag="Mais 🌽", ImageUrl="pictures/Testbilder/Mais_03.png", ProfileImageUrl="pictures/Profilbilder/Profilbild_07.png", Weight="450 g", Length="22 cm", Width="5 cm", Description="Mein ganzer Stolz aus dem Hochbeet!" }, 
+            new() { Username="@GrukenGanove", Tag="Gurken 🥒", ImageUrl="pictures/Testbilder/Gurken_01.jpg", ProfileImageUrl="pictures/Profilbilder/Profilbild_26.png", Weight="300 g", Length="25 cm", Width="6 cm", Description="Knackig und frisch geerntet." }, 
+            new() { Username="@KürbisKontrolleur", Tag="Kürbis 🎃", ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", ProfileImageUrl="pictures/Profilbilder/Profilbild_12.png", Weight="1200 g", Length="40 cm", Width="45 cm", Description="Fast zu schwer zum Tragen!" }
+};
+
 private bool _showLogout = false;
-private bool _showAdminNav = false; 
+private bool _showAdminNav = false;
 private bool _showReportModal = false;
 private bool _isProfileVisible = true;
 private string _selectedReportReason = "";
-private string _userName1 = "@user_name1";
+private readonly string[] _reportReasons = 
+{   "abstossende Inhalte", "sexuelle Inhalte", "gewaltvolle Inhalte", "'Catfishing' - nicht selbst angebaut", "Spam",};
+
+/* Werbe-Logik */
+private bool _showAd = true;
+private string _currentAdImage = "pictures/ads/pimpyourblechad02.jpg";
+private int _adCounter = 0;
+private Timer? _adTimer;
+private string[] _adImages = new[]
+{
+"pictures/ads/pimpyourblechad02.jpg",
+"pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg",
+"pictures/ads/GurkenStandAd.jpg",
+"pictures/ads/OBI_werbung.jpg",
+"pictures/ads/ralphschuhmacherad.png",
+"pictures/ads/werbeplakat-leberkaessemmel.jpg",
+"pictures/ads/DieLilaVersuchung.jpg",
+"pictures/ads/pimpyourblech01.jpg",
+"pictures/ads/werbeplakat-leberkassemmel02.jpg",
+"pictures/ads/WürstlStandAd.jpg",
+"pictures/ads/pimpyourblechad03.jpg"
+};
+
+protected override void OnInitialized()
+{
+_currentHarvest = _harvests[0];
+
+_currentAdImage = _adImages[0];
+_adTimer = new Timer(6000);
+_adTimer.Elapsed += async (sender, e) =>
+{
+_adCounter++;
+_currentAdImage = _adImages[_adCounter % _adImages.Length];
+await InvokeAsync(StateHasChanged);
+};
+_adTimer.AutoReset = true;
+_adTimer.Enabled = true;
+}
+
+private async Task HandleSwipe(bool like)
+{
+// Task-Logik: Sperre, wenn Animation läuft ODER Match-Overlay offen ist
+if (_isAnimating || _showMatchOverlay) return;
+_isAnimating = true;
+
+_animationClass = like ? "swipe-right" : "swipe-left";
+StateHasChanged();
+
+await Task.Delay(600);
+
+// temporäre Test-Match-Logik: 30% Chance auf ein Match bei Like
+if (like && Random.Shared.Next(1, 101) <= 30)
+{
+_matchedUser = _currentHarvest;
+_showMatchOverlay = true;
+await PlayMatchSound();
+}
+
+_harvestIndex = (_harvestIndex + 1) % _harvests.Count;
+_currentHarvest = _harvests[_harvestIndex];
+
+_animationClass = "fade-in";
+StateHasChanged();
+
+await Task.Delay(400);
+_animationClass = "";
+_isAnimating = false;
+}
+
+private async Task PlayMatchSound()
+{
+// Spielt Konfetti-Sound ab bei Match
+await JS.InvokeVoidAsync("eval", "new Audio('sounds/itsamatch.mp3').play()");
+}
+
+private void CloseMatchOverlay() => _showMatchOverlay = false;
+
+private async Task CloseAd()
+{
+_showAd = false;
+await Task.Delay(10000);
+_showAd = true;
+await InvokeAsync(StateHasChanged);
+}
+
+public void Dispose() => _adTimer?.Dispose();
 
 private void ToggleLogoutMenu()
 {
-    _showLogout = !_showLogout;
-    if (!_showLogout) _showAdminNav = false;
+_showLogout = !_showLogout;
+if (!_showLogout) _showAdminNav = false;
 }
 
 private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
 
 private void NavTo(string path)
 {
-    _showLogout = false;
-    Nav.NavigateTo(path, forceLoad: true);
+_showLogout = false;
+Nav.NavigateTo(path, forceLoad: true);
 }
 
+private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns", forceLoad: true);
 private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
 private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
 private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
@@ -244,301 +371,30 @@ private void CloseReportModal() => _showReportModal = false;
 
 private void UpdateReportReason(string reason, ChangeEventArgs e)
 {
-    if ((bool)e.Value) _selectedReportReason = reason;
-    else if (_selectedReportReason == reason) _selectedReportReason = string.Empty;
+if ((bool)e.Value) _selectedReportReason = reason;
+else if (_selectedReportReason == reason) _selectedReportReason = string.Empty;
 }
 
 private void ReportProfile()
 {
-    if (!string.IsNullOrEmpty(_selectedReportReason))
-    {
-        _isProfileVisible = false;
-        _showReportModal = false;
-    }
+if (!string.IsNullOrEmpty(_selectedReportReason))
+{
+_isProfileVisible = false;
+_showReportModal = false;
+}
 }
 
-private void DislikeProfile() => Console.WriteLine("0");
-private void LikeProfile() => Console.WriteLine("1");
-private string GetUsernameUrl() => _userName1.TrimStart('@');
+private string GetUsernameUrl() => _currentHarvest?.Username.TrimStart('@') ?? "";
+
+private class HarvestModel
+{
+public string Username { get; set; } = "";
+public string Tag { get; set; } = "";
+public string ImageUrl { get; set; } = "";
+public string ProfileImageUrl { get; set; } = "";
+public string Weight { get; set; } = "";
+public string Length { get; set; } = "";
+public string Width { get; set; } = "";
+public string Description { get; set; } = "";
 }
-
-<style>
-    .page-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .background-style {
-        background-image: url('pictures/LightIconBackground.jpeg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        width: 100%;
-        min-height: 100vh;
-        font-family: 'Patrick Hand', cursive, sans-serif;
-        padding-top: 1px;
-    }
-
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 15px;
-        border-bottom: 3px solid #000;
-        background-color: #fff;
-        z-index: 10;
-        box-shadow: 0 4px 0 0 #000;
-    }
-
-    .page-title {
-        font-size: 1.8rem;
-        margin: 0;
-        font-weight: bold;
-        color: black;
-    }
-
-    .icon-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-weight: bold;
-        font-size: 12px;
-        cursor: pointer;
-        transition: transform 0.2s;
-    }
-
-    .icon-wrapper:hover { transform: scale(1.05); }
-    .icon-wrapper img { margin-bottom: 2px; }
-    .menu-icon-container { cursor: pointer; }
-    .menu-icon { font-size: 30px; line-height: 1; color: #000; }
-
-    /* --- Logout-Menü (Dropdown) --- */
-    .logout-menu {
-        position: absolute;
-        top: 60px;
-        right: 15px;
-        width: 180px; 
-        background-color: #fff;
-        border: 3px solid #000;
-        border-radius: 8px;
-        box-shadow: 3px 3px 0 0 #000;
-        z-index: 20;
-        padding: 0;
-        overflow: hidden;
-    }
-
-    /* Logout Styling: Hellroter Hintergrund, rote Schrift */
-    .logout-link {
-        padding: 8px 10px;
-        margin: 0;
-        cursor: pointer;
-        font-size: 18px;
-        text-align: right;
-        border-bottom: 2px solid #000;
-        background-color: #fff0f0; 
-        color: #D62828; 
-        font-weight: bold;
-    }
-
-    .logout-link:hover {
-        background-color: #ffdada;
-    }
-
-    .admin-header {
-        background-color: #f0f0f0;
-        padding: 8px 10px;
-        font-size: 15px;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #000;
-    }
-
-    .admin-scroll-area {
-        max-height: 200px;
-        overflow-y: auto;
-        background-color: #fff;
-    }
-
-    .admin-link {
-        padding: 6px 10px;
-        font-size: 14px;
-        border-bottom: 1px solid #ddd;
-        cursor: pointer;
-    }
-
-    .admin-link:hover {
-        background-color: #8B45B3;
-        color: white;
-    }
-
-    /* --- Restliche Tinder-Card Styles (Unverändert) --- */
-    .tinder-card-area {
-        flex-grow: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        position: relative;
-    }
-
-    .tinder-wrapper-card {
-        width: 100%;
-        max-width: 700px;
-        height: 90vh;
-        max-height: 600px;
-        background-color: #ffffff;
-        border: 3px solid #000;
-        border-radius: 15px;
-        box-shadow: 5px 5px 0 0 #000;
-        position: relative;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .main-content-flex { display: flex; width: 100%; height: 100%; gap: 20px; }
-
-    .tinder-card {
-        flex: 1.5;
-        border: 3px solid #000;
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 3px 3px 0 0 #000;
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    .card-image-placeholder { width: 100%; flex-grow: 1; background-color: #eee; overflow: hidden; }
-    .harvest-image { width: 100%; height: 100%; object-fit: cover; }
-
-    .username-tag-combo {
-        position: absolute;
-        bottom: 26px;
-        left: 15px;
-        right: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #ffffff;
-        color: #000000;
-        padding: 8px 10px;
-        border-radius: 5px;
-        border: 3px solid #000000;
-        box-shadow: 3px 3px 0 0 #000;
-        font-size: 24px;
-        z-index: 5;
-        line-height: 1;
-    }
-
-    .username-link { color: #000; text-decoration: none; font-weight: bold; cursor: pointer; }
-    .tag-label span { color: #000000; padding: 5px 5px; font-weight: bold; white-space: nowrap; }
-
-    .right-info-stack {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        height: 100%;
-        border: 3px solid #000;
-        border-radius: 8px;
-        background-color: rgba(255, 255, 255, 0.95);
-        box-shadow: 3px 3px 0 0 #000;
-        padding: 15px;
-    }
-
-    .white-comic-box {
-        background-color: #fff;
-        color: #000;
-        padding: 10px;
-        border-radius: 8px;
-        border: 3px solid #000;
-        box-shadow: 3px 3px 0 0 #000;
-    }
-
-    .param-icon-circle {
-        width: 35px; height: 35px; min-width: 35px;
-        border-radius: 50%; border: 3px solid #000;
-        background-color: #eee; box-shadow: 1px 1px 0 0 #000;
-        display: flex; justify-content: center; align-items: center;
-        font-size: 19px; margin-right: 15px;
-    }
-
-    .param-content-wrapper { flex-grow: 1; }
-    .parameter-wrapper-vertical { display: flex; flex-direction: column; gap: 10px; flex: 0 0 auto; }
-    .parameter-wrapper-vertical .white-comic-box { width: 100%; padding: 8px 10px; display: flex; align-items: center; }
-    .param-title { font-weight: bold; margin: 0; font-size: 19px; line-height: 1.2; }
-    .param-value { font-size: 21px; font-weight: 800; margin: 0; line-height: 1.2; }
-
-    .comment-box { flex: 1; overflow-y: auto; }
-    .comment-label { font-weight: bold; margin-top: 0; margin-bottom: 5px; color: #000000; font-size: 23px; }
-    .comment-text { font-size: 17px; margin-bottom: 0; }
-
-    .rating-icons-in-stack {
-        margin-top: auto;
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        padding-top: 15px;
-        border-top: 2px dashed #000;
-    }
-
-    .rating-icon {
-        width: 55px; height: 55px; border-radius: 50%;
-        display: flex; justify-content: center; align-items: center;
-        cursor: pointer; border: 3px solid #000;
-        position: relative; box-shadow: 3px 3px 0 0 #000;
-        transition: transform 0.1s ease;
-    }
-
-    .rating-icon:active { transform: translate(3px, 3px) scale(0.95); box-shadow: 0 0 0 0 #000; }
-    .dislike-icon { background-color: #D62828; font-size: 28px !important; }
-    .like-icon { background-color: #4CAF50; font-size: 28px !important; }
-    .flag-icon, .settings-icon { background-color: #fff; }
-
-    .bottom-nav {
-        display: flex;
-        justify-content: space-around;
-        padding: 10px 0 20px 0;
-        background: white;
-        border-top: 3px solid #000;
-        z-index: 10;
-        box-shadow: 0 -4px 0 0 #000;
-        flex-shrink: 0;
-    }
-
-    .nav-item {
-        display: flex; flex-direction: column; align-items: center;
-        cursor: pointer; font-size: 0.9rem; width: 80px;
-        text-align: center; color: black; transition: transform 0.2s;
-        opacity: 1; font-weight: bold;
-    }
-
-    .nav-item:hover { transform: scale(1.05); }
-
-    .report-modal-overlay {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        display: flex; justify-content: center; align-items: center;
-        background-color: rgba(0, 0, 0, 0.5); z-index: 50;
-    }
-
-    .report-modal {
-        width: 80%; max-width: 300px; background-color: #fff; padding: 20px;
-        border: 3px solid #000; border-radius: 10px; box-shadow: 5px 5px 0 0 #000;
-    }
-
-    .report-button {
-        background-color: #D62828; color: white; border: 3px solid #000;
-        border-radius: 8px; padding: 8px 15px; font-weight: bold;
-        cursor: pointer; box-shadow: 3px 3px 0 0 #000;
-    }
-</style>
+}

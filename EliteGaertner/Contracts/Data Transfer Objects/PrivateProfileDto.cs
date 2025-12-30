@@ -3,6 +3,7 @@
 public record PrivateProfileDto
 {
     public int ProfileId { get; init; }
+    public string ProfilepictureUrl { get; init; }
     public string UserName { get; init; }
     public string FirstName { get; init; }
     public string LastName { get; init; }

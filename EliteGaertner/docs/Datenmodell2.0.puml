@@ -11,7 +11,7 @@ class Match {
 }
 
 class User {
-    +<u>userId : Int 
+    +<u>profileId : Int 
     +userName : String 
     +firstName : String 
     +lastName : String 
@@ -32,7 +32,7 @@ class Tags {
 
 class HarvestUpload {
     +<u>uploadId : Int 
-    +userId : int 
+    +profileId : int 
     +ImageUrl : String 
     +Description: String 
     +WeightKg : float 

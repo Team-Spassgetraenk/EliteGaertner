@@ -1,6 +1,6 @@
 CREATE TABLE PROFILE (
     ProfileId SERIAL PRIMARY KEY,
-    ProfilePictureUrl TEXT,
+    ProfilePictureUrl TEXT NOT NULL ,
     UserName TEXT NOT NULL,
     FirstName TEXT NOT NULL,
     LastName TEXT NOT NULL,
@@ -68,12 +68,12 @@ CREATE TABLE REPORT (
 
 
 CREATE TABLE RATING (
-    ContentCreatorId INT,
     ContentReceiverId INT,
+    ContentCreatorId INT,
     ProfileRating BOOLEAN NOT NULL,
     RatingDate TIMESTAMPTZ NOT NULL,
     
-    PRIMARY KEY (ContentCreatorId, ContentReceiverId),
+    PRIMARY KEY (ContentReceiverId, ContentCreatorId),
 
     FOREIGN KEY (ContentCreatorId) REFERENCES PROFILE(ProfileId),
     FOREIGN KEY (ContentReceiverId) REFERENCES PROFILE(ProfileId)

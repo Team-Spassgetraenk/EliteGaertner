@@ -1,0 +1,121 @@
+@page "/MatchesTest"
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<div class="mobile-container background-style">
+    <header class="top-bar">
+        @* Hier wird .icon-wrapper verwendet *@
+        <div class="icon-wrapper left" @onclick="GoToRanks">
+            <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
+            <span class="icon-label">Rangliste</span>
+        </div>
+
+        <h1 class="page-title">Meine Matches</h1>
+
+        @* HIER: Ersetzt durch den klickbaren Menü-Container *@
+        <div class="menu-icon-container">
+            <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
+        </div>
+    </header>
+
+    @* HIER: Dropdown-Menü für Logout *@
+    @if (_showLogout)
+    {
+    <div class="logout-menu">
+        <p @onclick="NavigateToLogout">Logout &lt;</p>
+    </div>
+    }
+
+    <div class="scroll-content">
+        @foreach (var match in _matches)
+        {
+        <div class="match-card">
+            <div class="card-inner">
+                <a class="username-link" href="@($"/profil/{match.UsernameUrl}")">
+                    <div class="username">@match.UserName</div>
+                </a>
+
+                <div class="info-row">
+                    <span class="label">Tel:</span> @match.Phone
+                </div>
+                <div class="info-row">
+                    <span class="label">E-Mail:</span> @match.Email
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <footer class="bottom-nav">
+        <div class="nav-item active" @onclick="GoToMatches">
+            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
+            <span>Matches</span>
+        </div>
+
+        <div class="nav-item" @onclick="GoToMainpage">
+            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
+            <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
+        </div>
+
+        <div class="nav-item" @onclick="GoToProfile">
+            <img src="pictures/Profil_04.png" alt="Profile" height="40" />
+            <span>Profil</span>
+        </div>
+    </footer>
+</div>
+
+@code {
+// NEU: Logout-Variable
+private bool _showLogout = false;
+
+public class UserMatch
+{
+public string UserName { get; set; } = "";
+public string Phone { get; set; } = "";
+public string Email { get; set; } = "";
+
+// Liefert den Namen ohne '@' für die URL
+public string UsernameUrl => UserName.TrimStart('@');
+}
+
+private List<UserMatch> _matches = new List<UserMatch>
+{
+new UserMatch { UserName = "@user_name1", Phone = "+49 12345678901", Email = "max.mustermann@gmail.com" },
+new UserMatch { UserName = "@user_name3", Phone = "+49 8415 7563344", Email = "reiner.zufall@gmx.de" },
+new UserMatch { UserName = "@user_name4", Phone = "+49 98765432109", Email = "elite.gaertner69@gmail.com" },
+new UserMatch { UserName = "@user_name5", Phone = "+49 34523045646", Email = "6sieben.atze3@web.de" },
+};
+
+// NEU: Logout-Methoden
+private void ToggleLogoutMenu()
+{
+_showLogout = !_showLogout;
+}
+
+private void NavigateToLogout()
+{
+Nav.NavigateTo("/", forceLoad: true);
+}
+
+private void GoToRanks()
+{
+Nav.NavigateTo("/RanglisteTest", forceLoad: true);
+}
+
+private void GoToMatches()
+{
+Nav.NavigateTo("/MatchesTest", forceLoad: true);
+}
+
+private void GoToMainpage()
+{
+Nav.NavigateTo("/startseite", forceLoad: true);
+}
+
+private void GoToProfile()
+{
+Nav.NavigateTo("/ProfilTest", forceLoad: true);
+}
+}

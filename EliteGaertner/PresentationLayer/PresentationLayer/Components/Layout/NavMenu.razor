@@ -1,0 +1,37 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">PresentationLayer</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler"/>
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Welcome" Match="NavLinkMatch.All">
+                <span class="bi bi-person-fill" aria-hidden="true"></span>
+                <img src="pictures/EliteGärtner-logo.png" alt="Logo" style="width:24px; height:24px; margin-right:5px;"/>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="MainpageTest">
+                <span class="bi bi-person-fill" aria-hidden="true"></span> Startseite
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="">
+                <span class="bi bi-person-fill" aria-hidden="true"></span> Anmelden
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="registertest">
+                <span class="bi bi-person-fill" aria-hidden="true"></span> Registrieren
+            </NavLink>
+        </div>
+    </nav>
+</div>

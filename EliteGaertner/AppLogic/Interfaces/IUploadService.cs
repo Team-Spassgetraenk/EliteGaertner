@@ -5,13 +5,11 @@ namespace AppLogic.Interfaces;
 
 public interface IUploadService
 {
+   bool CreateHarvestUpload(int profileId, string imageUrl, string description, float weight, int width, int length);
 
-
-    public bool CreateUpload(int userId, string imageUrl, string description, float weight, int width, int length);
-
-    bool CreateUpload(HarvestUploadDto uploadDto);
+   bool CreateHarvestUpload(HarvestUploadDto uploadDto);
     
-    bool DeleteUpload(int uploadId, int userId);
+    string DeleteUpload(int uploadId, int profileId);
 
-    List<HarvestUploadDto> GetUserUploads(int userId);
+    List<HarvestUploadDto> GetUserUploads(int profileId);
 }

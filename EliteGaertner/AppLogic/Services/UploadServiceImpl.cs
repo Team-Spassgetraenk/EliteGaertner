@@ -1,122 +1,67 @@
 ﻿using AppLogic.Interfaces;
+using DataManagement.Interfaces;
 using Contracts.Data_Transfer_Objects;
-using DataManagement;
-using DataManagement.Entities;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace AppLogic.Services;
 
 public class UploadServiceImpl : IUploadService
 {
-    private readonly EliteGaertnerDbContext _context;
-
-    public UploadServiceImpl(EliteGaertnerDbContext context)
+    private readonly IHarvestDbs _harvestDbs;
+    
+    public UploadServiceImpl(IHarvestDbs harvestDbs)
     {
-        _context = context;
+        _harvestDbs = harvestDbs;
     }
     
-    public bool CreateUpload(int userId, string imageUrl, string description, float weight, int width,  int length)
+    public bool CreateHarvestUpload(HarvestUploadDto uploadDto)
     {
-        Console.WriteLine("Upload angekommen.");
-        try
+        var success = _harvestDbs.CreateUploadDbs(uploadDto);
+        Console.WriteLine(success ? "Upload erfolgreich" : "Upload im ManagementDBS fehlgeschlagen"); return success;
+    }
+    
+    
+    public bool CreateHarvestUpload(int profileId, string imageUrl, string description, float weight, int width, int length)
+    {
+        var uploadDto = new HarvestUploadDto
         {
-            // Erst Profil mit userId laden (userId == Profileid)
-            var profile = _context.Profiles.Find(userId);
-            if (profile == null)
-                return false;
-
-            var entity = new Harvestupload
-            {
-                Imageurl = imageUrl,
-                Description = description,
-                Weightgramm = weight,
-                Widthcm = width,
-                Lengthcm = length,
-                Uploaddate = DateTime.UtcNow,
-                Profileid = userId
-            };
-
-            _context.Harvestuploads.Add(entity);
-            _context.SaveChanges();
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+            ProfileId = profileId,
+            ImageUrl = imageUrl,
+            Description = description,
+            WeightGram = weight,
+            WidthCm = width,
+            LengthCm = length,
+            UploadDate = DateTime.UtcNow
+        };
+    
+        bool success = _harvestDbs.CreateUploadDbs(uploadDto);
+        Console.WriteLine(success ? "Upload erfolgreich" : "Upload im ManagementDBS fehlgeschlagen"); 
+        return success;
     }
 
-    public bool CreateUpload(HarvestUploadDto uploadDto)
+    public HarvestUploadDto GetUploadDto(int uploadId)
     {
-        Console.WriteLine("Upload angekommen.");
-        try
-        {
-            // Profil prüfen (verhindert ForeignKey-Fehler)
-            var profileExists = _context.Profiles.Any(p => p.Profileid == uploadDto.ProfileId);
-            if (!profileExists)
-            {
-                Console.WriteLine($"Profil mit ID {uploadDto.ProfileId} nicht gefunden.");
-                return false;
-            }
+       return _harvestDbs.GetUploadDb(uploadId);
+    }
 
-            var entity = new Harvestupload
-            {
-                Imageurl = uploadDto.ImageUrl,
-                Description = uploadDto.Description,
-                Weightgramm = uploadDto.WeightGram,
-                Widthcm = uploadDto.WidthCm,
-                Lengthcm = uploadDto.LengthCm,
-                Uploaddate = uploadDto.UploadDate,
-                Profileid = uploadDto.ProfileId
-            };
-
-            _context.Harvestuploads.Add(entity);
-            _context.SaveChanges();
-            return true;
-        }
-        catch (DbUpdateException ex)
-        {
-            Console.WriteLine($"DB-Fehler: {ex.InnerException?.Message ?? ex.Message}");
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Allgemeiner Fehler: {ex.Message}\nStack: {ex.StackTrace}");
-            return false;
-        }
+    public string DeleteUpload(int uploadId, int profileId) //Hier wird null zurückgegeben, wenn nicht existiert löschung
+                                                         // des Bildes muss architekturwegens in .razor abgehandelt werden
+    {
+        var uploadDto = GetUploadDto(uploadId);
         
-    //     try
-    //     {
-    //         var entity = new Harvestupload
-    //         {
-    //             Imageurl = uploadDto.ImageUrl,
-    //             Description = uploadDto.Description,
-    //             Weightgramm = uploadDto.WeightGram,
-    //             Widthcm = uploadDto.WidthCm,
-    //             Lengthcm = uploadDto.LengthCm,
-    //             Uploaddate = uploadDto.UploadDate,
-    //             Profileid = uploadDto.ProfileId
-    //         };
-    //
-    //         _context.Harvestuploads.Add(entity);
-    //         _context.SaveChanges();
-    //         return true;
-    //     }
-    //     catch (Exception)
-    //     {
-    //         Console.WriteLine(Exception.ToString);
-    //         return false;
-    //     }
-     }
+        if (uploadDto == null || string.IsNullOrEmpty(uploadDto.ImageUrl))
+        {
+            Console.WriteLine("Upload oder ImageUrl fehlt");
+            return null;
+        }
 
-    
-    public bool DeleteUpload(int uploadId, int userId)
-    {
-        throw new NotImplementedException();
+        var fileName = uploadDto.ImageUrl;
+        
+        _harvestDbs.DeleteHarvestUpload(uploadId);
+
+        return fileName;
     }
 
-    public List<HarvestUploadDto> GetUserUploads(int userId)
+    public List<HarvestUploadDto> GetUserUploads(int profileId)
     {
         throw new NotImplementedException();
     }

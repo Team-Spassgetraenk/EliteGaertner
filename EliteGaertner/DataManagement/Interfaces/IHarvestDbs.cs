@@ -1,9 +1,10 @@
 using Contracts.Data_Transfer_Objects;
+using Contracts.Enumeration;
 
 namespace DataManagement.Interfaces;
 
 
-//Dieses Interface implementiert
+//TODO Kommentare fehlen
 public interface IHarvestDbs
 {
 
@@ -13,10 +14,14 @@ public interface IHarvestDbs
     //Erstell mir eine Repository an HarvestUploadDtos die zum dem Interessensprofil
     //des Users passen. Die Menge der DTOs wird vom preloadCount bestimmt.
     public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount);
-
-    //BESCHREIBUNG FEHLT!!!!!
-    public void SetReportHarvestUpload(int uploadId, Enum reason);
-
-    //Beschreibung fehlt
-    public IEnumerable<ReportDto> GetReportHarvestUpload(int uploadId);
+    
+    public bool CreateUploadDbs(HarvestUploadDto uploadDto);
+    
+    public HarvestUploadDto GetUploadDb(int uploadId);
+    
+    public bool DeleteHarvestUpload(int uploadId);
+    
+    public void SetReportHarvestUpload(int uploadId, ReportReasons reason);
+    
+    public int GetReportCount(int uploadId);
 }
