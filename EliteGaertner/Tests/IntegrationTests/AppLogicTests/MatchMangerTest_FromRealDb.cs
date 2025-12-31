@@ -53,9 +53,8 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
                 new PreferenceDto { TagId = 8,  Profileid = 1 }, // Karotten
             }
         };
-
-        const int preloadCount = 10;
-        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount);
+        
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
 
         var suggestionsBefore = manager.GetProfileSuggestionList();
         Assert.IsNotNull(suggestionsBefore);
@@ -126,7 +125,7 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
             }
         };
 
-        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
 
         var uploadId = CreateTestUpload(db, profileId: 1);
 
@@ -166,7 +165,7 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
             }
         };
 
-        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
 
         var uploadId = CreateTestUpload(db, profileId: 1);
 

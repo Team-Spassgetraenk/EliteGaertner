@@ -44,7 +44,7 @@ public class MatchManagerTests
             new List<HarvestUploadDto>() // AddSuggestions()
         });
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
 
         var creator = profileDbs.GetPublicProfile(2);
 
@@ -100,7 +100,7 @@ public class MatchManagerTests
             }
         });
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
 
         var creator2 = profileDbs.GetPublicProfile(2);
 
@@ -150,7 +150,7 @@ public class MatchManagerTests
             ReportCountToReturn = 5
         };
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
 
         // Act
         sut.ReportHarvestUpload(uploadId: 123, reason: ReportReasons.Spam);
@@ -188,7 +188,7 @@ public class MatchManagerTests
             ReportCountToReturn = 4
         };
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, preloadCount: 10);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
 
         // Act
         sut.ReportHarvestUpload(uploadId: 456, reason: ReportReasons.CatFishing);

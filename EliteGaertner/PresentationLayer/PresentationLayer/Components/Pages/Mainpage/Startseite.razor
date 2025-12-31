@@ -1,6 +1,8 @@
 @page "/startseite"
 @using Microsoft.AspNetCore.Components.Web
 @using System.Timers
+@using AppLogic.Interfaces
+@inject IMatchManager MatchManager
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 @implements IDisposable

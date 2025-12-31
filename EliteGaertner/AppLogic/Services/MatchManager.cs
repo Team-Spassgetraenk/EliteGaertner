@@ -12,13 +12,13 @@ public class MatchManager : IMatchManager
     private readonly IHarvestDbs _harvestDbs;
     private readonly int _profileId;
     private readonly List<int> _tagIds;
-    private readonly int _preloadCount;
     private readonly Dictionary<PublicProfileDto, HarvestUploadDto> _profileSuggestionList;
     private List<PublicProfileDto> _activeMatchesList;
     private const int ReportThreshold = 5;
+    private const int PreloadCount = 10;
     
     public MatchManager(IMatchesDbs matchesDbs, IProfileDbs profileDbs, IHarvestDbs harvestDbs, 
-        PrivateProfileDto contentReceiver, int preloadCount)
+        PrivateProfileDto contentReceiver)
     {
         _matchesDbs = matchesDbs;
         _profileDbs = profileDbs;
@@ -30,8 +30,7 @@ public class MatchManager : IMatchManager
             .Select(p => p.TagId)
             .Distinct()
             .ToList();
-        _preloadCount = preloadCount;
-        _profileSuggestionList = CreateProfileSuggestionList(_profileId, _tagIds, _preloadCount);
+        _profileSuggestionList = CreateProfileSuggestionList(_profileId, _tagIds, PreloadCount);
         
         //Hier müssen wir die _activeMatchesList erstmal initialisieren bevor wir
         //die Ergebnisse aus der UpdateActiveMatches übergeben können, da er in der Methode überprüft,
@@ -51,7 +50,7 @@ public class MatchManager : IMatchManager
     public void AddSuggestions()
     {
         //Gib eine neue Liste an Suggestions zurück.
-        var newSuggestions = CreateProfileSuggestionList(_profileId, _tagIds, _preloadCount);
+        var newSuggestions = CreateProfileSuggestionList(_profileId, _tagIds, PreloadCount);
         //Prüfe, ob die neu generierten Profile bereits in der "alten" Liste vorhanden sind.
         //Falls nicht, füge sie zur "alten" Liste hinzu.
         foreach (var sug in newSuggestions)
@@ -127,7 +126,6 @@ public class MatchManager : IMatchManager
 
     public List<PublicProfileDto> GetActiveMatches()
         => _activeMatchesList;
-
     
     public void ReportHarvestUpload(int uploadId, ReportReasons reason)
     {
@@ -137,13 +135,15 @@ public class MatchManager : IMatchManager
             _harvestDbs.DeleteHarvestUpload(uploadId);
     }
     
+    //TODO Bin mir nicht sicher ob wir das überhaupt benötigen
     public MatchManagerDto GetMatchManager()
         => new MatchManagerDto
         {
             ProfileId = _profileId,
             TagIds = _tagIds,
-            PreloadCount = _preloadCount,
+            PreloadCount = PreloadCount,
             ProfileSuggestionList = _profileSuggestionList,
             ActiveMatchesList = _activeMatchesList
         };
+    
 }
