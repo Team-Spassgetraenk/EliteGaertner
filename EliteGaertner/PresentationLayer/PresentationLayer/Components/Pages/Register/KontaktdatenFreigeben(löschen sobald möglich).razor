@@ -3,7 +3,7 @@
 @inject NavigationManager Nav
 @using Contracts.Data_Transfer_Objects
 @inject IProfileMgm ProfileMgm
-@rendermode InteractiveServer
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -112,7 +112,7 @@
 
             if (success)
             {
-                Nav.NavigateTo("/registrierung/profilerstellung", forceLoad: true);
+                Nav.NavigateTo("/registrierung/profilerstellung");
             }
         }
     }

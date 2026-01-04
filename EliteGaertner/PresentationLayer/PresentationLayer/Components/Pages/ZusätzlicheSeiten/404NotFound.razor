@@ -1,6 +1,6 @@
 @page "/404"
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -36,6 +36,6 @@
 @code {
     void GoHome()
     {
-        Nav.NavigateTo("/startseite", forceLoad: true); 
+        Nav.NavigateTo("/startseite"); 
     }
 }

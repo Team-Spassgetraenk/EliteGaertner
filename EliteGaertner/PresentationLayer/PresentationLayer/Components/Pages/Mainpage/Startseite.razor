@@ -1,12 +1,18 @@
 @page "/startseite"
-@using Microsoft.AspNetCore.Components.Web
-@using System.Timers
 @using AppLogic.Interfaces
-@inject IMatchManager MatchManager
-@inject NavigationManager Nav
+@using AppLogic.Services
+@using DataManagement.Interfaces
+@using PresentationLayer.State
+@using PresentationLayer.Shared
+@using System.Timers
+@inject CurrentProfileState CurrentProfile
+@inject IHarvestDbs HarvestDbs
+@inject IMatchesDbs MatchesDbs
+@inject IProfileDbs ProfileDbs
 @inject IJSRuntime JS
+@inject NavigationManager Nav
 @implements IDisposable
-@rendermode InteractiveServer
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -63,14 +69,14 @@
             <div class="match-content">
                 <h2 class="match-title">IT'S A MATCH!</h2>
                 <p class="match-subtitle">Glückwunsch!!! 
-                    Du und @_matchedUser?.Username seid jetzt ein Team!</p>
+                    Du und @_matchedUser?.UserName seid jetzt ein Team!</p>
 
                 <div class="match-images">
                     <div class="match-photo-circle left-photo">
                         <img src="pictures/Profilbilder/Profilbild_27.png" alt="Dein Profil" style="width:100%; height:100%; object-fit:cover;" />
                     </div>
                     <div class="match-photo-circle right-photo">
-                        <img src="@_matchedUser?.ProfileImageUrl" alt="Match Profil" style="width:100%; height:100%; object-fit:cover;" />
+                        <img src="@_matchedUser?.ProfilepictureUrl" alt="Match Profil" style="width:100%; height:100%; object-fit:cover;" />
                     </div>
                 </div>
 
@@ -114,85 +120,103 @@
         </div>
     </div>
     }
-
+    @* Standard Vorschlags Karte *@
     <div class="tinder-card-area">
         @if (_isProfileVisible && _currentHarvest != null)
         {
-        <div class="tinder-wrapper-card @_animationClass" @key="_harvestIndex">
-            <div class="main-content-flex">
-                <div class="tinder-card">
-                    <div class="card-image-placeholder">
-                        <img src="@_currentHarvest.ImageUrl" alt="Erntebild" class="harvest-image" />
-                    </div>
-                    @* --- Profilbild des fremden Users auf der Karte --- *@
-                    <div class="user-avatar-on-card">
-                        <img src="@_currentHarvest.ProfileImageUrl" alt="User Avatar" />
-                    </div>
-                    <div class="username-tag-combo">
-                        <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
-                            <span class="username-label">@_currentHarvest.Username</span>
-                        </a>
-                        <div class="tag-label">
-                            <span>@_currentHarvest.Tag</span>
+            <div class="tinder-wrapper-card @_animationClass" @key="_cardKey">
+                <div class="main-content-flex">
+                    <div class="tinder-card">
+                        <div class="card-image-placeholder">
+                            <img src="@_currentHarvest.ImageUrl" alt="Erntebild" class="harvest-image" />
                         </div>
-                    </div>
-                </div>
-
-                <div class="right-info-stack">
-                    <div class="parameter-wrapper-vertical">
-                        <div class="white-comic-box">
-                            <div class="param-icon-circle">⚖️</div>
-                            <div class="param-content-wrapper">
-                                <p class="param-title">Gewicht</p>
-                                <p class="param-value">@_currentHarvest.Weight</p>
-                            </div>
+                        @* --- Profilbild des fremden Users auf der Karte --- *@
+                        <div class="user-avatar-on-card">
+                            <img src="@_currentHarvest.ProfileImageUrl" alt="User Avatar" />
                         </div>
-                        <div class="white-comic-box">
-                            <div class="param-icon-circle">📏</div>
-                            <div class="param-content-wrapper">
-                                <p class="param-title">Länge</p>
-                                <p class="param-value">@_currentHarvest.Length</p>
-                            </div>
-                        </div>
-                        <div class="white-comic-box">
-                            <div class="param-icon-circle">📐</div>
-                            <div class="param-content-wrapper">
-                                <p class="param-title">Breite</p>
-                                <p class="param-value">@_currentHarvest.Width</p>
+                        <div class="username-tag-combo">
+                            <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
+                                <span class="username-label">@_currentHarvest.Username</span>
+                            </a>
+                            <div class="tag-label">
+                                <span>@_currentHarvest.Tag</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="comment-box white-comic-box">
-                        <p class="comment-label">Erntebeschreibung</p>
-                        <p class="comment-text">@_currentHarvest.Description</p>
-                    </div>
-
-                    <div class="rating-icons-in-stack">
-                        <div class="rating-icon flag-icon" @onclick="FlagProfile">
-                            <span style="font-size: 20px;">🚩</span>
+            
+                    <div class="right-info-stack">
+                        <div class="parameter-wrapper-vertical">
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">⚖️</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Gewicht</p>
+                                    <p class="param-value">@_currentHarvest.Weight</p>
+                                </div>
+                            </div>
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">📏</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Länge</p>
+                                    <p class="param-value">@_currentHarvest.Length</p>
+                                </div>
+                            </div>
+                            <div class="white-comic-box">
+                                <div class="param-icon-circle">📐</div>
+                                <div class="param-content-wrapper">
+                                    <p class="param-title">Breite</p>
+                                    <p class="param-value">@_currentHarvest.Width</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="rating-icon dislike-icon" @onclick="() => HandleSwipe(false)">
-                            <span style="font-size: 24px;">❌</span>
+            
+                        <div class="comment-box white-comic-box">
+                            <p class="comment-label">Erntebeschreibung</p>
+                            <p class="comment-text">@_currentHarvest.Description</p>
                         </div>
-                        <div class="rating-icon like-icon" @onclick="() => HandleSwipe(true)">
-                            <span style="font-size: 24px;">💚</span>
-                        </div>
-                        <div class="rating-icon settings-icon" @onclick="NavigateToPreferences">
-                            <img src="pictures/EinstellungenIcon.png" alt="Einstellungen" height="27" />
+            
+                        <div class="rating-icons-in-stack">
+                            <div class="rating-icon flag-icon" @onclick="FlagProfile">
+                                <span style="font-size: 20px;">🚩</span>
+                            </div>
+                            <div class="rating-icon dislike-icon" @onclick="() => HandleSwipe(false)">
+                                <span style="font-size: 24px;">❌</span>
+                            </div>
+                            <div class="rating-icon like-icon" @onclick="() => HandleSwipe(true)">
+                                <span style="font-size: 24px;">💚</span>
+                            </div>
+                            <div class="rating-icon settings-icon" @onclick="NavigateToPreferences">
+                                <img src="pictures/EinstellungenIcon.png" alt="Einstellungen" height="27" />
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         }
+        @* Report Karte *@
         else if (!_isProfileVisible)
         {
-            <div class="white-comic-box" style="text-align: center; padding: 20px;">
+            <div class="white-comic-box @_animationClass"
+                 @key="_cardKey"
+                 style="text-align: center; padding: 20px;">
                 <p>Profil wurde gemeldet und ausgeblendet.</p>
-                <button class="report-button" @onclick="() => _isProfileVisible = true">Weiter</button>
             </div>
         }
+        @* "Keine Vorschläge" Karte *@
+        else
+        {
+            <div class="white-comic-box @_animationClass"
+                 @key="_cardKey"
+                 style="text-align: center; padding: 20px; max-width: 850px; width: 100%;">
+                <p style="font-size: 1.4rem; font-weight: bold; margin: 0;">Keine passenden Vorschläge</p>
+                <p style="margin-top: 10px;">Passe deine Interessen an oder versuche es später erneut.</p>
+
+                <button class="app-button primary-button"
+                        style="margin-top: 10px;"
+                        @onclick="NavigateToPreferences">
+                    Präferenzen öffnen
+                </button>
+            </div>
+        } 
 
         @* --- REPORT MODAL --- *@
         @if (_showReportModal)
@@ -204,8 +228,10 @@
                         @foreach (var reason in _reportReasons)
                         {
                             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                                <input type="checkbox" @onchange="@(e => UpdateReportReason(reason,e))" checked="@(_selectedReportReason == reason)" />
-                                <label>@reason</label>
+                                <input type="checkbox"
+                                       @onchange="@(e => UpdateReportReason(reason, e))"
+                                       checked="@(_selectedReportReason == reason)" />
+                                <label>@GetReportReasonLabel(reason)</label>
                             </div>
                         }
                     </div>
@@ -236,167 +262,484 @@
     </footer>
 </div>
 
+
 @code {
-    private string _loggedInUserName = "@MaisMädrescher";
+    // ----------------------------
+    // AppLogic (runtime-created)
+    // ----------------------------
+    private IMatchManager? _matchManager;
+    private (PublicProfileDto Creator, HarvestUploadDto Harvest)? _currentSuggestion;
+
+    // ----------------------------
+    // UI State
+    // ----------------------------
+    private string _loggedInUserName = "";
+
+    // Animation / current card
     private string _animationClass = "";
     private bool _isAnimating = false;
-    private int _harvestIndex = 0;
+    //Benötigt Blazor um ein komplett neues DOM Element für die Karte zu bauen
+    private int _cardKey = 0;
     private HarvestModel? _currentHarvest;
 
-/* Match Variablen */
+    // Match overlay
     private bool _showMatchOverlay = false;
-    private HarvestModel? _matchedUser;
-    private string[] _confettiColors = { "#FFC107", "#2196F3", "#FF5722", "#4CAF50", "#E91E63" };
+    private PublicProfileDto? _matchedUser;
+    private readonly string[] _confettiColors = { "#FFC107", "#2196F3", "#FF5722", "#4CAF50", "#E91E63" };
 
-    private List<HarvestModel> _harvests = new()
+    // Logout/admin menu
+    private bool _showLogout = false;
+    private bool _showAdminNav = false;
+
+    // Report modal
+    private bool _showReportModal = false;
+    private bool _isProfileVisible = true;
+    private ReportReasons? _selectedReportReason = null;
+    private readonly ReportReasons[] _reportReasons =
+    {
+        ReportReasons.AbstossendeInhalte,
+        ReportReasons.SexuelleInhalte,
+        ReportReasons.GewaltvolleInhalte,
+        ReportReasons.CatFishing,
+        ReportReasons.Spam
+    };
+
+    // ----------------------------
+    // Ads
+    // ----------------------------
+    private bool _showAd = true;
+    private string _currentAdImage = "pictures/ads/pimpyourblechad02.jpg";
+    private int _adCounter = 0;
+    private Timer? _adTimer;
+    private ElapsedEventHandler? _adTimerElapsedHandler;
+    private readonly string[] _adImages =
+    {
+        "pictures/ads/pimpyourblechad02.jpg",
+        "pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg",
+        "pictures/ads/GurkenStandAd.jpg",
+        "pictures/ads/OBI_werbung.jpg",
+        "pictures/ads/ralphschuhmacherad.png",
+        "pictures/ads/werbeplakat-leberkaessemmel.jpg",
+        "pictures/ads/DieLilaVersuchung.jpg",
+        "pictures/ads/pimpyourblech01.jpg",
+        "pictures/ads/werbeplakat-leberkassemmel02.jpg",
+        "pictures/ads/WürstlStandAd.jpg",
+        "pictures/ads/pimpyourblechad03.jpg"
+    };
+
+    // ----------------------------
+    // Lifecycle
+    // ----------------------------
+    protected override void OnInitialized()
+    {
+        //TODO KOMMT WEG
+        Console.WriteLine("Er kommt zumindest in OnInitialized");
+        Console.WriteLine($"STATE(Startseite): {CurrentProfile.InstanceId}");
+        
+        // Guard: wenn kein Profil im State liegt, sind wir nicht (mehr) eingeloggt.
+        // Dann zurück zur Login-Seite, bevor wir UserName/LoggedInProfile verwenden.
+        if (CurrentProfile.LoggedInProfile is null)
         {
-            new() { Username="@MaisMeister", Tag="Mais 🌽", ImageUrl="pictures/Testbilder/Mais_03.png", ProfileImageUrl="pictures/Profilbilder/Profilbild_07.png", Weight="450 g", Length="22 cm", Width="5 cm", Description="Mein ganzer Stolz aus dem Hochbeet!" }, 
-            new() { Username="@GrukenGanove", Tag="Gurken 🥒", ImageUrl="pictures/Testbilder/Gurken_01.jpg", ProfileImageUrl="pictures/Profilbilder/Profilbild_26.png", Weight="300 g", Length="25 cm", Width="6 cm", Description="Knackig und frisch geerntet." }, 
-            new() { Username="@KürbisKontrolleur", Tag="Kürbis 🎃", ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", ProfileImageUrl="pictures/Profilbilder/Profilbild_12.png", Weight="1200 g", Length="40 cm", Width="45 cm", Description="Fast zu schwer zum Tragen!" }
-};
+            //TODO TEST GEHÖRT WEG
+            Console.WriteLine("STARTSEITE GUARD TRIGGERED: LoggedInProfile is null -> redirect to /");
 
-private bool _showLogout = false;
-private bool _showAdminNav = false;
-private bool _showReportModal = false;
-private bool _isProfileVisible = true;
-private string _selectedReportReason = "";
-private readonly string[] _reportReasons = 
-{   "abstossende Inhalte", "sexuelle Inhalte", "gewaltvolle Inhalte", "'Catfishing' - nicht selbst angebaut", "Spam",};
+            // optional: noch mehr Kontext
+            Console.WriteLine($"IsLoggedIn: {CurrentProfile.IsLoggedIn}");
+            Console.WriteLine($"UserName: '{CurrentProfile.UserName}'");
+            
+            Nav.NavigateTo("/");
+            return;
+        }
+        
+        //Rückgabe welcher User eingeloggt ist
+        _loggedInUserName = "@" + CurrentProfile.UserName;
+        
+        //MatchManager wird initialisiert
+        _matchManager = new MatchManager(
+            MatchesDbs,
+            ProfileDbs,
+            HarvestDbs,
+            CurrentProfile.LoggedInProfile
+        );
+        
+        _matchManager.CreateMatch += OnMatchCreated;
+        
+        //Erste Suggestion laden
+        TryLoadNextSuggestion();
+        
+        //Hier wird der WerbeBlock abgehandelt
+        _currentAdImage = _adImages[0];
+        _adTimer = new Timer(6000);
+        _adTimerElapsedHandler = async (_, _) =>
+        {
+            _adCounter++;
+            _currentAdImage = _adImages[_adCounter % _adImages.Length];
+            await InvokeAsync(StateHasChanged);
+        };
+        _adTimer.Elapsed += _adTimerElapsedHandler;
+        _adTimer.AutoReset = true;
+        _adTimer.Enabled = true;
+    }
+    
+    //Subscription auf MatchManager Methode löst die Methode aus, falls es zu einem neuen Match kommt
+    private async void OnMatchCreated(PublicProfileDto matchProfile)
+    {
+        _matchedUser = matchProfile;
+        _showMatchOverlay = true;
+        await PlayMatchSound();
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    //Falls Seite verlassen wird
+    public void Dispose()
+    {
+        //-> Create Match Subscription beenden
+        if (_matchManager is not null)
+            _matchManager.CreateMatch -= OnMatchCreated;
+        
+        //-> AdTimer beenden
+        if (_adTimer is not null)
+        {
+            _adTimer.Stop();
 
-/* Werbe-Logik */
-private bool _showAd = true;
-private string _currentAdImage = "pictures/ads/pimpyourblechad02.jpg";
-private int _adCounter = 0;
-private Timer? _adTimer;
-private string[] _adImages = new[]
-{
-"pictures/ads/pimpyourblechad02.jpg",
-"pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg",
-"pictures/ads/GurkenStandAd.jpg",
-"pictures/ads/OBI_werbung.jpg",
-"pictures/ads/ralphschuhmacherad.png",
-"pictures/ads/werbeplakat-leberkaessemmel.jpg",
-"pictures/ads/DieLilaVersuchung.jpg",
-"pictures/ads/pimpyourblech01.jpg",
-"pictures/ads/werbeplakat-leberkassemmel02.jpg",
-"pictures/ads/WürstlStandAd.jpg",
-"pictures/ads/pimpyourblechad03.jpg"
-};
+            if (_adTimerElapsedHandler is not null)
+                _adTimer.Elapsed -= _adTimerElapsedHandler;
 
-protected override void OnInitialized()
-{
-_currentHarvest = _harvests[0];
+            _adTimer.Dispose();
+            _adTimer = null;
+            _adTimerElapsedHandler = null;
+        }
+    }
 
-_currentAdImage = _adImages[0];
-_adTimer = new Timer(6000);
-_adTimer.Elapsed += async (sender, e) =>
-{
-_adCounter++;
-_currentAdImage = _adImages[_adCounter % _adImages.Length];
-await InvokeAsync(StateHasChanged);
-};
-_adTimer.AutoReset = true;
-_adTimer.Enabled = true;
-}
+    // ----------------------------
+    // Card interactions
+    // ----------------------------
+    private async Task HandleSwipe(bool like)
+    {
+        //Sperre, wenn Animation läuft ODER Match-Overlay offen ist
+        if (_isAnimating || _showMatchOverlay)
+            return;
+        
+        //Keine Karte vorhanden
+        if (_matchManager is null || _currentSuggestion is null || _currentHarvest is null)
+            return;
+        
+        //Muss true sein, damit Animation überhaupt möglich werden
+        _isAnimating = true;
 
-private async Task HandleSwipe(bool like)
-{
-// Task-Logik: Sperre, wenn Animation läuft ODER Match-Overlay offen ist
-if (_isAnimating || _showMatchOverlay) return;
-_isAnimating = true;
+        //Falls der try Block nicht funktioniert -> isAnimating immer sicher zurücksetzen lassen
+        //Sonst friert UI ein
+        try
+        {
+            //Änder den State der Karte
+            _animationClass = like ? "swipe-right" : "swipe-left";
+            //Trigger die Animation
+            StateHasChanged();
 
-_animationClass = like ? "swipe-right" : "swipe-left";
-StateHasChanged();
+            //Verzögert das Nachladen der nächsten Suggestion, um die Animation durchlaufen zu lassen
+            await Task.Delay(600);
 
-await Task.Delay(600);
+            //Holt aus der Tupel das aktelle vorgeschlagene Profil
+            var (creator, _) = _currentSuggestion.Value;
+            //Ruft die Rate Methode im Match Manager mit dem bewertet Creator und der Bewertung auf
+            _matchManager.RateUser(creator, like);
 
-// temporäre Test-Match-Logik: 30% Chance auf ein Match bei Like
-if (like && Random.Shared.Next(1, 101) <= 30)
-{
-_matchedUser = _currentHarvest;
-_showMatchOverlay = true;
-await PlayMatchSound();
-}
+            //Reset der UI, damit keine vorherigen Zustände ungewollt übernommen werden
+            ResetUiAfterSwipe();
+            //Lädt die nächste Suggestion
+            TryLoadNextSuggestion();
 
-_harvestIndex = (_harvestIndex + 1) % _harvests.Count;
-_currentHarvest = _harvests[_harvestIndex];
+            //Änder den State der Karte -> Neuer Vorschlag soll gerendert werden
+            _animationClass = "fade-in";
+            //Trigger die Animation
+            StateHasChanged();
 
-_animationClass = "fade-in";
-StateHasChanged();
+            //Verzögerung, um die Animation durchlaufen zu lassen
+            await Task.Delay(400);
+            //Wird geleert
+            _animationClass = "";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            //Animationen sollen nicht mehr möglich sein
+            _isAnimating = false;  
+        }
+    }
 
-await Task.Delay(400);
-_animationClass = "";
-_isAnimating = false;
-}
+    private async Task PlayMatchSound()
+    {
+        // Spielt Konfetti-Sound ab bei Match
+        await JS.InvokeVoidAsync("eval", "new Audio('sounds/itsamatch.mp3').play()");
+    }
 
-private async Task PlayMatchSound()
-{
-// Spielt Konfetti-Sound ab bei Match
-await JS.InvokeVoidAsync("eval", "new Audio('sounds/itsamatch.mp3').play()");
-}
+    private void CloseMatchOverlay() => _showMatchOverlay = false;
 
-private void CloseMatchOverlay() => _showMatchOverlay = false;
+    // ----------------------------
+    // Ads
+    // ----------------------------
+    private async Task CloseAd()
+    {
+        _showAd = false;
+        await Task.Delay(10000);
+        _showAd = true;
+        await InvokeAsync(StateHasChanged);
+    }
 
-private async Task CloseAd()
-{
-_showAd = false;
-await Task.Delay(10000);
-_showAd = true;
-await InvokeAsync(StateHasChanged);
-}
+    // ----------------------------
+    // Menus / Navigation
+    // ----------------------------
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        if (!_showLogout)
+            _showAdminNav = false;
+    }
 
-public void Dispose() => _adTimer?.Dispose();
+    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
 
-private void ToggleLogoutMenu()
-{
-_showLogout = !_showLogout;
-if (!_showLogout) _showAdminNav = false;
-}
+    private void NavTo(string path)
+    {
+        _showLogout = false;
+        Nav.NavigateTo(path);
+    }
 
-private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
+    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
+    private void NavigateToLogout() => Nav.NavigateTo("/");
+    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
+    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
+    private void GoToMatches() => Nav.NavigateTo("/MatchesTest");
+    private void GoToMainpage() => Nav.NavigateTo("/startseite");
+    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
 
-private void NavTo(string path)
-{
-_showLogout = false;
-Nav.NavigateTo(path, forceLoad: true);
-}
+    // ----------------------------
+    // Report modal
+    // ----------------------------
+    private void FlagProfile() => _showReportModal = true;
+    private void CloseReportModal() => _showReportModal = false;
 
-private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns", forceLoad: true);
-private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
-private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen", forceLoad: true);
-private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
-private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
-private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
-private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
-private void FlagProfile() => _showReportModal = true;
-private void CloseReportModal() => _showReportModal = false;
+    //CheckBox Logik im ReportFenster
+    private void UpdateReportReason(ReportReasons reason, ChangeEventArgs e)
+    {
+        //Methode entscheidet in welchen Boolwert übersetzt wird
+        var isChecked = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            _ => false
+        };
+        
+        //Wenn Checkbox angeklickt wird -> Reason setzen
+        if (isChecked)
+            _selectedReportReason = reason;
+        //Wenn Checkbox "geleert" wird -> Reason auf null
+        else if (_selectedReportReason == reason) 
+            _selectedReportReason = null;
+    }
 
-private void UpdateReportReason(string reason, ChangeEventArgs e)
-{
-if ((bool)e.Value) _selectedReportReason = reason;
-else if (_selectedReportReason == reason) _selectedReportReason = string.Empty;
-}
+    private async Task ReportProfile()
+    {
+        //Überprüfungen
+        // Sperre, wenn Animation läuft oder Match-Overlay offen ist
+        if (_isAnimating || _showMatchOverlay)
+            return;
+        //MatchManager initialisiert?
+        if (_matchManager is null)
+            return;
+        //Vorschläge vorhanden?
+        if (_currentSuggestion is null)
+            return;
+        //Überprüft, ob _selectedReportReason einen gültigen Enum Wert besitzt
+        //Falls ja -> Enum wird in reason abgespeichert 
+        if (_selectedReportReason is not ReportReasons reason)
+            return;
+        
+        //UI sperren damit keine parallelen Klicks registirert werden
+        _isAnimating = true;
 
-private void ReportProfile()
-{
-if (!string.IsNullOrEmpty(_selectedReportReason))
-{
-_isProfileVisible = false;
-_showReportModal = false;
-}
-}
+        try
+        {
+            //Upload des aktuellen Vorschlags extrahieren
+            var creator = _currentSuggestion.Value.Creator;
+            var upload = _currentSuggestion.Value.Harvest;
 
-private string GetUsernameUrl() => _currentHarvest?.Username.TrimStart('@') ?? "";
+            //Aufruf der Reportmethode des MatchManagers
+            _matchManager.ReportHarvestUpload(upload.UploadId, reason);
+            //Profil wird negativ bewertet -> Vorschlag wird entfernt
+            _matchManager.RateUser(creator, false);
 
-private class HarvestModel
-{
-public string Username { get; set; } = "";
-public string Tag { get; set; } = "";
-public string ImageUrl { get; set; } = "";
-public string ProfileImageUrl { get; set; } = "";
-public string Weight { get; set; } = "";
-public string Length { get; set; } = "";
-public string Width { get; set; } = "";
-public string Description { get; set; } = "";
-}
+            //Report Fenster wird geschlossen
+            _showReportModal = false;
+            //Reason wird zurückgesetzt
+            _selectedReportReason = null;
+
+            //Nach links swipen
+            _animationClass = "swipe-left";
+            //Trigger der Animation
+            StateHasChanged();
+            //Warten bis Animation durchgeführt wird
+            await Task.Delay(600);
+
+            //Reset der Animation
+            _animationClass = "";
+            StateHasChanged();
+
+            //Report Karte anzeigen 
+            _cardKey++;
+            _isProfileVisible = false;
+            //Fade-In für die neue Karte
+            _animationClass = "fade-in";
+            //Trigger der Animation
+            StateHasChanged();
+            //Warten bis die Animation durchgeführt wird
+            await Task.Delay(400);
+
+            //Animation "leeren"
+            _animationClass = "";
+            //Animation triggern
+            StateHasChanged();
+            //Es soll drei Sekunden gewartet werden bis der nächste Vorschlag gerendert wird
+            await Task.Delay(3000);
+
+            //UI Reset + nächsten Vorschlag laden
+            ResetUiAfterSwipe();
+            TryLoadNextSuggestion();
+
+            //Fade-In für die neue Karte
+            _animationClass = "fade-in";
+            //Trigger der Animation
+            StateHasChanged();
+            //Warten bis die Animation durchgeführt wird
+            await Task.Delay(400);
+
+            //Animation "leeren"
+            _animationClass = "";
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            _animationClass = "";
+            StateHasChanged();
+        }
+        finally
+        {
+            //IsAnimating wird wieder auf falsch gesetzt
+            _isAnimating = false;
+        }
+    }
+
+    //Resetted die UI nach einem Swipe, da sonst Zwischenstände in die nächste UI gezogen werden könnten
+    private void ResetUiAfterSwipe()
+    {
+        _showReportModal = false;
+        _selectedReportReason = null;
+        _isProfileVisible = true;
+    }
+
+    // ----------------------------
+    // Helpers
+    // ----------------------------
+    private string GetUsernameUrl() => _currentHarvest?.Username.TrimStart('@') ?? "";
+    
+    private void LoadNextSuggestion()
+    {
+        //Zeigt die Standard VorschlagsKarte an
+        _isProfileVisible = true;
+        
+        //Methode abbrechen, falls MatchManager nicht initialisiert ist
+        //Zeigt die "Keine Vorschläge" Karte an
+        if (_matchManager is null)
+        {
+            LoadEmptySuggestion();
+            return;
+        }
+        
+        //Gib mir den ersten Eintrag aus der Vorschlagsliste zurück
+        var next = _matchManager.GetNextSuggestion();
+        
+        //Falls Vorschlagsliste leeren Key zurückgibt -> 
+        //Zeigt die "Keine Vorschläge" Karte an
+        if (next is null)
+        {
+            LoadEmptySuggestion();
+            return;
+        }
+        
+        //Speicher Profil + Upload in currenSuggestion ab
+        _currentSuggestion = (next.Value.creator, next.Value.harvest);
+        
+        //Hier entziehen wir dem HarvestUpload die TagId und geben uns von dem TagCatalog 
+        //den passenden String zurück
+        //Falls TagIds null ist -> weise 0 zu
+        var firstTagId = next.Value.harvest.TagIds?.FirstOrDefault() ?? 0;
+        var tagItem = firstTagId > 0 ? TagCatalog.FindById(firstTagId) : null;
+        
+        //Erstell aus dem Vorschlag das Harvestmodel, dass von Blazor dementsprechend gerendert wird
+        _currentHarvest = new HarvestModel
+        {
+            Username = "@" + next.Value.creator.UserName,
+            ProfileImageUrl = next.Value.creator.ProfilepictureUrl,
+            ImageUrl = next.Value.harvest.ImageUrl,
+            Description = next.Value.harvest.Description,
+            Weight = $"{next.Value.harvest.WeightGram} g",
+            Length = $"{next.Value.harvest.LengthCm} cm",
+            Width = $"{next.Value.harvest.WidthCm} cm",
+            Tag = tagItem is null ? "" : $"{tagItem.Icon} {tagItem.Name}"
+        };
+
+        //Blazor weiß damit, dass hier ein neues Dom Element gerendert werden soll
+        _cardKey++;
+    }
+    
+    private void TryLoadNextSuggestion()
+    {
+        try
+        {
+            LoadNextSuggestion();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Startseite LoadNextSuggestion crashed:");
+            Console.WriteLine(ex);
+            LoadEmptySuggestion();
+            StateHasChanged(); // optional, aber hilft sofort UI zu aktualisieren
+        }
+    }
+    
+    private void LoadEmptySuggestion()
+    {
+        _currentSuggestion = null;
+        _currentHarvest = null;
+        _cardKey++;
+    }
+
+    //Das Mappen der Enumeration mit den Strings, die auf der Webseite gerendert werden
+    private static string GetReportReasonLabel(ReportReasons reason)
+        => reason switch
+        {
+            ReportReasons.AbstossendeInhalte => "Abstossende Inhalte",
+            ReportReasons.SexuelleInhalte => "Sexuelle Inhalte",
+            ReportReasons.GewaltvolleInhalte => "Gewaltvolle Inhalte",
+            ReportReasons.CatFishing => "Catfishing - nicht selbst angebaut",
+            ReportReasons.Spam => "Spam",
+            //Unterstrich ist Default
+            _=> reason.ToString()
+        };
+
+
+    private sealed class HarvestModel
+    {
+        public string Username { get; set; } = "";
+        public string Tag { get; set; } = "";
+        public string ImageUrl { get; set; } = "";
+        public string ProfileImageUrl { get; set; } = "";
+        public string Weight { get; set; } = "";
+        public string Length { get; set; } = "";
+        public string Width { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
 }

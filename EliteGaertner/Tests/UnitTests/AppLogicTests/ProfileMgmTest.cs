@@ -298,7 +298,7 @@ public class ProfileMgmUnitTests
         _mockProfileDbs.Setup(x => x.SetNewProfile(newProfile)).Returns(registeredProfile);
 
         // Act
-        var result = _profileMgm.RegisterProfile(newProfile);
+        var result = _profileMgm.RegisterProfile(newProfile, TODO);
 
         // Assert
         Assert.AreEqual(1, result.ProfileId);
@@ -343,7 +343,7 @@ public class ProfileMgmUnitTests
         _mockProfileDbs.Setup(x => x.GetPrivateProfile(profileId)).Returns(profileInfo);
 
         // Act
-        var result = _profileMgm.LoginProfile(loginProfile);
+        var result = _profileMgm.LoginProfile(TODO);
 
         // Assert
         Assert.AreEqual(profileId, result.ProfileId);
@@ -373,7 +373,7 @@ public class ProfileMgmUnitTests
         _mockProfileDbs.Setup(x => x.CheckPassword(loginProfile.EMail, loginProfile.PasswordHash)).Returns((int?)null);
 
         // Act & Assert
-        Assert.ThrowsException<UnauthorizedAccessException>(() => _profileMgm.LoginProfile(loginProfile));
+        Assert.ThrowsException<UnauthorizedAccessException>(() => _profileMgm.LoginProfile(TODO));
         _mockProfileDbs.Verify(x => x.CheckPassword(loginProfile.EMail, loginProfile.PasswordHash), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();

@@ -1,6 +1,6 @@
 @page "/registrierung/profilerstellung"
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -128,6 +128,6 @@
     
     private void Weiter()
     {
-        NavigationManager.NavigateTo("/ernte-hochladen", forceLoad: true);
+        NavigationManager.NavigateTo("/ernte-hochladen");
     }
 }

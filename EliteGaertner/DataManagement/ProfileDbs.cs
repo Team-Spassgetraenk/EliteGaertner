@@ -118,20 +118,20 @@ public class ProfileDbs : IProfileDbs
         return result;
     }
 
-    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
-    {
-        if (privateProfile == null)
-            return new PrivateProfileDto();
-        
-        // Credential DTO aus PrivateProfileDto kopieren
-        var credentials = new CredentialProfileDto
-        {
-            EMail = privateProfile.EMail,
-            PasswordHash = privateProfile.PasswordHash
-        };
-    
-        return SetNewProfile(privateProfile, credentials);
-    }
+    //public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
+    //{
+    //    if (privateProfile == null)
+    //        return new PrivateProfileDto();
+    //    
+    //    // Credential DTO aus PrivateProfileDto kopieren
+    //    var credentials = new CredentialProfileDto
+    //    {
+    //        EMail = privateProfile.EMail,
+    //        PasswordHash = privateProfile.PasswordHash
+    //    };
+    //
+    //    return SetNewProfile(privateProfile, credentials);
+    //}
 
 
     public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
@@ -285,6 +285,29 @@ public class ProfileDbs : IProfileDbs
             });
 
         return result;
+    }
+
+    public void EditPassword(CredentialProfileDto credentials)
+    {
+        //Überprüfungen
+        if (credentials is null)
+            throw new ArgumentNullException(nameof(credentials));
+        //Trim die Mail -> lowercases
+        var email = credentials.EMail?.Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("E-Mail ist erforderlich.", nameof(credentials.EMail));
+        if (string.IsNullOrWhiteSpace(credentials.PasswordHash))
+            throw new ArgumentException("Passwort/Hash ist erforderlich.", nameof(credentials.PasswordHash));
+
+        //Holt das gesuchte Profil aus der Datenbank
+        var profile = _dbContext.Profiles.SingleOrDefault(p => p.Email == email);
+        //Falls Profil nicht gefunden worden ist
+        if (profile is null)
+            throw new ArgumentException("Profil mit dieser E-Mail nicht gefunden.", nameof(credentials.EMail));
+
+        profile.Passwordhash = credentials.PasswordHash;
+
+        _dbContext.SaveChanges();
     }
 
     public bool SetUserPreference(List<PreferenceDto> preferences) //Wichtiger Hinweis: Methode kann bei Aufruf nur für

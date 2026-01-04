@@ -46,21 +46,9 @@ public class ProfileMgm : IProfileMgm
         //hier zwei verschiedene Datenbankzugriffe durchführen (Profilinfos, Harvestuploads)
         var profileHarvests = _harvestDbs.GetProfileHarvestUploads(profileId);
         var profileInfo = _profileDbs.GetPrivateProfile(profileId);
-        var privateProfile = new PrivateProfileDto
+        var privateProfile = profileInfo with
         {
-            ProfileId = profileInfo.ProfileId,
-            ProfilepictureUrl = profileInfo.ProfilepictureUrl,
-            UserName = profileInfo.UserName,
-            FirstName = profileInfo.FirstName,
-            LastName = profileInfo.LastName,
-            EMail = profileInfo.EMail,
-            Phonenumber = profileInfo.Phonenumber,
-            Profiletext = profileInfo.Profiletext,
-            ShareMail = profileInfo.ShareMail,
-            SharePhoneNumber = profileInfo.SharePhoneNumber,
-            UserCreated = profileInfo.UserCreated,
             HarvestUploads = profileHarvests.ToList(),
-            PreferenceDtos = profileInfo.PreferenceDtos
         };
             
         return privateProfile;
@@ -92,18 +80,18 @@ public class ProfileMgm : IProfileMgm
         return false;
     }
 
-    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile)
+    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials)
     {
         
-        return _profileDbs.SetNewProfile(newProfile);
+        return _profileDbs.SetNewProfile(newProfile, credentials);
         
         // HarvestUploads und PreferenceDtos sind null - wie in der Doku beschrieben
         // Hier können ggf. Default-Werte gesetzt werden
     }
 
-    public PrivateProfileDto LoginProfile(PrivateProfileDto receiverProfile) //TODO Nicolas über Auth
+    public PrivateProfileDto LoginProfile(CredentialProfileDto credentials) 
     {
-        int? profileId = _profileDbs.CheckPassword(receiverProfile.EMail, receiverProfile.PasswordHash);
+        int? profileId = _profileDbs.CheckPassword(credentials.EMail, credentials.PasswordHash);
         
         if (profileId.HasValue)
         {
@@ -111,21 +99,9 @@ public class ProfileMgm : IProfileMgm
             //hier zwei verschiedene Datenbankzugriffe durchführen (Profilinfos, Harvestuploads)
             var profileHarvests = _harvestDbs.GetProfileHarvestUploads(profileId.Value);
             var profileInfo = _profileDbs.GetPrivateProfile(profileId.Value);
-            var dto = new PrivateProfileDto
+            var dto = profileInfo with 
             {
-                ProfileId = profileInfo.ProfileId,
-                ProfilepictureUrl = profileInfo.ProfilepictureUrl,
-                UserName = profileInfo.UserName,
-                FirstName = profileInfo.FirstName,
-                LastName = profileInfo.LastName,
-                EMail = profileInfo.EMail,
-                Phonenumber = profileInfo.Phonenumber,
-                Profiletext = profileInfo.Profiletext,
-                ShareMail = profileInfo.ShareMail,
-                SharePhoneNumber = profileInfo.SharePhoneNumber,
-                UserCreated = profileInfo.UserCreated,
                 HarvestUploads = profileHarvests.ToList(),
-                PreferenceDtos = profileInfo.PreferenceDtos
             };
             
             return dto;
@@ -133,6 +109,19 @@ public class ProfileMgm : IProfileMgm
         
         throw new UnauthorizedAccessException("Ungültige Anmeldedaten");
     }
+
+    public void UpdateCredentials(CredentialProfileDto credentials)
+    {
+        try
+        {
+            _profileDbs.EditPassword(credentials);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Anmeldedaten konnten nicht aktualisiert werden.", ex);
+        }
+    }
+
 
     public List<PreferenceDto> GetPreference(int profileId)
     {

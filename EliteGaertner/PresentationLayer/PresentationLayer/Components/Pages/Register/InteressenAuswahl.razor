@@ -1,8 +1,9 @@
 @page "/registrierung/interessen"
 @using PresentationLayer.State
+@using PresentationLayer.Shared
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
 
 @* WICHTIG: Beide Schriftarten laden, da Patrick Hand für den allgemeinen Text und Playfair Display für den EliteGärtner-Titel verwendet wird *@
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -23,7 +24,7 @@
             
             <h4 class="tag-headline">Gemüse</h4>
             <div class="tag-grid">
-                @foreach (var tag in _gemueseTags)
+                @foreach (var tag in TagCatalog.Gemuese)
                 {
                     <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
                          @onclick="() => ToggleTag(tag.Name)">
@@ -35,7 +36,7 @@
 
             <h4 class="tag-headline">Obst</h4>
             <div class="tag-grid">
-                @foreach (var tag in _obstTags)
+                @foreach (var tag in TagCatalog.Obst)
                 {
                     <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
                          @onclick="() => ToggleTag(tag.Name)">
@@ -62,39 +63,6 @@
 </div>
 
 @code {
-
-    public record TagItem(string Name, string Icon);
-
-    List<TagItem> _gemueseTags = new()
-    {
-        new("Auberginen", "🍆"),
-        new("Gurken", "🥒"),
-        new("Tomaten", "🍅"),
-        new("Kürbisse", "🎃"),
-        new("Paprika", "🌶️"),
-        new("Zucchini", "🥒"),
-        new("Kartoffeln", "🥔"),
-        new("Karotten", "🥕"),
-        new("Salate", "🥬"),
-        new("Zwiebeln", "🧅"),
-        new ("Bohnen", "🌿"),
-        new ("Spinat", "🍃"),
-        new ("Radieschen", "🌱"),
-        new ("Brokkoli", "🥦"),
-        new ("Mais", "🌽"),
-    };
-
-    List<TagItem> _obstTags = new()
-    {
-        new("Melonen", "🍉"),
-        new("Äpfel", "🍎"),
-        new("Birnen", "🍐"),
-        new("Pfirsiche", "🍑"),
-        new("Kirschen", "🍒"),
-        new("Erdbeeren", "🍓"),
-        new("Trauben", "🍇")
-    };
-
     void ToggleTag(string tag)
     {
         if (!RegistrationState.SelectedTags.Add(tag))
@@ -104,6 +72,6 @@
     void Speichern()
     {
         Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", RegistrationState.SelectedTags));
-        Nav.NavigateTo("/registrierung/profilerstellung", forceLoad: true);
+        Nav.NavigateTo("/registrierung/profilerstellung");
     }
 }

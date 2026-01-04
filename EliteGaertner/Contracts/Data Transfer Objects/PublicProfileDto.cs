@@ -8,8 +8,6 @@ public record PublicProfileDto
     public string EMail { get; init; }
     public string Phonenumber { get; init; }
     public string Profiletext { get; init; }
-    public bool ShareMail { get; init; }
-    public bool SharePhoneNumber { get; init; }
     public DateTime UserCreated { get; init; }
     public List <HarvestUploadDto> HarvestUploads { get; init; }
 }

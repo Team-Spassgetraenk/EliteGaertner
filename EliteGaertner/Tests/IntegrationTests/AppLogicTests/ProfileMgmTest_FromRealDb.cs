@@ -121,7 +121,7 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
             PasswordHash = passwordHash
         };
 
-        var result = sut.LoginProfile(loginDto);
+        var result = sut.LoginProfile(TODO);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(profileId, result.ProfileId);
