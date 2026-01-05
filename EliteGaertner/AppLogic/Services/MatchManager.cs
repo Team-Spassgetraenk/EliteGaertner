@@ -90,8 +90,7 @@ public class MatchManager : IMatchManager
             AddSuggestions();
     }
 
-    public PublicProfileDto CreateMatch(PublicProfileDto creatorProfile)
-        => creatorProfile;
+    public event Action<PublicProfileDto>? CreateMatch;
     
     public List<PublicProfileDto> UpdateActiveMatches()
     {
@@ -117,7 +116,9 @@ public class MatchManager : IMatchManager
         //Für jedes neue Match wird die CreateMatch Methode aufgerufen
         foreach (var newMatch in newlyAddedMatches)
         {
-            CreateMatch(newMatch);
+            //Solange keiner den CreateMatch subscribed (passiert im Presentation Layer) 
+            //bleibt CreateMatch Null. Deswegen wird CreateMatch nur ausgeführt, wenn er nicht null ist 
+            CreateMatch?.Invoke(newMatch);
         }
         
         _activeMatchesList = newActiveMatchesList;
@@ -126,24 +127,32 @@ public class MatchManager : IMatchManager
 
     public List<PublicProfileDto> GetActiveMatches()
         => _activeMatchesList;
+
+    public (PublicProfileDto creator, HarvestUploadDto harvest)? GetNextSuggestion()
+    {
+        //Prüfe, ob ein Vorschlag vorhanden ist
+        if (_profileSuggestionList.Count == 0)
+            return null;
+        
+        //Nimm das erste Paar aus den Vorschlägen
+        var first = _profileSuggestionList.First();
+        //Gib Key und Value aus dem einzelnen Vorschlag zurück 
+        return (first.Key, first.Value);
+    }
     
     public void ReportHarvestUpload(int uploadId, ReportReasons reason)
     {
-        _harvestDbs.SetReportHarvestUpload(uploadId,reason);
-        //Sobald ein Bild 5 Mal reported worden ist, wird es gelöscht
-        if (_harvestDbs.GetReportCount(uploadId) >= ReportThreshold) 
-            _harvestDbs.DeleteHarvestUpload(uploadId);
-    }
-    
-    //TODO Bin mir nicht sicher ob wir das überhaupt benötigen
-    public MatchManagerDto GetMatchManager()
-        => new MatchManagerDto
+        try
         {
-            ProfileId = _profileId,
-            TagIds = _tagIds,
-            PreloadCount = PreloadCount,
-            ProfileSuggestionList = _profileSuggestionList,
-            ActiveMatchesList = _activeMatchesList
-        };
-    
+            _harvestDbs.SetReportHarvestUpload(uploadId,reason);
+            //Sobald ein Bild 5 Mal reported worden ist, wird es gelöscht
+            if (_harvestDbs.GetReportCount(uploadId) >= ReportThreshold) 
+                _harvestDbs.DeleteHarvestUpload(uploadId);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"Fehler beim Melden von UploadId={uploadId} (Reason={reason}).", ex);
+        }
+    }
 }

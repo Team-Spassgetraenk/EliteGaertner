@@ -1,6 +1,6 @@
 @page "/profil/profilverwaltung"
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
 
@@ -401,7 +401,7 @@ catch { return false; }
 // ======================================
 
 private void ToggleLogoutMenu() => _showLogout = !_showLogout;
-private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
+private void NavigateToLogout() => Nav.NavigateTo("/");
 
 // Bild-Lösch Logik
 private void SetHoveredIndex(int index) => _hoveredIndex = index;
@@ -438,6 +438,6 @@ return;
 Console.WriteLine("Änderungen gespeichert:");
 // ... Speicherlogik
 
-Nav.NavigateTo("/ProfilTest", forceLoad: true); // Zurück zum Profil
+Nav.NavigateTo("/ProfilTest"); // Zurück zum Profil
 }
 }

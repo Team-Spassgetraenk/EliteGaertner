@@ -9,6 +9,7 @@ public record HarvestUploadDto
     public float WidthCm { get; init; }
     public float LengthCm { get; init; }
     public DateTime UploadDate { get; init; }
+    public IReadOnlyList<int> TagIds { get; init; }
     public int ProfileId { get; init; }
     
 }

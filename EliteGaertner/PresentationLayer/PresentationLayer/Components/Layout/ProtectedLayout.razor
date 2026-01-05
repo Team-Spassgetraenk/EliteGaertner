@@ -1,0 +1,27 @@
+@inherits LayoutComponentBase
+@using PresentationLayer.State
+@inject CurrentProfileState CurrentProfile
+@inject NavigationManager Nav 
+
+
+@* Diese Blazor Komponente prüft, ob ein Profil eingeloggt ist. Falls nicht -> Blazor wir komplett neu gestartet 
+und man wird zur Root Seite weitergeleitet. *@
+@if (!_redirecting)
+{
+    @Body @* Solange Profil eingeloggt ist, wird der Body gerendert *@
+}
+
+@code {
+    private bool _redirecting;
+
+    protected override void OnInitialized()
+    {
+        if (!CurrentProfile.IsLoggedIn)
+        {
+            _redirecting = true;
+            Nav.NavigateTo("/");
+        }
+        //TODO TEST LOG LÖSCHEN
+        Console.WriteLine("ProtectedLayout Initialize läuft problemlos");
+    }
+}

@@ -1,5 +1,5 @@
 ﻿@page "/registertest"
-@rendermode InteractiveServer
+
 @inject NavigationManager Nav
 @using Contracts.Data_Transfer_Objects
 @using AppLogic.Interfaces
@@ -141,7 +141,7 @@
             bool success = ProfileMgm.UpdateProfile(profileDto);
             if (success)
             {
-                Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
+                Nav.NavigateTo("/registrierung/interessen");
                 Console.WriteLine($"Profil aktualisiert für: {email}");
             }
             else

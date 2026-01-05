@@ -13,10 +13,10 @@ public interface IProfileDbs
     public bool CheckUsernameExists(string username);
     
     public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials);
-    
-    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile);
 
     public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile);
+
+    public void EditPassword(CredentialProfileDto credentials);
     
     public Profile? GetProfile(int profileId);
     

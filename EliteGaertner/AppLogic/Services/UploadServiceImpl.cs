@@ -13,29 +13,16 @@ public class UploadServiceImpl : IUploadService
         _harvestDbs = harvestDbs;
     }
     
-    public bool CreateHarvestUpload(HarvestUploadDto uploadDto)
+    public void CreateHarvestUpload(HarvestUploadDto uploadDto)
     {
-        var success = _harvestDbs.CreateUploadDbs(uploadDto);
-        Console.WriteLine(success ? "Upload erfolgreich" : "Upload im ManagementDBS fehlgeschlagen"); return success;
-    }
-    
-    
-    public bool CreateHarvestUpload(int profileId, string imageUrl, string description, float weight, int width, int length)
-    {
-        var uploadDto = new HarvestUploadDto
+        try
         {
-            ProfileId = profileId,
-            ImageUrl = imageUrl,
-            Description = description,
-            WeightGram = weight,
-            WidthCm = width,
-            LengthCm = length,
-            UploadDate = DateTime.UtcNow
-        };
-    
-        bool success = _harvestDbs.CreateUploadDbs(uploadDto);
-        Console.WriteLine(success ? "Upload erfolgreich" : "Upload im ManagementDBS fehlgeschlagen"); 
-        return success;
+            _harvestDbs.CreateUploadDbs(uploadDto);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Upload fehlgeschlagen", ex);
+        }
     }
 
     public HarvestUploadDto GetUploadDto(int uploadId)
@@ -43,26 +30,37 @@ public class UploadServiceImpl : IUploadService
        return _harvestDbs.GetUploadDb(uploadId);
     }
 
-    public string DeleteUpload(int uploadId, int profileId) //Hier wird null zurückgegeben, wenn nicht existiert löschung
-                                                         // des Bildes muss architekturwegens in .razor abgehandelt werden
+    public string? DeleteUpload(int uploadId) // gibt die ImageUrl zurück, damit die UI die Datei in wwwroot löschen kann
     {
-        var uploadDto = GetUploadDto(uploadId);
+        HarvestUploadDto uploadDto;
         
-        if (uploadDto == null || string.IsNullOrEmpty(uploadDto.ImageUrl))
+        //Lädt HarvestUpload aus Datenbank
+        try
         {
-            Console.WriteLine("Upload oder ImageUrl fehlt");
-            return null;
+            uploadDto = GetUploadDto(uploadId);
         }
-
-        var fileName = uploadDto.ImageUrl;
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Upload konnte nicht geladen werden.", ex);
+        }
         
-        _harvestDbs.DeleteHarvestUpload(uploadId);
+        if (uploadDto == null || string.IsNullOrWhiteSpace(uploadDto.ImageUrl))
+            return null;
 
-        return fileName;
-    }
-
-    public List<HarvestUploadDto> GetUserUploads(int profileId)
-    {
-        throw new NotImplementedException();
+        //Speichert ImageUrl ab
+        var imageUrl = uploadDto.ImageUrl;
+        
+        //Löscht HarvestUpload in der Datenbank
+        try
+        {
+            _harvestDbs.DeleteHarvestUpload(uploadId);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Upload konnte nicht gelöscht werden.", ex);
+        }
+        
+        //Gibt ImageUrl zurück
+        return imageUrl;
     }
 }

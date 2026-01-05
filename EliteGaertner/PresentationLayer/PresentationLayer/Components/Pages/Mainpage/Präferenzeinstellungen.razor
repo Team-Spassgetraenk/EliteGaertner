@@ -2,7 +2,7 @@
 @using PresentationLayer.State
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -61,7 +61,8 @@
 </div>
 
 @code {
-
+    
+    //TODO Interessen speichern fehlt
     public record TagItem(string Name, string Icon);
 
     List<TagItem> _gemueseTags = new()
@@ -103,6 +104,6 @@
     void Speichern()
     {
         Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", RegistrationState.SelectedTags));
-        Nav.NavigateTo("/startseite", forceLoad: true);
+        Nav.NavigateTo("/startseite");
     }
 }

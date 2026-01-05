@@ -1,5 +1,5 @@
 @page "/RanglisteTest"
-@rendermode InteractiveServer
+
 @inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -172,7 +172,7 @@
 
     private void NavigateToLogout()
     {
-        Nav.NavigateTo("/Login", forceLoad: true);
+        Nav.NavigateTo("/Login");
     }
 
     private void GoToProfile(string username)
@@ -180,15 +180,15 @@
         string userUrl = username.TrimStart('@');
         if (username.ToLower() == "ich")
         {
-            Nav.NavigateTo("/ProfilTest", forceLoad: true);
+            Nav.NavigateTo("/ProfilTest");
         }
         else
         {
-            Nav.NavigateTo($"/profil/{userUrl}", forceLoad: true);
+            Nav.NavigateTo($"/profil/{userUrl}");
         }
     }
     
-    private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
-    private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
-    private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+    private void GoToMatches() => Nav.NavigateTo("/MatchesTest");
+    private void GoToMainpage() => Nav.NavigateTo("/startseite");
+    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
 }

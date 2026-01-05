@@ -1,11 +1,9 @@
 @page "/registrierung/interessen"
-@using Contracts.Data_Transfer_Objects
-@using AppLogic.Interfaces
-@inject IProfileMgm ProfileMgm
 @using PresentationLayer.State
+@using PresentationLayer.Shared
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
 
 @* WICHTIG: Beide Schriftarten laden, da Patrick Hand für den allgemeinen Text und Playfair Display für den EliteGärtner-Titel verwendet wird *@
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -26,7 +24,7 @@
             
             <h4 class="tag-headline">Gemüse</h4>
             <div class="tag-grid">
-                @foreach (var tag in _gemueseTags)
+                @foreach (var tag in TagCatalog.Gemuese)
                 {
                     <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
                          @onclick="() => ToggleTag(tag.Name)">
@@ -38,7 +36,7 @@
 
             <h4 class="tag-headline">Obst</h4>
             <div class="tag-grid">
-                @foreach (var tag in _obstTags)
+                @foreach (var tag in TagCatalog.Obst)
                 {
                     <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
                          @onclick="() => ToggleTag(tag.Name)">
@@ -65,38 +63,6 @@
 </div>
 
 @code {
-    public record TagItem(int TagId, string Name, string Icon);
-
-    List<TagItem> _gemueseTags = new()
-    {
-        new(1, "Auberginen", "🍆"),
-        new(2, "Gurken", "🥒"),
-        new(3, "Tomaten", "🍅"),
-        new(4, "Kürbisse", "🎃"),
-        new(5, "Paprika", "🌶️"),
-        new(6, "Zucchini", "🥒"),
-        new(7, "Kartoffeln", "🥔"),
-        new(8, "Karotten", "🥕"),
-        new(9, "Salate", "🥬"),
-        new(10, "Zwiebeln", "🧅"),
-        new(18, "Bohnen", "🌿"),
-        new(19, "Spinat", "🍃"),
-        new(20, "Radieschen", "🌱"),
-        new(21, "Brokkoli", "🥦"),
-        new(22, "Mais", "🌽"),
-    };
-
-    List<TagItem> _obstTags = new()
-    {
-        new(11, "Melonen", "🍉"),
-        new(12, "Äpfel", "🍎"),
-        new(13, "Birnen", "🍐"),
-        new(14, "Pfirsiche", "🍑"),
-        new(15, "Kirschen", "🍒"),
-        new(16, "Erdbeeren", "🍓"),
-        new(17, "Trauben", "🍇")
-    };
-    
     void ToggleTag(string tag)
     {
         if (RegistrationState.SelectedTags.Contains(tag))

@@ -25,17 +25,14 @@ builder.Services.AddScoped<IProfileDbs, ProfileDbs>();
 //DI der AppLogic Schicht
 builder.Services.AddScoped<IUploadService, UploadServiceImpl>();
 builder.Services.AddScoped<IProfileMgm, ProfileMgm>();
-builder.Services.AddScoped<IHarvestSuggestion, HarvestSuggestion>();
-builder.Services.AddScoped<IProfileSuggestion, ProfileSuggestion>();
-builder.Services.AddScoped<IMatchManager, MatchManager>();
-builder.Services.AddScoped<ILeaderBoardService, LeaderboardService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(); // Blazor Server interaktiv
 
-// Registrierungsstatus **vor Build registrieren**
-builder.Services.AddSingleton<UserRegistrationState>();
+//Registrierung der State-Klassen
+builder.Services.AddScoped<UserRegistrationState>();
+builder.Services.AddScoped<CurrentProfileState>();
 
 var app = builder.Build();
 

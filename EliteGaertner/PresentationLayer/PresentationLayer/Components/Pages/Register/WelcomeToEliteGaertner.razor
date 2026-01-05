@@ -1,5 +1,5 @@
 @page "/Welcome"
-@rendermode InteractiveServer
+
 @inject NavigationManager Nav
 
 <div class="welcome-container">
@@ -27,6 +27,6 @@
 @code {
     private void GoToStartseite()
     {
-        Nav.NavigateTo("/MainpageTest", forceLoad: true);
+        Nav.NavigateTo("/MainpageTest");
     }
 }

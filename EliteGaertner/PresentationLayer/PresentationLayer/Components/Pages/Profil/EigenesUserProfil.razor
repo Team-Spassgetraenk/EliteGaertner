@@ -1,7 +1,7 @@
 @page "/ProfilTest"
 @using Microsoft.AspNetCore.Components.Web
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -169,69 +169,69 @@
     
     private string _bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit Anbeginn der Zeit.";
 
-// Bild-Lösch Logik
-private void SetHoveredIndex(int index) => _hoveredIndex = index;
-private void ResetHoveredIndex() => _hoveredIndex = null;
-
-private void ToggleDeletePopup(int index)
-{
-    if (_showDeletePopupIndex == index)
+    // Bild-Lösch Logik
+    private void SetHoveredIndex(int index) => _hoveredIndex = index;
+    private void ResetHoveredIndex() => _hoveredIndex = null;
+    
+    private void ToggleDeletePopup(int index)
     {
-        _showDeletePopupIndex = null;
+        if (_showDeletePopupIndex == index)
+        {
+            _showDeletePopupIndex = null;
+        }
+        else
+        {
+            _showDeletePopupIndex = index;
+        }
     }
-    else
+    
+    private void DeletePhoto(HarvestDetail item)
     {
-        _showDeletePopupIndex = index;
+        if (item != null)
+        {
+            _harvestDetails.Remove(item);
+            _showDeletePopupIndex = null; // Popup schließen
+            StateHasChanged(); // UI aktualisieren
+        }
     }
-}
-
-private void DeletePhoto(HarvestDetail item)
-{
-    if (item != null)
+    
+    // Detailansicht HarvestUploads
+    private List<HarvestDetail> _harvestDetails = new()
     {
-        _harvestDetails.Remove(item);
-        _showDeletePopupIndex = null; // Popup schließen
-        StateHasChanged(); // UI aktualisieren
+        new() { ImageUrl="pictures/Testbilder/Gurken_01.jpg", Tag="Gurken 🥒", Weight="320g", Length="22cm", Width="5cm", Description="Sehr knackig dieses Jahr!" },
+        new() { ImageUrl="pictures/Testbilder/Karotten_01.jpg", Tag="Karotten 🥕", Weight="150g", Length="18cm", Width="3cm", Description="Direkt aus dem Hochbeet." },
+        new() { ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", Tag="Kürbis 🎃", Weight="4.2kg", Length="35cm", Width="40cm", Description="Prachtexemplar für Halloween." },
+        new() { ImageUrl="pictures/Testbilder/Auberginen_01.jpg", Tag="Auberginen 🍆", Weight="400g", Length="15cm", Width="8cm", Description="Viel Sonne getankt." },
+        new() { ImageUrl="pictures/Testbilder/Erdbeeren_01.jpg", Tag="Erdbeeren 🍓", Weight="45g", Length="5cm", Width="4cm", Description="Zuckersüß!" },
+        new() { ImageUrl="pictures/Testbilder/Trauben_01.jpg", Tag="Trauben 🍇", Weight="600g", Length="20cm", Width="12cm", Description="Sorte: Muskat." }
+    };
+    
+    private HarvestDetail? _selectedHarvest;
+    
+    private bool _showLogout = false;
+    
+    public class GridItem {
+        public bool IsImage { get; set; }
+        public bool IsAddButton { get; set; }
+        public string Path { get; set; } = "";
     }
-}
-
-// Detailansicht HarvestUploads
-private List<HarvestDetail> _harvestDetails = new()
-{
-    new() { ImageUrl="pictures/Testbilder/Gurken_01.jpg", Tag="Gurken 🥒", Weight="320g", Length="22cm", Width="5cm", Description="Sehr knackig dieses Jahr!" },
-    new() { ImageUrl="pictures/Testbilder/Karotten_01.jpg", Tag="Karotten 🥕", Weight="150g", Length="18cm", Width="3cm", Description="Direkt aus dem Hochbeet." },
-    new() { ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", Tag="Kürbis 🎃", Weight="4.2kg", Length="35cm", Width="40cm", Description="Prachtexemplar für Halloween." },
-    new() { ImageUrl="pictures/Testbilder/Auberginen_01.jpg", Tag="Auberginen 🍆", Weight="400g", Length="15cm", Width="8cm", Description="Viel Sonne getankt." },
-    new() { ImageUrl="pictures/Testbilder/Erdbeeren_01.jpg", Tag="Erdbeeren 🍓", Weight="45g", Length="5cm", Width="4cm", Description="Zuckersüß!" },
-    new() { ImageUrl="pictures/Testbilder/Trauben_01.jpg", Tag="Trauben 🍇", Weight="600g", Length="20cm", Width="12cm", Description="Sorte: Muskat." }
-};
-
-private HarvestDetail? _selectedHarvest;
-
-private bool _showLogout = false;
-
-public class GridItem {
-public bool IsImage { get; set; }
-public bool IsAddButton { get; set; }
-public string Path { get; set; } = "";
-}
-
-
-private void ToggleLogoutMenu() => _showLogout = !_showLogout;
-private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
-private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
-private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
-private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
-private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
-private void GoToManageProfile() => Nav.NavigateTo("/profil/profilverwaltung", forceLoad: true);
-private void AddPhoto() => Nav.NavigateTo("/ernte-hochladen", forceLoad: true);
-
-private class HarvestDetail {
-    public string ImageUrl { get; set; } = "";
-    public string Tag { get; set; } = "";
-    public string Weight { get; set; } = "";
-    public string Length { get; set; } = "";
-    public string Width { get; set; } = "";
-    public string Description { get; set; } = "";
-}
+    
+    
+    private void ToggleLogoutMenu() => _showLogout = !_showLogout;
+    private void NavigateToLogout() => Nav.NavigateTo("/");
+    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
+    private void GoToMatches() => Nav.NavigateTo("/MatchesTest");
+    private void GoToMainpage() => Nav.NavigateTo("/startseite");
+    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
+    private void GoToManageProfile() => Nav.NavigateTo("/profil/profilverwaltung");
+    private void AddPhoto() => Nav.NavigateTo("/ernte-hochladen");
+    
+    private class HarvestDetail {
+        public string ImageUrl { get; set; } = "";
+        public string Tag { get; set; } = "";
+        public string Weight { get; set; } = "";
+        public string Length { get; set; } = "";
+        public string Width { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
 }
