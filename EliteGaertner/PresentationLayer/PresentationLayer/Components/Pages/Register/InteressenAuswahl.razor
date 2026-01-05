@@ -1,4 +1,7 @@
 @page "/registrierung/interessen"
+@using Contracts.Data_Transfer_Objects
+@using AppLogic.Interfaces
+@inject IProfileMgm ProfileMgm
 @using PresentationLayer.State
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
@@ -62,48 +65,78 @@
 </div>
 
 @code {
-
-    public record TagItem(string Name, string Icon);
+    public record TagItem(int TagId, string Name, string Icon);
 
     List<TagItem> _gemueseTags = new()
     {
-        new("Auberginen", "🍆"),
-        new("Gurken", "🥒"),
-        new("Tomaten", "🍅"),
-        new("Kürbisse", "🎃"),
-        new("Paprika", "🌶️"),
-        new("Zucchini", "🥒"),
-        new("Kartoffeln", "🥔"),
-        new("Karotten", "🥕"),
-        new("Salate", "🥬"),
-        new("Zwiebeln", "🧅"),
-        new ("Bohnen", "🌿"),
-        new ("Spinat", "🍃"),
-        new ("Radieschen", "🌱"),
-        new ("Brokkoli", "🥦"),
-        new ("Mais", "🌽"),
+        new(1, "Auberginen", "🍆"),
+        new(2, "Gurken", "🥒"),
+        new(3, "Tomaten", "🍅"),
+        new(4, "Kürbisse", "🎃"),
+        new(5, "Paprika", "🌶️"),
+        new(6, "Zucchini", "🥒"),
+        new(7, "Kartoffeln", "🥔"),
+        new(8, "Karotten", "🥕"),
+        new(9, "Salate", "🥬"),
+        new(10, "Zwiebeln", "🧅"),
+        new(18, "Bohnen", "🌿"),
+        new(19, "Spinat", "🍃"),
+        new(20, "Radieschen", "🌱"),
+        new(21, "Brokkoli", "🥦"),
+        new(22, "Mais", "🌽"),
     };
 
     List<TagItem> _obstTags = new()
     {
-        new("Melonen", "🍉"),
-        new("Äpfel", "🍎"),
-        new("Birnen", "🍐"),
-        new("Pfirsiche", "🍑"),
-        new("Kirschen", "🍒"),
-        new("Erdbeeren", "🍓"),
-        new("Trauben", "🍇")
+        new(11, "Melonen", "🍉"),
+        new(12, "Äpfel", "🍎"),
+        new(13, "Birnen", "🍐"),
+        new(14, "Pfirsiche", "🍑"),
+        new(15, "Kirschen", "🍒"),
+        new(16, "Erdbeeren", "🍓"),
+        new(17, "Trauben", "🍇")
     };
-
+    
     void ToggleTag(string tag)
     {
-        if (!RegistrationState.SelectedTags.Add(tag))
+        if (RegistrationState.SelectedTags.Contains(tag))
+        {
             RegistrationState.SelectedTags.Remove(tag);
+        }
+        else
+        {RegistrationState.SelectedTags.Add(tag);}
+        StateHasChanged();
     }
 
     void Speichern()
     {
-        Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", RegistrationState.SelectedTags));
-        Nav.NavigateTo("/registrierung/profilerstellung", forceLoad: true);
+        if (RegistrationState.ProfileId == 0) //Überprüfung: Ist neues Profil angelegt? 
+        {
+            Nav.NavigateTo("/registrierung");
+            return;
+        }
+        
+        var allTags = _gemueseTags.Concat(_obstTags).ToList();
+
+        var preferences = RegistrationState.SelectedTags
+            .Select(tagName => allTags.First(t => t.Name == tagName))
+            .Select(tag => new PreferenceDto 
+            { 
+                TagId = tag.TagId, 
+                Profileid = RegistrationState.ProfileId,
+                DateUpdated = DateTime.UtcNow 
+            }).ToList();
+
+        bool success = ProfileMgm.SetPreference(preferences);
+    
+        if (success)
+        {
+            Console.WriteLine($"Tags für ProfileId {RegistrationState.ProfileId} gespeichert");
+            Nav.NavigateTo("/registrierung/profilerstellung", forceLoad: true);
+        }
+        else
+        {
+            Console.WriteLine("Fehler beim Speichern der Tags.");
+        }
     }
 }

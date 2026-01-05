@@ -1,6 +1,11 @@
 @page "/registrierung/profilerstellung"
 @inject NavigationManager NavigationManager
+@using AppLogic.Interfaces
+@inject IProfileMgm ProfileMgm
+@using PresentationLayer.State
+@inject UserRegistrationState RegistrationState
 @rendermode InteractiveServer
+@inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -128,6 +133,29 @@
     
     private void Weiter()
     {
-        NavigationManager.NavigateTo("/ernte-hochladen", forceLoad: true);
+        if (RegistrationState.ProfileId == 0) //Überprüfung: Ist neues Profil angelegt? 
+        {
+            Nav.NavigateTo("/registrierung");
+            return;
+        }
+        
+        var profile = ProfileMgm.VisitPrivateProfile(RegistrationState.ProfileId);
+        var updatedProfile = profile with 
+        { 
+            ProfilepictureUrl = SelectedProfile,
+            Profiletext = Bio 
+        };
+
+        if (ProfileMgm.UpdateProfile(profile))
+        {
+            Console.WriteLine($"Profilbild und Bio für ProfileId {RegistrationState.ProfileId} gespeichert");
+            Nav.NavigateTo("/ernte-hochladen", forceLoad: true);
+        }
+        else
+        {
+            Console.WriteLine("Fehler beim Speichern von Bio.");
+        }
+        
+        
     }
 }

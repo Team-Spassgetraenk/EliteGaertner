@@ -5,6 +5,9 @@
 @using System.Text.RegularExpressions
 @using Microsoft.AspNetCore.Components
 @using PresentationLayer.State
+@using Contracts.Data_Transfer_Objects
+@using AppLogic.Interfaces
+@inject IProfileMgm ProfileMgm
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -156,6 +159,11 @@
                     disabled="@(!RegisterEnabled)">
                 Registrieren
             </button>
+            
+            @if (!string.IsNullOrEmpty(RegistrationError))
+            {
+                <div class="alert alert-danger">@RegistrationError</div>
+            }
 
             @if (!RegisterEnabled)
             {
@@ -316,14 +324,56 @@ RequiredFieldsFilled && !PasswordMismatch && ContactShareSelected && EmailValid 
 
 // Methode: Registrierung und Weiterleitung
 void Registrieren()
-{
-if (RegisterEnabled)
-{
-Console.WriteLine($"Registrierung erfolgreich für: {_email}");
-Console.WriteLine($"Volle Telefonnummer zur Speicherung: {FullTelephoneNumber}");
-Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
+{ 
+    if (RegisterEnabled && !ProfileMgm.CheckUsernameExists(_username.Trim().ToLowerInvariant()))
+    {
+        try
+        {
+            var profileDto = new PrivateProfileDto
+            {
+                // ID kommt aus db
+                UserName = _username,
+                FirstName = _prename,
+                LastName = _sirname,
+                EMail = _email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(_password),
+                Phonenumber = FullTelephoneNumber,
+                Profiletext = "",
+                ProfilepictureUrl = "/pictures/Profilbilder/Profilbild_01.png",
+                ShareMail = _shareEmail,
+                SharePhoneNumber = _shareTelephone,
+                UserCreated = DateTime.UtcNow
+            };
+            
+            var result = ProfileMgm.RegisterProfile(profileDto);
+                
+            if (result != null)
+            {
+                RegistrationState.ProfileId = result.ProfileId;
+                RegistrationError = "";
+                
+                Console.WriteLine($"✅ Registrierung OK: {result.ProfileId}");
+                Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
+            }
+            else 
+            {
+                // Fehler anzeigen
+                RegistrationError = "Registrierung fehlgeschlagen!";
+            }
+        }
+        catch (Exception ex)
+        {
+            RegistrationError = $"Fehler: {ex.Message}";
+        }
+    }
+    else 
+    {
+        // Fehler anzeigen
+        RegistrationError = "Benutzername existiert bereits";
+    }
 }
-}
+
+public string RegistrationError = "";
 
 // Statische Methode: Email-Validierung (Regex)
 public static bool IsValidEmail(string email)
