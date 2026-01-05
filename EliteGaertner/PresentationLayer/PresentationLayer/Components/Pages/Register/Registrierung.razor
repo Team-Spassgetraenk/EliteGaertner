@@ -1,5 +1,5 @@
 @page "/registrierung"
-
+@layout Layout.MainLayout
 @inject NavigationManager Nav
 @inject UserRegistrationState RegistrationState
 @using System.Text.RegularExpressions
@@ -8,6 +8,7 @@
 @using Contracts.Data_Transfer_Objects
 @using AppLogic.Interfaces
 @inject IProfileMgm ProfileMgm
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -327,6 +328,7 @@ void Registrieren()
 { 
     if (RegisterEnabled && !ProfileMgm.CheckUsernameExists(_username.Trim().ToLowerInvariant()))
     {
+        
         try
         {
             var profileDto = new PrivateProfileDto
@@ -336,7 +338,6 @@ void Registrieren()
                 FirstName = _prename,
                 LastName = _sirname,
                 EMail = _email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(_password),
                 Phonenumber = FullTelephoneNumber,
                 Profiletext = "",
                 ProfilepictureUrl = "/pictures/Profilbilder/Profilbild_01.png",
@@ -344,8 +345,14 @@ void Registrieren()
                 SharePhoneNumber = _shareTelephone,
                 UserCreated = DateTime.UtcNow
             };
+
+            var credentialDto = new CredentialProfileDto()
+            {
+                EMail = _email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(_password)
+            };
             
-            var result = ProfileMgm.RegisterProfile(profileDto);
+            var result = ProfileMgm.RegisterProfile(profileDto, credentialDto);
                 
             if (result != null)
             {
@@ -353,7 +360,7 @@ void Registrieren()
                 RegistrationError = "";
                 
                 Console.WriteLine($"✅ Registrierung OK: {result.ProfileId}");
-                Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
+                Nav.NavigateTo("/registrierung/interessen");
             }
             else 
             {

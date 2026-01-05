@@ -1,11 +1,14 @@
 @page "/registrierung/profilerstellung"
-@inject NavigationManager NavigationManager
+
+@layout Layout.MainLayout
+
 @using AppLogic.Interfaces
-@inject IProfileMgm ProfileMgm
 @using PresentationLayer.State
+
 @inject UserRegistrationState RegistrationState
-@rendermode InteractiveServer
 @inject NavigationManager Nav
+@inject NavigationManager NavigationManager
+@inject IProfileMgm ProfileMgm
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -143,13 +146,13 @@
         var updatedProfile = profile with 
         { 
             ProfilepictureUrl = SelectedProfile,
-            Profiletext = Bio 
-        };
+            Profiletext = Bio
+    };
 
-        if (ProfileMgm.UpdateProfile(profile))
+        if (ProfileMgm.UpdateProfile(updatedProfile))
         {
             Console.WriteLine($"Profilbild und Bio für ProfileId {RegistrationState.ProfileId} gespeichert");
-            Nav.NavigateTo("/ernte-hochladen", forceLoad: true);
+            Nav.NavigateTo("/ernte-hochladen");
         }
         else
         {

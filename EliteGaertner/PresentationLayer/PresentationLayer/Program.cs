@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 //ConnectionString für EliteGaertnerDbContext
 var connectionString = builder.Configuration.GetConnectionString("Default")
-                       ?? "Host=localhost;Port=5432;Database=elitegaertner;Username=postgres;Password=postgres";
+                       ?? "Host=localhost;Port=5432;Database=elitegaertner;Username=postgres;Password=postgres,Ssl Mode=Disable";
 //EliteGaertnerDbContext wird mit den Optionen + ConnectionString aufgerufen
 builder.Services.AddDbContext<EliteGaertnerDbContext>(options =>
     options.UseNpgsql(connectionString));

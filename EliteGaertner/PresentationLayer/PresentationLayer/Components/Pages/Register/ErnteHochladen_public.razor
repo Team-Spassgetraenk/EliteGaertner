@@ -1,11 +1,15 @@
 @page "/ernte-hochladen"
 
+@layout Layout.MainLayout
+
 @inject NavigationManager Nav
 @using AppLogic.Interfaces
 @using Contracts.Data_Transfer_Objects
 @inject IUploadService UploadService
 @inject IWebHostEnvironment Env
 @using Microsoft.AspNetCore.Components.Forms
+@using PresentationLayer.State
+@inject UserRegistrationState RegistrationState
 
 
 
@@ -210,7 +214,7 @@ _selectedTag = (_selectedTag == tag) ? null : tag;
         if (string  .IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild)) return;
 
         // TODO: echten profileId z.B. aus Auth/Context holen
-        int profileId = 1;
+        int profileId = RegistrationState.ProfileId;
 
         float weightGram = (Gewicht ?? 0);
         float lengthCm = Laenge ?? 0;

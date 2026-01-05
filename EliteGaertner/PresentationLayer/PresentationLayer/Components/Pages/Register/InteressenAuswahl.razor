@@ -1,6 +1,12 @@
 @page "/registrierung/interessen"
+
+@layout Layout.MainLayout
+
 @using PresentationLayer.State
 @using PresentationLayer.Shared
+@using AppLogic.Interfaces
+
+@inject IProfileMgm ProfileMgm
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
 
@@ -81,11 +87,9 @@
             Nav.NavigateTo("/registrierung");
             return;
         }
-        
-        var allTags = _gemueseTags.Concat(_obstTags).ToList();
 
         var preferences = RegistrationState.SelectedTags
-            .Select(tagName => allTags.First(t => t.Name == tagName))
+            .Select(tagName => TagCatalog.FindByName(tagName))
             .Select(tag => new PreferenceDto 
             { 
                 TagId = tag.TagId, 
@@ -98,7 +102,7 @@
         if (success)
         {
             Console.WriteLine($"Tags für ProfileId {RegistrationState.ProfileId} gespeichert");
-            Nav.NavigateTo("/registrierung/profilerstellung", forceLoad: true);
+            Nav.NavigateTo("/registrierung/profilerstellung");
         }
         else
         {
