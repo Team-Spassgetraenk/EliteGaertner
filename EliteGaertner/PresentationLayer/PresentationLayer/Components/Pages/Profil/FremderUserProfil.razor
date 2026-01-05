@@ -1,6 +1,6 @@
 @page "/profil/{Username}"
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -140,11 +140,11 @@
     public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
     
     private void ToggleLogoutMenu() => _showLogout = !_showLogout;
-    private void NavigateToLogout() => Nav.NavigateTo("/", forceLoad: true);
-    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest", forceLoad: true);
-    private void GoToMatches() => Nav.NavigateTo("/MatchesTest", forceLoad: true);
-    private void GoToMainpage() => Nav.NavigateTo("/startseite", forceLoad: true);
-    private void GoToProfile() => Nav.NavigateTo("/ProfilTest", forceLoad: true);
+    private void NavigateToLogout() => Nav.NavigateTo("/");
+    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
+    private void GoToMatches() => Nav.NavigateTo("/MatchesTest");
+    private void GoToMainpage() => Nav.NavigateTo("/startseite");
+    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
 
     private class HarvestDetail {
         public string ImageUrl { get; set; } = "";

@@ -1,3 +1,5 @@
+namespace PresentationLayer.State;
+
 public class UserRegistrationState
 {
     // Kontaktdaten
@@ -8,4 +10,5 @@ public class UserRegistrationState
 
     // Ausgewählte Tags
     public HashSet<string> SelectedTags { get; set; } = new();
+    
 }

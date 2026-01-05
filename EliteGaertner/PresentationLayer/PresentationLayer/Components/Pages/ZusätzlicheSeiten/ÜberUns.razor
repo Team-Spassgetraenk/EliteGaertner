@@ -1,6 +1,6 @@
 @page "/ueber-uns"
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -8,7 +8,7 @@
 <div class="about-page-container">
     @* --- TOP BAR --- *@
     <header class="comic-top-bar">
-        <div class="back-button" @onclick='() => Nav.NavigateTo("/startseite", forceLoad: true)'>
+        <div class="back-button" @onclick='() => Nav.NavigateTo("/startseite")'>
             <i class="bi bi-chevron-left"></i>
             <span>Zurück</span>
         </div>

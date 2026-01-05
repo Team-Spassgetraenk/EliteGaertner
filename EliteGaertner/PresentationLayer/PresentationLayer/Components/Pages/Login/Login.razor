@@ -1,6 +1,13 @@
 ﻿@page "/"
+@layout Layout.MainLayout
+@using AppLogic.Interfaces
+@using PresentationLayer.State
+@inject IProfileMgm ProfileMgm
+@inject CurrentProfileState CurrentProfile
 @inject NavigationManager Nav
-@rendermode InteractiveServer
+
+
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -36,6 +43,12 @@
                 <p class="disabled-hint">Bitte zuerst E-Mail und Passwort eingeben.</p>
             }
 
+            @* Falls Exception (Login falsch) geworfen wird *@
+            @if (!string.IsNullOrWhiteSpace(_errorMessage))
+            {
+                <p class="error-message">@_errorMessage</p> @* TODO JONAS BITTE PRÜFEN *@
+            }
+            
             <div class="register-text">
                 <p>Ich habe noch keinen Account?</p>
                 <a href="/registrierung" class="register-link">Jetzt registrieren</a>
@@ -49,17 +62,63 @@
 @code {
     string _email = "";
     string _password = "";
+    string _errorMessage = "";
 
-    // Berechnete Eigenschaft, die überprüft, ob beide Felder gefüllt sind
-    private bool LoginEnabled => !string.IsNullOrWhiteSpace(_email) && !string.IsNullOrWhiteSpace(_password);
-
-    void Einloggen()
+    //Sind beide Felder gefüllt?
+    private bool LoginEnabled =>
+        !string.IsNullOrWhiteSpace(_email) &&
+        !string.IsNullOrWhiteSpace(_password);
+    
+    private void Einloggen()
     {
-        // Diese Prüfung stellt sicher, dass LoginEnabled true ist, bevor navigiert wird
-        if (LoginEnabled)
+        if (!LoginEnabled)
+            return;
+
+        _errorMessage = ""; // Reset
+
+        try
         {
-            Nav.NavigateTo("/startseite", forceLoad: true);
-            Console.WriteLine($"Eingegeben: {_email} / {_password}");
+            var loginDto = new CredentialProfileDto
+            {
+                EMail = _email,
+                PasswordHash = _password
+            };
+
+            var loggedInProfile = ProfileMgm.LoginProfile(loginDto);
+
+            // WICHTIG: wenn LoginProfile "leeres DTO" zurückgibt (ProfileId = 0),
+            // dann behandeln wir das wie "Login fehlgeschlagen".
+            if (loggedInProfile is null || loggedInProfile.ProfileId <= 0)
+            {
+                _errorMessage = "Login fehlgeschlagen (kein gültiges Profil zurückgegeben).";
+                return;
+            }
+            
+            CurrentProfile.Login(loggedInProfile);
+            
+            
+            //TODO TEST KOMMT WEG!
+            Console.WriteLine($"STATE(Login): {CurrentProfile.InstanceId}");
+            
+            //TODO TEST KOMMT WEG!
+            Console.WriteLine("LOGIN RESULT:");
+            Console.WriteLine($"ProfileId: {loggedInProfile?.ProfileId}");
+            Console.WriteLine($"UserName: {loggedInProfile?.UserName}");
+            
+            
+            Nav.NavigateTo("/startseite");
+            
+            //TODO KOMMT WEG!
+            Console.WriteLine("NavigateTo(/startseite) wurde aufgerufen");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Technischer Fehler beim Login: {ex.GetType().Name}";
+            Console.WriteLine(ex);
         }
     }
 }

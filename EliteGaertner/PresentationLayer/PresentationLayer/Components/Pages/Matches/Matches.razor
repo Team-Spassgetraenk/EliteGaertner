@@ -1,5 +1,5 @@
 @page "/MatchesTest"
-@rendermode InteractiveServer
+
 @inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -96,26 +96,26 @@ _showLogout = !_showLogout;
 
 private void NavigateToLogout()
 {
-Nav.NavigateTo("/", forceLoad: true);
+Nav.NavigateTo("/");
 }
 
 private void GoToRanks()
 {
-Nav.NavigateTo("/RanglisteTest", forceLoad: true);
+Nav.NavigateTo("/RanglisteTest");
 }
 
 private void GoToMatches()
 {
-Nav.NavigateTo("/MatchesTest", forceLoad: true);
+Nav.NavigateTo("/MatchesTest");
 }
 
 private void GoToMainpage()
 {
-Nav.NavigateTo("/startseite", forceLoad: true);
+Nav.NavigateTo("/startseite");
 }
 
 private void GoToProfile()
 {
-Nav.NavigateTo("/ProfilTest", forceLoad: true);
+Nav.NavigateTo("/ProfilTest");
 }
 }

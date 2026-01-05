@@ -26,8 +26,11 @@ public interface IMatchManager
     //Falls nicht, werden wieder neue Vorschläge generiert.
     public void RateUser(PublicProfileDto targetProfile, bool value);
     
-    //TODO KOMMENTAR FEHLT
-    public PublicProfileDto CreateMatch(PublicProfileDto targetProfile);
+    //TODO Kommentar fehlt
+    public event Action<PublicProfileDto>? CreateMatch;
+
+    //TODO Kommentar fehlt
+    public (PublicProfileDto creator, HarvestUploadDto harvest)? GetNextSuggestion();
     
     //TODO Kommentar fehlt
     public List<PublicProfileDto> UpdateActiveMatches();
@@ -37,8 +40,4 @@ public interface IMatchManager
     
     //TODO KOMMENTAR FEHLT
     public void ReportHarvestUpload(int uploadId, ReportReasons reason);
-    
-    //TODO METHODE FEHLT!!
-    public MatchManagerDto GetMatchManager();
-
 }

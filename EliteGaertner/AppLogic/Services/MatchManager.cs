@@ -12,13 +12,13 @@ public class MatchManager : IMatchManager
     private readonly IHarvestDbs _harvestDbs;
     private readonly int _profileId;
     private readonly List<int> _tagIds;
-    private readonly int _preloadCount;
     private readonly Dictionary<PublicProfileDto, HarvestUploadDto> _profileSuggestionList;
     private List<PublicProfileDto> _activeMatchesList;
     private const int ReportThreshold = 5;
+    private const int PreloadCount = 10;
     
     public MatchManager(IMatchesDbs matchesDbs, IProfileDbs profileDbs, IHarvestDbs harvestDbs, 
-        PrivateProfileDto contentReceiver, int preloadCount)
+        PrivateProfileDto contentReceiver)
     {
         _matchesDbs = matchesDbs;
         _profileDbs = profileDbs;
@@ -30,8 +30,7 @@ public class MatchManager : IMatchManager
             .Select(p => p.TagId)
             .Distinct()
             .ToList();
-        _preloadCount = preloadCount;
-        _profileSuggestionList = CreateProfileSuggestionList(_profileId, _tagIds, _preloadCount);
+        _profileSuggestionList = CreateProfileSuggestionList(_profileId, _tagIds, PreloadCount);
         
         //Hier müssen wir die _activeMatchesList erstmal initialisieren bevor wir
         //die Ergebnisse aus der UpdateActiveMatches übergeben können, da er in der Methode überprüft,
@@ -51,7 +50,7 @@ public class MatchManager : IMatchManager
     public void AddSuggestions()
     {
         //Gib eine neue Liste an Suggestions zurück.
-        var newSuggestions = CreateProfileSuggestionList(_profileId, _tagIds, _preloadCount);
+        var newSuggestions = CreateProfileSuggestionList(_profileId, _tagIds, PreloadCount);
         //Prüfe, ob die neu generierten Profile bereits in der "alten" Liste vorhanden sind.
         //Falls nicht, füge sie zur "alten" Liste hinzu.
         foreach (var sug in newSuggestions)
@@ -91,8 +90,7 @@ public class MatchManager : IMatchManager
             AddSuggestions();
     }
 
-    public PublicProfileDto CreateMatch(PublicProfileDto creatorProfile)
-        => creatorProfile;
+    public event Action<PublicProfileDto>? CreateMatch;
     
     public List<PublicProfileDto> UpdateActiveMatches()
     {
@@ -118,7 +116,9 @@ public class MatchManager : IMatchManager
         //Für jedes neue Match wird die CreateMatch Methode aufgerufen
         foreach (var newMatch in newlyAddedMatches)
         {
-            CreateMatch(newMatch);
+            //Solange keiner den CreateMatch subscribed (passiert im Presentation Layer) 
+            //bleibt CreateMatch Null. Deswegen wird CreateMatch nur ausgeführt, wenn er nicht null ist 
+            CreateMatch?.Invoke(newMatch);
         }
         
         _activeMatchesList = newActiveMatchesList;
@@ -128,22 +128,31 @@ public class MatchManager : IMatchManager
     public List<PublicProfileDto> GetActiveMatches()
         => _activeMatchesList;
 
+    public (PublicProfileDto creator, HarvestUploadDto harvest)? GetNextSuggestion()
+    {
+        //Prüfe, ob ein Vorschlag vorhanden ist
+        if (_profileSuggestionList.Count == 0)
+            return null;
+        
+        //Nimm das erste Paar aus den Vorschlägen
+        var first = _profileSuggestionList.First();
+        //Gib Key und Value aus dem einzelnen Vorschlag zurück 
+        return (first.Key, first.Value);
+    }
     
     public void ReportHarvestUpload(int uploadId, ReportReasons reason)
     {
-        _harvestDbs.SetReportHarvestUpload(uploadId,reason);
-        //Sobald ein Bild 5 Mal reported worden ist, wird es gelöscht
-        if (_harvestDbs.GetReportCount(uploadId) >= ReportThreshold) 
-            _harvestDbs.DeleteHarvestUpload(uploadId);
-    }
-    
-    public MatchManagerDto GetMatchManager()
-        => new MatchManagerDto
+        try
         {
-            ProfileId = _profileId,
-            TagIds = _tagIds,
-            PreloadCount = _preloadCount,
-            ProfileSuggestionList = _profileSuggestionList,
-            ActiveMatchesList = _activeMatchesList
-        };
+            _harvestDbs.SetReportHarvestUpload(uploadId,reason);
+            //Sobald ein Bild 5 Mal reported worden ist, wird es gelöscht
+            if (_harvestDbs.GetReportCount(uploadId) >= ReportThreshold) 
+                _harvestDbs.DeleteHarvestUpload(uploadId);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"Fehler beim Melden von UploadId={uploadId} (Reason={reason}).", ex);
+        }
+    }
 }

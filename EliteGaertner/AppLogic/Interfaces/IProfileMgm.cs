@@ -2,6 +2,7 @@
 
 namespace AppLogic.Interfaces;
 
+//TODO Kommentare fehlen
 public interface IProfileMgm
 {
     public bool CheckUsernameExists (string username);
@@ -12,11 +13,13 @@ public interface IProfileMgm
 
     public bool UpdateProfile(PrivateProfileDto profile);
 
+    public void UpdateCredentials(CredentialProfileDto credentials);
+
     public bool UpdateContactVisibility(ContactVisibilityDto dto);
     
-    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile);
+    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials);
 
-    public PrivateProfileDto LoginProfile(PrivateProfileDto receiverProfile);
+    public PrivateProfileDto LoginProfile(CredentialProfileDto credentials);
 
     public List<PreferenceDto> GetPreference(int profileId);
     

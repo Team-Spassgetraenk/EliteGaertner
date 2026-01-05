@@ -5,6 +5,7 @@ using AppLogic.Interfaces;
 using AppLogic.Services;
 using DataManagement.Interfaces;
 using PresentationLayer.Components.Pages.Register;
+using PresentationLayer.State;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,25 +15,24 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
 //EliteGaertnerDbContext wird mit den Optionen + ConnectionString aufgerufen
 builder.Services.AddDbContext<EliteGaertnerDbContext>(options =>
     options.UseNpgsql(connectionString));
-//Hier wird definiert welche Interfaces ManagementDbs implementieren
+
+//DI der DataManagement-Schicht
 builder.Services.AddScoped<IHarvestDbs, HarvestDbs>();
 builder.Services.AddScoped<IMatchesDbs, MatchesDbs>();
 builder.Services.AddScoped<ILeaderBoardDbs, LeaderboardDbs>();
 builder.Services.AddScoped<IProfileDbs, ProfileDbs>();
 
+//DI der AppLogic Schicht
+builder.Services.AddScoped<IUploadService, UploadServiceImpl>();
+builder.Services.AddScoped<IProfileMgm, ProfileMgm>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(); // Blazor Server interaktiv
 
-// Registrierungsstatus **vor Build registrieren**
-builder.Services.AddSingleton<UserRegistrationState>();
-
-// UploadService registrieren
-builder.Services.AddScoped<IUploadService, UploadServiceImpl>();
-
-// ProfileMgm registrieren
-builder.Services.AddScoped<IProfileMgm, ProfileMgm>();
+//Registrierung der State-Klassen
+builder.Services.AddScoped<UserRegistrationState>();
+builder.Services.AddScoped<CurrentProfileState>();
 
 var app = builder.Build();
 
@@ -43,7 +43,6 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<EliteGaertnerDbContext>();
     db.Database.Migrate();
 }
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

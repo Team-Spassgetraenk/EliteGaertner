@@ -1,5 +1,5 @@
 @page "/ernte-hochladen"
-@rendermode InteractiveServer
+
 @inject NavigationManager Nav
 @using AppLogic.Interfaces
 @using Contracts.Data_Transfer_Objects
@@ -228,16 +228,17 @@ _selectedTag = (_selectedTag == tag) ? null : tag;
             ProfileId = profileId
         };
 
-        bool success = UploadService.CreateHarvestUpload(dto);
-
-        if (success)
+        try
         {
-            Console.WriteLine($"Veröffentlicht: {_selectedTag}, Bildgröße: {_hochgeladenesBild.Length}");
-            Nav.NavigateTo("/ProfilTest", forceLoad: true);
+            UploadService.CreateHarvestUpload(dto);
         }
-        else
+        catch (Exception ex)
         {
-            Console.WriteLine("Upload fehlgeschlagen.");
+            Console.WriteLine(ex + "Upload fehlgeschlagen");
         }
+        
+        Console.WriteLine($"Veröffentlicht: {_selectedTag}, Bildgröße: {_hochgeladenesBild.Length}");
+        Nav.NavigateTo("/ProfilTest");
+        
     }
 }

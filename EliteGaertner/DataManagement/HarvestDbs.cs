@@ -39,24 +39,43 @@ public class HarvestDbs : IHarvestDbs
         return result;
     }
         
-    public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+    public void CreateUploadDbs(HarvestUploadDto uploadDto)
     {
+        //Prüfungen
+        if (uploadDto.ProfileId <= 0)
+            throw new ArgumentException("Ungültige ProfileId");
+
+        if (uploadDto.TagIds == null || uploadDto.TagIds.Count == 0)
+            throw new ArgumentException("Mindestens ein Tag muss angegeben werden.");
+        
+        //Da TagIds doppelt in der HarvestUploadDto vorkommen könnten -> Duplikate entfernen
+        var tagIds = uploadDto.TagIds
+            .Where(id => id > 0)
+            .Distinct()
+            .ToList();
+        
+        //Tags aus der Datenbank holen
+        var tags = _dbContext.Tags
+            .Where(t => tagIds.Contains(t.Tagid))
+            .ToList();
+        //Überprüfe, ob mitgegebene Tags auch in der Datenbank vorhanden sind
+        if (tags.Count != tagIds.Count)
+            throw new InvalidOperationException("Mindestens ein Tag existiert nicht in der Datenbank.");
+        
         var entity = new Harvestupload
         {
-
             Imageurl = uploadDto.ImageUrl,
             Description = uploadDto.Description,
             Weightgramm = uploadDto.WeightGram,
             Widthcm = uploadDto.WidthCm,
             Lengthcm = uploadDto.LengthCm,
             Uploaddate = uploadDto.UploadDate,
+            Tags = tags, 
             Profileid = uploadDto.ProfileId
         };
 
         _dbContext.Harvestuploads.Add(entity);
-        var rows = _dbContext.SaveChanges(); //checkt ob db überhaupt schreibt
-        return rows > 0;
-        
+        _dbContext.SaveChanges();
     }
 
     public HarvestUploadDto GetUploadDb(int uploadId)
@@ -82,29 +101,25 @@ public class HarvestDbs : IHarvestDbs
 
         return dto ?? new HarvestUploadDto();
     }
-
-    //TODO LÖSCHUNG funktioniert noch nicht, da ich noch nicht die Abhängigkeiten mitlösche
-    public bool DeleteHarvestUpload(int uploadId)
+    
+    public void DeleteHarvestUpload(int uploadId)
     {
+        //Prüfungen
         if (uploadId <= 0)
             throw new ArgumentOutOfRangeException(nameof (uploadId), "UploadId muss größer als 0 sein.");
         
-        //Existiert überhaupt Upload?
-        var uploadIdExists = _dbContext.Harvestuploads
-            .AsNoTracking()
-            .Any(h => h.Uploadid == uploadId);
-
-        if (!uploadIdExists)
-            throw new ArgumentException("Kein HarvestUpload mit dieser UploadId auffindbar!", nameof(uploadId));
-
-        //Finde das gesuchte Bild
         var deleteUpload = _dbContext.Harvestuploads
-            .Single(h => h.Uploadid == uploadId);
+            .SingleOrDefault(h => h.Uploadid == uploadId);
+        
+        //Falls kein Upload gefunden wird
+        if (deleteUpload is null)
+            throw new ArgumentException(
+                "Kein HarvestUpload mit dieser UploadId auffindbar!",
+                nameof(uploadId));
 
         //Lösche es
         _dbContext.Remove(deleteUpload);
         _dbContext.SaveChanges();
-        return true;
     }
     
     public void SetReportHarvestUpload(int uploadId, ReportReasons reason)

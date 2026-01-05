@@ -1,9 +1,10 @@
 @page "/registrierung"
-@rendermode InteractiveServer
+
 @inject NavigationManager Nav
 @inject UserRegistrationState RegistrationState
 @using System.Text.RegularExpressions
 @using Microsoft.AspNetCore.Components
+@using PresentationLayer.State
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -320,7 +321,7 @@ if (RegisterEnabled)
 {
 Console.WriteLine($"Registrierung erfolgreich für: {_email}");
 Console.WriteLine($"Volle Telefonnummer zur Speicherung: {FullTelephoneNumber}");
-Nav.NavigateTo("/registrierung/interessen", forceLoad: true);
+Nav.NavigateTo("/registrierung/interessen");
 }
 }
 
