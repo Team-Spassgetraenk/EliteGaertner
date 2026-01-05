@@ -257,6 +257,11 @@ public class MatchManagerTests
         public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
             => throw new NotImplementedException();
 
+        public void EditPassword(CredentialProfileDto credentials)
+        {
+            throw new NotImplementedException();
+        }
+
         public DataManagement.Entities.Profile? GetProfile(int profileId)
             => null;
 
@@ -301,10 +306,10 @@ public class MatchManagerTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => Enumerable.Empty<HarvestUploadDto>();
 
-        public bool DeleteHarvestUpload(int uploadId)
+        public void DeleteHarvestUpload(int uploadId)
         {
             DeleteCalls.Add(uploadId);
-            return true;
+            return;
         }
 
         public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
@@ -312,7 +317,7 @@ public class MatchManagerTests
 
         public int GetReportCount(int uploadId) => ReportCountToReturn;
 
-        public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+        public void CreateUploadDbs(HarvestUploadDto uploadDto)
             => throw new NotImplementedException();
 
         public HarvestUploadDto GetUploadDb(int uploadId)

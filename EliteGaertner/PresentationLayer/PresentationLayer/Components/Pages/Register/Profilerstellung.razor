@@ -152,7 +152,7 @@
         if (ProfileMgm.UpdateProfile(updatedProfile))
         {
             Console.WriteLine($"Profilbild und Bio für ProfileId {RegistrationState.ProfileId} gespeichert");
-            Nav.NavigateTo("/ernte-hochladen");
+            Nav.NavigateTo("/registrierung/ernte-hochladen");
         }
         else
         {
