@@ -14,19 +14,24 @@ public class ProfileDbs : IProfileDbs
         _dbContext = dbContext;
     }   
     
-    public int? CheckPassword(string eMail, string passwordHash)
+    public int? CheckPassword(string eMail, string klartextPassword)
     {
-        if (string.IsNullOrWhiteSpace(eMail) || string.IsNullOrWhiteSpace(passwordHash))
+        if (string.IsNullOrWhiteSpace(eMail) || string.IsNullOrWhiteSpace(klartextPassword))
             return null;
         
         var normalizedEmail = eMail.Trim().ToLowerInvariant();
         var profile = _dbContext.Profiles
             .AsNoTracking()
             .SingleOrDefault(p => 
-                p.Email == normalizedEmail && 
-                p.Passwordhash == passwordHash);
+                p.Email == normalizedEmail);
         
-        return profile?.Profileid;
+        
+        if (profile == null)
+            return null;
+
+        bool isValid = BCrypt.Net.BCrypt.Verify(klartextPassword, profile.Passwordhash);
+    
+        return isValid ? profile.Profileid : null;
     }
     
 

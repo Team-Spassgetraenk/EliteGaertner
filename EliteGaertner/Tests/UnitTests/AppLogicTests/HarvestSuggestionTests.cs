@@ -37,13 +37,13 @@ public class HarvestSuggestionTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => throw new NotImplementedException();
 
-        public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+        public void CreateUploadDbs(HarvestUploadDto uploadDto)
             => throw new NotImplementedException();
 
         public HarvestUploadDto GetUploadDb(int uploadId)
             => throw new NotImplementedException();
 
-        public bool DeleteHarvestUpload(int uploadId)
+        public void DeleteHarvestUpload(int uploadId)
             => throw new NotImplementedException();
 
         public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
