@@ -706,62 +706,145 @@ FROM TAGS t
          JOIN HARVESTUPLOADS h ON h.Description ILIKE '%Mais%'
 WHERE t.Label = 'Mais';
 
--- =============================
--- RATINGS (inkl. „Matches“)
--- =============================
+-- ==================================================
+-- Zusätzliche Ratings für mehr Verteilung / Matches
+-- ==================================================
 
--- Match 1
+-- TomatenTiger bekommt mehrere Likes, liked aber NICHT zurück (kein Match)
 INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
-SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '2 days' + interval '11 hours'
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '4 days' + interval '13 hours'
 FROM PROFILE p1, PROFILE p2
 WHERE p1.UserName = 'tomatentiger'
-  AND p2.UserName = 'beerenboss';
+  AND p2.UserName = 'zucchinizauberer';
 
 INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
-SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '2 days' + interval '11 hours' + interval '35 minutes'
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '3 days' + interval '09 hours'
 FROM PROFILE p1, PROFILE p2
 WHERE p1.UserName = 'tomatentiger'
-  AND p2.UserName = 'beerenboss';
+  AND p2.UserName = 'paprikapiratin';
 
--- Match 2
 INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
-SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '3 days' + interval '18 hours'
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '3 days' + interval '12 hours' + interval '18 minutes'
 FROM PROFILE p1, PROFILE p2
-WHERE p1.UserName = 'zucchinizauberer'
-  AND p2.UserName = 'gurkenguru';
+WHERE p1.UserName = 'tomatentiger'
+  AND p2.UserName = 'kartoffelknight';
 
 INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
-SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '3 days' + interval '18 hours' + interval '22 minutes'
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '2 days' + interval '17 hours'
 FROM PROFILE p1, PROFILE p2
-WHERE p1.UserName = 'zucchinizauberer'
-  AND p2.UserName = 'gurkenguru';
+WHERE p1.UserName = 'tomatentiger'
+  AND p2.UserName = 'melonenmaster';
 
--- Match 3
 INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
-SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '1 days' + interval '20 hours'
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '2 days' + interval '10 hours' + interval '07 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'tomatentiger'
+  AND p2.UserName = 'apfelalchemist';
+
+-- Mehr Matches (gegenseitige Likes)
+-- Match 4: PaprikaPiratin <-> MelonenMaster
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '6 days' + interval '18 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'paprikapiratin'
+  AND p2.UserName = 'melonenmaster';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '6 days' + interval '18 hours' + interval '19 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'paprikapiratin'
+  AND p2.UserName = 'melonenmaster';
+
+-- Match 5: KartoffelKnight <-> ZwiebelZauberin
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '7 days' + interval '09 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'kartoffelknight'
+  AND p2.UserName = 'zwiebelzauberin';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '7 days' + interval '09 hours' + interval '41 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'kartoffelknight'
+  AND p2.UserName = 'zwiebelzauberin';
+
+-- Match 6: BohnenBaron <-> SpinatSpion
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '5 days' + interval '20 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'bohnenbaron'
+  AND p2.UserName = 'spinatspion';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '5 days' + interval '20 hours' + interval '12 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'bohnenbaron'
+  AND p2.UserName = 'spinatspion';
+
+-- Match 7: MaisMagier <-> KürbisKönig
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '8 days' + interval '16 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'maismagier'
+  AND p2.UserName = 'kürbiskönig';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '8 days' + interval '16 hours' + interval '33 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'maismagier'
+  AND p2.UserName = 'kürbiskönig';
+
+-- Match 8: TraubenTaktiker <-> ApfelAlchemist
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '9 days' + interval '11 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'traubentaktiker'
+  AND p2.UserName = 'apfelalchemist';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '9 days' + interval '11 hours' + interval '27 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'traubentaktiker'
+  AND p2.UserName = 'apfelalchemist';
+
+-- Match 9: KarottenKönigin <-> SalatSamurai
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '6 days' + interval '07 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'karottenkönigin'
+  AND p2.UserName = 'salatsamurai';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '6 days' + interval '07 hours' + interval '08 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'karottenkönigin'
+  AND p2.UserName = 'salatsamurai';
+
+-- Zusätzliche verteilte Likes ohne Match
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '4 days' + interval '19 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'beerenboss'
+  AND p2.UserName = 'traubentaktiker';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '4 days' + interval '19 hours' + interval '26 minutes'
 FROM PROFILE p1, PROFILE p2
 WHERE p1.UserName = 'melonenmaster'
-  AND p2.UserName = 'beerenboss';
+  AND p2.UserName = 'kartoffelknight';
 
 INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
-SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '1 days' + interval '20 hours' + interval '08 minutes'
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '3 days' + interval '21 hours'
 FROM PROFILE p1, PROFILE p2
-WHERE p1.UserName = 'melonenmaster'
-  AND p2.UserName = 'beerenboss';
+WHERE p1.UserName = 'brokkoliboss'
+  AND p2.UserName = 'bohnenbaron';
 
--- Positives Rating ohne Match
 INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
-SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '4 days' + interval '09 hours'
+SELECT p1.ProfileId, p2.ProfileId, FALSE, (:'seed_now')::timestamptz - interval '3 days' + interval '22 hours'
 FROM PROFILE p1, PROFILE p2
-WHERE p1.UserName = 'apfelalchemist'
-  AND p2.UserName = 'birnenbarde';
+WHERE p1.UserName = 'radieschenrocker'
+  AND p2.UserName = 'salatsamurai';
 
--- Negatives Rating
-INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
-SELECT p1.ProfileId, p2.ProfileId, FALSE, (:'seed_now')::timestamptz - interval '5 days' + interval '14 hours'
-FROM PROFILE p1, PROFILE p2
-WHERE p1.UserName = 'gurkenguru'
-  AND p2.UserName = 'tomatentiger';
 
 -- =============================
 -- REPORTS (10 Meldungen)

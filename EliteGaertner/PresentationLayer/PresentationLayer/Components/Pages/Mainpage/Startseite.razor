@@ -225,10 +225,10 @@
 
     <footer class="bottom-nav">
         <div class="nav-item active matches-nav-container" @onclick="GoToMatches">
-            @if (CurrentMatches() > 0)
+            @if (CurrentMatchesCount() > 0)
             {
                 <div class="matches-badge">
-                    @CurrentMatches()
+                    @CurrentMatchesCount()
                 </div>
             }
             <img src="pictures/MatchesIcon.png" alt="Matches" height="40"/>
@@ -366,16 +366,6 @@
         _adTimer.Enabled = true;
     }
     
-    //Subscription auf MatchManager Methode löst die Methode aus, falls es zu einem neuen Match kommt
-    private async void OnMatchCreated(PublicProfileDto matchProfile)
-    {
-        //TODO AWAIT SYNC Aleks prüfen wie es sich bei mehreren Matches verhält
-        _matchedUser = matchProfile;
-        _showMatchOverlay = true;
-        await PlayMatchSound();
-        await InvokeAsync(StateHasChanged);
-    }
-    
     //Falls Seite verlassen wird
     public void Dispose()
     {
@@ -400,20 +390,33 @@
     // ----------------------------
     // Current Matches Logik
     // ----------------------------
-    private int _matchCount = 1; 
+    private int _matchCount; 
 
-    // Deine Methode, die vom HTML aufgerufen wird
-    private int CurrentMatches()
+    //TODO KOMMENTAR FEHLT
+    private int CurrentMatchesCount()
     {
-        // Hier könnte später die Logik stehen, die in der DB nachzählt
+        if (_matchManager is null)
+            return 0;
+        
+        _matchCount = _matchManager.GetActiveMatches().Count;
         return _matchCount;
     }
-
-    // Beispiel: Methode zum Erhöhen der Matches (z.B. nach einem Like)
-    private void OnNewMatchFound()
+    
+    //Subscription auf MatchManager Methode löst die Methode aus, falls es zu einem neuen Match kommt
+    private async void OnMatchCreated(PublicProfileDto matchProfile)
     {
-        _matchCount++;
-        StateHasChanged(); // UI aktualisieren
+        //TODO AWAIT SYNC Aleks prüfen wie es sich bei mehreren Matches verhält
+        _matchedUser = matchProfile;
+        _showMatchOverlay = true;
+        _matchCount = _matchManager?.GetActiveMatches().Count ?? _matchCount;
+        await PlayMatchSound();
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    private async Task PlayMatchSound()
+    {
+        // Spielt Konfetti-Sound ab bei Match
+        await JS.InvokeVoidAsync("eval", "new Audio('sounds/itsamatch.mp3').play()");
     }
 
     // ----------------------------
@@ -473,12 +476,6 @@
             //Animationen sollen nicht mehr möglich sein
             _isAnimating = false;  
         }
-    }
-
-    private async Task PlayMatchSound()
-    {
-        // Spielt Konfetti-Sound ab bei Match
-        await JS.InvokeVoidAsync("eval", "new Audio('sounds/itsamatch.mp3').play()");
     }
 
     private void CloseMatchOverlay() => _showMatchOverlay = false;
