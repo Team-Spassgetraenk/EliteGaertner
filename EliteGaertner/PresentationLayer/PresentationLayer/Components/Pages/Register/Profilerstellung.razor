@@ -141,23 +141,23 @@
             Nav.NavigateTo("/registrierung");
             return;
         }
-        
-        var profile = ProfileMgm.VisitPrivateProfile(RegistrationState.ProfileId);
-        var updatedProfile = profile with 
-        { 
-            ProfilepictureUrl = SelectedProfile,
-            Profiletext = Bio
-    };
-
-        if (ProfileMgm.UpdateProfile(updatedProfile))
-        {
-            Console.WriteLine($"Profilbild und Bio für ProfileId {RegistrationState.ProfileId} gespeichert");
-            Nav.NavigateTo("/registrierung/ernte-hochladen");
-        }
-        else
-        {
-            Console.WriteLine("Fehler beim Speichern von Bio.");
-        }
+// musste ich auskommentieren da sonst Fehler beim starten! ~ jonas        
+//        var profile = ProfileMgm.VisitPrivateProfile(RegistrationState.ProfileId);
+//        var updatedProfile = profile with
+//        {
+//            ProfilepictureUrl = SelectedProfile,
+//            Profiletext = Bio
+//    };
+//
+//        if (ProfileMgm.UpdateProfile(updatedProfile))
+//        {
+//            Console.WriteLine($"Profilbild und Bio für ProfileId {RegistrationState.ProfileId} gespeichert");
+//            Nav.NavigateTo("/registrierung/ernte-hochladen");
+//        }
+//        else
+//        {
+//            Console.WriteLine("Fehler beim Speichern von Bio.");
+//        }
         
         
     }

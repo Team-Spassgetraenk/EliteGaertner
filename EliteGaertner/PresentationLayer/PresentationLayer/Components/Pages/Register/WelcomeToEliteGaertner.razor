@@ -1,32 +1,43 @@
-@page "/Welcome"
+@page "/welcome"
+
+@layout Layout.MainLayout
 
 @inject NavigationManager Nav
+@using AppLogic.Interfaces
+@using PresentationLayer.State
+@inject UserRegistrationState RegistrationState
 
-<div class="welcome-container">
-    <div class="text-center mb-4">
-        <h2 class="" style="margin-bottom: 15px;">
-            Willkommen bei
-        </h2>
-        <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" style="width:100px;"/>
-        
-        <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem">
-            EliteGärtner.
-        </h2>
-        
-        <h2 class="" style="margin-top: 15px; font-weight: 200; font-size: 2.0rem">
-            Du hast dich erfolgreich registriert
-        </h2>
-        
-        <button type="button" class="weiter-btn" @onclick="GoToStartseite">
-            🔍 Finde deinen Traumgärtner
-        </button>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<div class="page-container background-style">
+    <div class="welcome-centering-container">
+        <div class="welcome-container comic-box">
+            <div class="text-center">
+                <h2 class="comic-text">Willkommen bei</h2>
+                
+                <div class="logo-wrapper">
+                    <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="logo-img-styled"/>
+                </div>
+                
+                <h1 class="elitegaertner-title-welcome">EliteGärtner.</h1>
+                
+                <div class="divider-dashed"></div>
+                
+                <h2 class="sub-message">Du hast dich erfolgreich registriert!</h2>
+                
+                <div class="button-section">
+                    <button type="button" class="save-button garden-btn" @onclick="GoToStartseite">
+                        🔍 Finde deinen Traumgärtner
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 
 @code {
     private void GoToStartseite()
     {
-        Nav.NavigateTo("/MainpageTest");
+        Nav.NavigateTo("/");
     }
 }
