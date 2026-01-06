@@ -1,6 +1,12 @@
 @page "/präferenzeinstellungen"
+@using AppLogic.Services
+@using Contracts.Data_Transfer_Objects
+@using AppLogic.Interfaces
 @using PresentationLayer.State
-@inject UserRegistrationState RegistrationState
+@using PresentationLayer.Shared
+@inject CurrentProfileState CurrentProfile
+@inject PreferenceState Preference
+@inject IProfileMgm ProfileMgm
 @inject NavigationManager Nav
 
 
@@ -22,10 +28,10 @@
             
             <h4 class="tag-headline">Gemüse</h4>
             <div class="tag-grid">
-                @foreach (var tag in _gemueseTags)
+                @foreach (var tag in TagCatalog.Gemuese)
                 {
-                    <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
-                         @onclick="() => ToggleTag(tag.Name)">
+                    <div class="tag app-tag @(Preference.CurrentProfileTagIds.Contains(tag.TagId) ? "selected" : "")"
+                         @onclick="() => Preference.ToggleTag(tag.TagId)">
                         <span>@tag.Icon</span>
                         <span>@tag.Name</span>
                     </div>
@@ -34,10 +40,10 @@
 
             <h4 class="tag-headline">Obst</h4>
             <div class="tag-grid">
-                @foreach (var tag in _obstTags)
+                @foreach (var tag in TagCatalog.Obst)
                 {
-                    <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
-                         @onclick="() => ToggleTag(tag.Name)">
+                    <div class="tag app-tag @(Preference.CurrentProfileTagIds.Contains(tag.TagId) ? "selected" : "")"
+                         @onclick="() => Preference.ToggleTag(tag.TagId)">
                         <span>@tag.Icon</span>
                         <span>@tag.Name</span>
                     </div>
@@ -45,12 +51,12 @@
             </div>
 
             <button class="app-button primary-button weiter-button"
-                    disabled="@( !RegistrationState.SelectedTags.Any() )"
+                    disabled="@( !Preference.CurrentProfileTagIds.Any() )"
                     @onclick="Speichern">
                 Speichern
             </button>
             
-            @if ( !RegistrationState.SelectedTags.Any() )
+            @if ( !Preference.CurrentProfileTagIds.Any() )
             {
                 <p class="disabled-hint">Bitte mindestens ein Tag auswählen.</p>
             }
@@ -62,48 +68,55 @@
 
 @code {
     
-    //TODO Interessen speichern fehlt
-    public record TagItem(string Name, string Icon);
-
-    List<TagItem> _gemueseTags = new()
+    protected override void OnInitialized()
     {
-        new("Auberginen", "🍆"),
-        new("Gurken", "🥒"),
-        new("Tomaten", "🍅"),
-        new("Kürbisse", "🎃"),
-        new("Paprika", "🌶️"),
-        new("Zucchini", "🥒"),
-        new("Kartoffeln", "🥔"),
-        new("Karotten", "🥕"),
-        new("Salate", "🥬"),
-        new("Zwiebeln", "🧅"),
-        new ("Bohnen", "🌿"),
-        new ("Spinat", "🍃"),
-        new ("Radieschen", "🌱"),
-        new ("Brokkoli", "🥦"),
-        new ("Mais", "🌽"),
-    };
+        //Überprüfung
+        //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
+        if (CurrentProfile.LoggedInProfile is null)
+        {
+            //TODO TEST GEHÖRT WEG
+            Console.WriteLine("STARTSEITE GUARD TRIGGERED: LoggedInProfile is null -> redirect to /");
 
-    List<TagItem> _obstTags = new()
-    {
-        new("Melonen", "🍉"),
-        new("Äpfel", "🍎"),
-        new("Birnen", "🍐"),
-        new("Pfirsiche", "🍑"),
-        new("Kirschen", "🍒"),
-        new("Erdbeeren", "🍓"),
-        new("Trauben", "🍇")
-    };
-
-    void ToggleTag(string tag)
-    {
-        if (!RegistrationState.SelectedTags.Add(tag))
-            RegistrationState.SelectedTags.Remove(tag);
+            // optional: noch mehr Kontext
+            Console.WriteLine($"IsLoggedIn: {CurrentProfile.IsLoggedIn}");
+            Console.WriteLine($"UserName: '{CurrentProfile.UserName}'");
+            
+            Nav.NavigateTo("/");
+            return;
+        }
+        
+        CurrentProfile.Onchange += StateHasChanged;
+        
+        //Initialisiert die TagId Liste in PreferenceState
+        //Falls PreferenceDto is null -> Leere Liste übergeben
+        Preference.InitializeCurrentProfileTagIds(CurrentProfile.PreferenceDtos ?? Array.Empty<PreferenceDto>());
     }
-
+    
     void Speichern()
     {
-        Console.WriteLine("Ausgewählte Tags: " + string.Join(", ", RegistrationState.SelectedTags));
+        //Überprüft ob ProfileId null ist
+        if (CurrentProfile.ProfileId is null)
+        {
+            //Falls ja, Zurück zur Login Seite 
+            Nav.NavigateTo("/");
+            return;
+        }
+        
+        //Speichern der neuen Preferences
+        ProfileMgm.SetPreference(
+            //Die Preference HashSet muss erstmal wieder in DTOS gepackt werden
+            Preference.CreatePreferenceDtos(CurrentProfile.ProfileId.Value)
+            );
+        
+        CurrentProfile.RefreshProfile(ProfileMgm);
+        
+        Dispose();
+        //Zurück zu Startseite
         Nav.NavigateTo("/startseite");
+    }
+    
+    private void Dispose()
+    {
+        CurrentProfile.Onchange -= StateHasChanged;
     }
 }

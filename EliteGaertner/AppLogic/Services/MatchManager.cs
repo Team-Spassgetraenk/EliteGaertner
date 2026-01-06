@@ -31,12 +31,10 @@ public class MatchManager : IMatchManager
             .Distinct()
             .ToList();
         _profileSuggestionList = CreateProfileSuggestionList(_profileId, _tagIds, PreloadCount);
-        
-        //Hier müssen wir die _activeMatchesList erstmal initialisieren bevor wir
-        //die Ergebnisse aus der UpdateActiveMatches übergeben können, da er in der Methode überprüft,
-        //ob _activeMatchesList leer ist oder nicht. -> NullReferenceException
+       
+        //activeMatchesList wird initialisiert und dann mit den aktuellen Matches befüllt
         _activeMatchesList = new List<PublicProfileDto>();
-        _activeMatchesList = UpdateActiveMatches();
+        _activeMatchesList = _matchesDbs.GetActiveMatches(_profileId).ToList();
     }
 
     public Dictionary<PublicProfileDto, HarvestUploadDto> CreateProfileSuggestionList(int profileId, List<int> tagIds, int preloadCount)
@@ -95,13 +93,6 @@ public class MatchManager : IMatchManager
     public List<PublicProfileDto> UpdateActiveMatches()
     {
         var newActiveMatchesList = _matchesDbs.GetActiveMatches(_profileId).ToList();
-        
-        //Falls die _activeMatchesList null ist, schreibt er den Rückgabewert der Datebank sofort rein
-        if (_activeMatchesList.Count == 0)
-        {
-            _activeMatchesList = newActiveMatchesList;
-            return _activeMatchesList;
-        }
 
         //Herausfinden welche neuen Matches dazu gekommen sind
         var newlyAddedMatches =

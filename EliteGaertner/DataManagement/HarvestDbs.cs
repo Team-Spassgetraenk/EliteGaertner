@@ -15,12 +15,13 @@ public class HarvestDbs : IHarvestDbs
         _dbContext = dbContext;
     }   
     
-        public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
+    public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
     {
         //Falls die profileId <= 0 ist, return leere HarvestUploadDto Enumerable 
         if (profileId <= 0)
             return Enumerable.Empty<HarvestUploadDto>();
-
+        
+        
         var result = _dbContext.Harvestuploads
             .AsNoTracking()
             .Where(h => h.Profileid == profileId)
@@ -33,6 +34,9 @@ public class HarvestDbs : IHarvestDbs
                 WidthCm = h.Widthcm,
                 LengthCm = h.Lengthcm,
                 UploadDate = h.Uploaddate,
+                TagIds = h.Tags
+                    .Select(t => t.Tagid)
+                    .ToList(),
                 ProfileId = h.Profileid
             });
 
@@ -95,6 +99,9 @@ public class HarvestDbs : IHarvestDbs
                 WidthCm = h.Widthcm,
                 LengthCm = h.Lengthcm,
                 UploadDate = h.Uploaddate,
+                TagIds = h.Tags
+                    .Select(t => t.Tagid)
+                    .ToList(), 
                 ProfileId = h.Profileid
             })
             .SingleOrDefault();
@@ -221,6 +228,9 @@ public class HarvestDbs : IHarvestDbs
                     WidthCm = h.Widthcm,
                     LengthCm = h.Lengthcm,
                     UploadDate = h.Uploaddate,
+                    TagIds = h.Tags
+                        .Select(t => t.Tagid)
+                        .ToList(), 
                     ProfileId = h.Profileid
                 })
             //PreloadCount gibt die Anzahl der benötigten DTOs an

@@ -33,6 +33,7 @@ builder.Services.AddRazorComponents()
 //Registrierung der State-Klassen
 builder.Services.AddScoped<UserRegistrationState>();
 builder.Services.AddScoped<CurrentProfileState>();
+builder.Services.AddScoped<PreferenceState>();
 
 var app = builder.Build();
 

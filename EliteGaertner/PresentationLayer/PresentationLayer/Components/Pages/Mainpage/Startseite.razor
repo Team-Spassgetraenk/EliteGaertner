@@ -81,7 +81,7 @@
                 </div>
 
                 <div class="match-actions">
-                    <button class="match-btn contact-btn" @onclick='() => NavTo("/matchestest")'>Kontakt aufnehmen</button>
+                    <button class="match-btn contact-btn" @onclick='() => NavTo("/matches")'>Kontakt aufnehmen</button>
                     <button class="match-btn continue-btn" @onclick="CloseMatchOverlay">Weiter gärtnern</button>
                 </div>
             </div>
@@ -114,7 +114,7 @@
                 <div class="admin-link" @onclick='() => NavTo("/startseite")'>Startseite</div>
                 <div class="admin-link" @onclick='() => NavTo("/präferenzeinstellungen")'>Präferenzen</div>
                 <div class="admin-link" @onclick='() => NavTo("/ranglistetest")'>Rangliste</div>
-                <div class="admin-link" @onclick='() => NavTo("/matchestest")'>Matches</div>
+                <div class="admin-link" @onclick='() => NavTo("/matches")'>Matches</div>
             </div>
             }
         </div>
@@ -336,8 +336,8 @@
         Console.WriteLine("Er kommt zumindest in OnInitialized");
         Console.WriteLine($"STATE(Startseite): {CurrentProfile.InstanceId}");
         
-        // Guard: wenn kein Profil im State liegt, sind wir nicht (mehr) eingeloggt.
-        // Dann zurück zur Login-Seite, bevor wir UserName/LoggedInProfile verwenden.
+        //Überprüfung
+        //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
         if (CurrentProfile.LoggedInProfile is null)
         {
             //TODO TEST GEHÖRT WEG
@@ -384,6 +384,7 @@
     //Subscription auf MatchManager Methode löst die Methode aus, falls es zu einem neuen Match kommt
     private async void OnMatchCreated(PublicProfileDto matchProfile)
     {
+        //TODO AWAIT SYNC Aleks prüfen wie es sich bei mehreren Matches verhält
         _matchedUser = matchProfile;
         _showMatchOverlay = true;
         await PlayMatchSound();
@@ -511,7 +512,7 @@
     private void NavigateToLogout() => Nav.NavigateTo("/");
     private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
     private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
-    private void GoToMatches() => Nav.NavigateTo("/MatchesTest");
+    private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");
     private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
 
@@ -660,6 +661,9 @@
         
         //Gib mir den ersten Eintrag aus der Vorschlagsliste zurück
         var next = _matchManager.GetNextSuggestion();
+        
+        Console.WriteLine($"Harvest UploadId: {next.Value.harvest.UploadId}");
+        Console.WriteLine($"TagIds: {(next.Value.harvest.TagIds is null ? "NULL" : string.Join(",", next.Value.harvest.TagIds))}");
         
         //Falls Vorschlagsliste leeren Key zurückgibt -> 
         //Zeigt die "Keine Vorschläge" Karte an

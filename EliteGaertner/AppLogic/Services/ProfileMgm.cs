@@ -39,8 +39,8 @@ public class ProfileMgm : IProfileMgm
             
         return publicProfile;
     }
-
-    public PrivateProfileDto VisitPrivateProfile(int profileId) // get
+    
+    public PrivateProfileDto GetPrivProfile(int profileId) 
     {
         //Da wir die Datenbankzugriffe auf verschiedene Klassen aufgesplittet haben, müssen wir 
         //hier zwei verschiedene Datenbankzugriffe durchführen (Profilinfos, Harvestuploads)
@@ -121,7 +121,6 @@ public class ProfileMgm : IProfileMgm
             throw new InvalidOperationException("Anmeldedaten konnten nicht aktualisiert werden.", ex);
         }
     }
-
 
     public List<PreferenceDto> GetPreference(int profileId)
     {

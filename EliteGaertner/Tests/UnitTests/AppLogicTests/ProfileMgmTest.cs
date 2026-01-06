@@ -143,7 +143,7 @@ public class ProfileMgmUnitTests
         _mockProfileDbs.Setup(x => x.GetPrivateProfile(profileId)).Returns(expectedProfileInfo);
 
         // Act
-        var result = _profileMgm.VisitPrivateProfile(profileId);
+        var result = _profileMgm.GetPrivProfile(profileId);
 
         // Assert
         Assert.AreEqual(expectedProfileInfo.ProfileId, result.ProfileId);

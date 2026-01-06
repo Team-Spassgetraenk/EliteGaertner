@@ -106,8 +106,8 @@ public class ProfileDbs : IProfileDbs
             ProfilepictureUrl = profileEntity.Profilepictureurl,
             UserName = profileEntity.Username,
             FirstName = profileEntity.Firstname,
-            LastName = profileEntity.Lastname,
-            EMail = profileEntity.Email,
+            LastName = profileEntity.Lastname,  
+            EMail = profileEntity.Email,         
             Phonenumber = profileEntity.Phonenumber,
             Profiletext = profileEntity.Profiletext,
             ShareMail = profileEntity.Sharemail,
@@ -265,7 +265,7 @@ public class ProfileDbs : IProfileDbs
         return rowsAffected > 0;
     }
     
-        public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
+    public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
     {
         //Falls die profileId <= 0 ist, return ein leeres PreferenceDto Enumerable 
         if (profileId <= 0)
