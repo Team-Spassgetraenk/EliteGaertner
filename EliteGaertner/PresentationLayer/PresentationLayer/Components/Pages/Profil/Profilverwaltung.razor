@@ -218,40 +218,7 @@
                 }
             </div>
         </div>
-
-        @* --- Trennlinie --- *@
-        <div class="divider"></div>
-
-        @* --- FOTOS GALERIE --- *@
-        <div class="management-box comic-box">
-            <h3 class="box-title">Meine Fotos</h3>
-
-            <div class="harvest-grid">
-
-                @for (int i = 0; i < _uploadedImages.Count; i++)
-                {
-                var imgPath = _uploadedImages[i];
-                var index = i;
-
-                <div class="grid-item comic-grid-item" @onmouseover="() => SetHoveredIndex(index)" @onmouseout="ResetHoveredIndex">
-                    <img src="@imgPath" alt="Erntebild" class="harvest-photo" />
-
-                    @* Lösch-Mechanismus mit Popup *@
-                    <div class="delete-overlay" @onclick="() => ToggleDeletePopup(index)">
-                        <span class="delete-icon" style="color: #FFFFFF">✖</span>
-                    </div>
-
-                    @if (_showDeletePopupIndex == index)
-                    {
-                    <div class="delete-popup comic-box" @onclick="() => DeletePhoto(imgPath)">
-                        Bild löschen
-                    </div>
-                    }
-                </div>
-                }
-            </div>
-        </div>
-
+        
         @* --- Änderungen Speichern Button --- *@
         <button class="save-button purple-button"
                 @onclick="SaveChanges"

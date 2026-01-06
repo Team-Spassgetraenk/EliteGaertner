@@ -83,7 +83,6 @@
                 </div>
 
                 <div class="match-actions">
-                    <button class="match-btn contact-btn" @onclick='() => NavTo("/matches")'>Kontakt aufnehmen</button>
                     <button class="match-btn continue-btn" @onclick="CloseMatchOverlay">Weiter gärtnern</button>
                 </div>
             </div>
@@ -97,31 +96,9 @@
         <div class="admin-header" @onclick="NavigateToAboutUs">
             <span>ℹ️ Über uns</span>
         </div>
-        <div class="admin-nav-section">
-            <div class="admin-header" @onclick="ToggleAdminNav">
-                <span>🛠 Admin-Navigation</span>
-                <span style="font-size: 12px;">@(_showAdminNav ? " ▲" : " ▼")</span>
-            </div>
-            @if (_showAdminNav)
-            {
-            <div class="admin-scroll-area">
-                <div class="admin-link" @onclick='() => NavTo("/")'>Login</div>
-                <div class="admin-link" @onclick='() => NavTo("/registrierung")'>Registrierung</div>
-                <div class="admin-link" @onclick='() => NavTo("/registrierung/interessen")'>Interessen</div>
-                <div class="admin-link" @onclick='() => NavTo("/registrierung/profilerstellung")'>Profilerstellung</div>
-                <div class="admin-link" @onclick='() => NavTo("/ernte-hochladen")'>Ernte Upload</div>
-                <div class="admin-link" @onclick='() => NavTo("/profiltest")'>Profil (Eigen)</div>
-                <div class="admin-link" @onclick='() => NavTo("/profil/profilverwaltung")'>Verwaltung</div>
-                <div class="admin-link" @onclick='() => NavTo("/profil/fremder-user")'>Profil (Fremd)</div>
-                <div class="admin-link" @onclick='() => NavTo("/startseite")'>Startseite</div>
-                <div class="admin-link" @onclick='() => NavTo("/präferenzeinstellungen")'>Präferenzen</div>
-                <div class="admin-link" @onclick='() => NavTo("/ranglistetest")'>Rangliste</div>
-                <div class="admin-link" @onclick='() => NavTo("/matches")'>Matches</div>
-            </div>
-            }
-        </div>
     </div>
     }
+    
     @* Standard Vorschlags Karte *@
     <div class="tinder-card-area">
         @if (_isProfileVisible && _currentHarvest != null)
@@ -247,8 +224,14 @@
     </div>
 
     <footer class="bottom-nav">
-        <div class="nav-item active" @onclick="GoToMatches">
-            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
+        <div class="nav-item active matches-nav-container" @onclick="GoToMatches">
+            @if (CurrentMatches() > 0)
+            {
+                <div class="matches-badge">
+                    @CurrentMatches()
+                </div>
+            }
+            <img src="pictures/MatchesIcon.png" alt="Matches" height="40"/>
             <span>Matches</span>
         </div>
 
@@ -412,6 +395,25 @@
             _adTimer = null;
             _adTimerElapsedHandler = null;
         }
+    }
+    
+    // ----------------------------
+    // Current Matches Logik
+    // ----------------------------
+    private int _matchCount = 1; 
+
+    // Deine Methode, die vom HTML aufgerufen wird
+    private int CurrentMatches()
+    {
+        // Hier könnte später die Logik stehen, die in der DB nachzählt
+        return _matchCount;
+    }
+
+    // Beispiel: Methode zum Erhöhen der Matches (z.B. nach einem Like)
+    private void OnNewMatchFound()
+    {
+        _matchCount++;
+        StateHasChanged(); // UI aktualisieren
     }
 
     // ----------------------------
