@@ -64,7 +64,7 @@
             {
                 <div class="rank-entry @GetRankCssClass(entry.Rank)" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
                     <div class="rank-info" @onclick="() => GoToProfile(entry.UserName)">
-                        <span class="rank-number">@GetRankPrefix(entry.UserName)@entry.Rank</span>
+                        <span class="rank-number">#@entry.Rank</span>
                         <span class="username-display">@entry.UserName</span>
                     </div>
                     <div class="rank-value" style="margin-left:auto; white-space:nowrap;">
@@ -127,11 +127,9 @@
     private bool _showLeaderboardMenu = false;
     private List<LeaderboardDto> _leaderboardList = new();
     private LeaderboardDto _currentLeaderboard;
-    private ILeaderBoardService _leaderboardService;
-
     
     
-    //TODO Kommentar fehlt
+    
     protected override void OnInitialized()
     {
         
@@ -143,46 +141,23 @@
             return;
         }
         
+        //Er erstellt hier aus LeaderBoardCategories die Leaderboards die wir benötigen
         foreach (var leaderboard in LeaderBoardCategories.Leaderboards)
         {
-            _leaderboardService = new LeaderboardService(
+            var service = new LeaderboardService(
                 leaderboard.LeaderboardTitle,
                 leaderboard.LeaderboardId,
                 CurrentProfile.ProfileId.Value,
                 leaderboard.TagId,
                 leaderboard.Goal,
                 LeaderBoardDbs
-                );
-            
-            _leaderboardList.Add(_leaderboardService.GetLeaderBoardDto());
+            );
+
+            _leaderboardList.Add(service.GetLeaderBoardDto());
         }
 
         _currentLeaderboard = _leaderboardList.First();
-
-        //TODO TEST MUSS ENTFERNT WERDEN
-        foreach (var leaderboard in _leaderboardList)
-        {
-            Console.WriteLine();
-            Console.WriteLine("---LEADERBOARD---");
-            Console.WriteLine("Title: " + leaderboard.LeaderboardTitle);
-            Console.WriteLine("Anzahl der Entries: " + leaderboard.Entries.Count);
-            foreach (var entries in leaderboard.Entries)
-            {
-                Console.WriteLine("---Next Entry---");
-                Console.WriteLine("Entry Rank: " + entries.Rank);
-                Console.WriteLine("Entry ProfileId: " + entries.ProfileId);
-                Console.WriteLine("Entry Profilename: " + entries.UserName);
-                Console.WriteLine("Entry Value: " + entries.Value + "cm");
-            }
-            Console.WriteLine("-------------------");
-            Console.WriteLine("---Personal Entry--");
-            Console.WriteLine("Entry Rank: " + leaderboard.PersonalEntry.Rank);
-            Console.WriteLine("Entry ProfileId: " + leaderboard.PersonalEntry.ProfileId);
-            Console.WriteLine("Entry Profilename: " + leaderboard.PersonalEntry.UserName);
-            Console.WriteLine("Entry Value: " + leaderboard.PersonalEntry.Value + "cm");
-        }
     }
-    
     
 
     private string GetRankCssClass(int rank)
@@ -190,11 +165,10 @@
         if (rank == 1) return "rank-1";
         if (rank == 2) return "rank-2";
         if (rank == 3) return "rank-3";
-        //if (_currentLeaderboard.Entr.Any(r => r.Rank == rank && r.IsCurrentUser)) return "current-user-rank";
         return "default-rank";
     }
 
-    //TODO KOMMENTAR FEHLT
+    // Formatiert den Ranglistenwert abhängig vom Ziel (Likes / cm / g).
     private string FormatValue(float value, LeaderboardSearchGoal goal)
     {
         // Use compact formatting for floats.
@@ -209,22 +183,13 @@
             _ => n
         };
     }
-    
-    
-    
-    
-    //_-----------------------------------
-    
-    private string GetRankPrefix(string username)
-    {
-        return username == "Ich" ? "" : "#";
-    }
 
     private void ToggleCategoryMenu()
     {
         _showLeaderboardMenu = !_showLeaderboardMenu;
     }
     
+    //Weist dem currentLeaderboard die im Menü ausgewählte Rangliste zu
     private void SelectCategory(LeaderboardDto leaderboard)
     {
         _currentLeaderboard = leaderboard;
@@ -239,18 +204,11 @@
     
     private void GoToProfile(string username)
     {
-        string userUrl = username.TrimStart('@');
-        if (username.ToLower() == "ich")
-        {
-            Nav.NavigateTo("/ProfilTest");
-        }
-        else
-        {
-            Nav.NavigateTo($"/profil/{userUrl}");
-        }
+        var userUrl = username.TrimStart('@');
+        Nav.NavigateTo($"/profil/{userUrl}");
     }
     
     private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
+    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
 }

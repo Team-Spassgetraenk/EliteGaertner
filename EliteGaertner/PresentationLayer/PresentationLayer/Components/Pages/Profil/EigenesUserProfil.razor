@@ -1,8 +1,19 @@
-@page "/ProfilTest"
+@page "/EigenesUserProfil"
 @using Microsoft.AspNetCore.Components.Web
 @using PresentationLayer.Services
+@using PresentationLayer.State
+@using PresentationLayer.Shared
+@using System.Linq
+@using AppLogic.Interfaces
+@using AppLogic.Services
+@using DataManagement.Interfaces
+@inject IHarvestDbs HarvestDbs
+@inject IUploadService UploadService
+@inject IProfileMgm ProfileMgm
+@inject CurrentProfileState CurrentProfile
 @inject SessionService Session
 @inject NavigationManager Nav
+@implements IDisposable
 
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -43,9 +54,9 @@
 
                 <div class="profile-info">
                     <div class="profile-pic-placeholder">
-                        <img src="pictures/Profilbilder/Profilbild_28.png" alt="Profilbild" class="profile-pic" />
+                        <img src="@_profilePictureUrl" alt="Profilbild" class="profile-pic" />
                     </div>
-                    <h2 class="username-display">@@MaisMädrescher</h2>
+                    <h2 class="username-display">@_profileName</h2>
                 </div>
 
                 <div class="divider"></div>
@@ -67,11 +78,11 @@
                     </div>
                     
                     @* --- HarvestUploads ---  *@
-                    @for (int i = 0; i < _harvestDetails.Count; i++)
+                    @for (int i = 0; i < _profileHarvestUploads.Count; i++)
                     {
                         // Lokale Kopie des Index für Lambda-Ausdrücke (wichtig in Blazor!)
                         int index = i;
-                        var h = _harvestDetails[i];
+                        var h = _profileHarvestUploads[i];
 
                         <div class="grid-item comic-grid-item" style="position: relative;">
                             @* HarvestUpload *@
@@ -86,7 +97,7 @@
                             @* Das Lösch-Bestätigungs-Popup *@
                             @if (_showDeletePopupIndex == index)
                             {
-                                <div class="delete-popup comic-box" @onclick="() => DeletePhoto(h)">
+                                <div class="delete-popup comic-box" @onclick="async () => await DeletePhoto(h)">
                                     Bild löschen
                                 </div>
                             }
@@ -109,7 +120,10 @@
                             <img src="@_selectedHarvest.ImageUrl" alt="Ernte" class="harvest-image" />
                         </div>
                         <div class="username-tag-combo">
-                            <span class="username-label">@_selectedHarvest.Tag</span>
+                            <span class="username-label">@_profileName</span>
+                            <div class="tag-label">
+                                <span>@GetPrimaryTagLabel(_selectedHarvest)</span>
+                            </div>
                         </div>
                     </div>
 
@@ -119,21 +133,21 @@
                                 <div class="param-icon-circle">⚖️</div>
                                 <div class="param-content-wrapper">
                                     <p class="param-title">Gewicht</p>
-                                    <p class="param-value">@_selectedHarvest.Weight</p>
+                                    <p class="param-value">@_selectedHarvest.WeightGram</p>
                                 </div>
                             </div>
                             <div class="white-comic-box">
                                 <div class="param-icon-circle">📏</div>
                                 <div class="param-content-wrapper">
                                     <p class="param-title">Länge</p>
-                                    <p class="param-value">@_selectedHarvest.Length</p>
+                                    <p class="param-value">@_selectedHarvest.LengthCm</p>
                                 </div>
                             </div>
                             <div class="white-comic-box">
                                 <div class="param-icon-circle">📐</div>
                                 <div class="param-content-wrapper">
                                     <p class="param-title">Breite</p>
-                                    <p class="param-value">@_selectedHarvest.Width</p>
+                                    <p class="param-value">@_selectedHarvest.WidthCm</p>
                                 </div>
                             </div>
                         </div>
@@ -167,14 +181,49 @@
 
 @code {
     private int? _showDeletePopupIndex = null;
-    private int? _hoveredIndex = null;
-    
-    private string _bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit Anbeginn der Zeit.";
 
-    // Bild-Lösch Logik
-    private void SetHoveredIndex(int index) => _hoveredIndex = index;
-    private void ResetHoveredIndex() => _hoveredIndex = null;
+    //Profildaten
+    private string _profileName;
+    private string _profilePictureUrl;
+    private string _bioText;
+    private List<HarvestUploadDto> _profileHarvestUploads = new ();
+
+    private HarvestUploadDto? _selectedHarvest;
+
+    //TODO KOMMENTIEREN ALEKS
+    //Navigation Profilbild hochladen
+
+    protected override void OnInitialized()
+    {
+        //Überprüfung
+        //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
+        if (CurrentProfile.LoggedInProfile is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+        
+        CurrentProfile.Onchange += StateHasChanged;
+        
+        //Zuweisung der Currentprofile
+        _profileName = "@" + CurrentProfile.UserName;
+        _profilePictureUrl = CurrentProfile.ProfilepictureUrl ?? "";
+        _bioText = CurrentProfile.Profiletext ?? "";
+        _profileHarvestUploads = CurrentProfile.HarvestUploads?.ToList() ?? new List<HarvestUploadDto>();
+    }
     
+
+    //Nimm TagId, mappe ihm mit dem TagCatalog und render den passenden String
+    private static string GetPrimaryTagLabel(HarvestUploadDto? harvest)
+    {
+        var firstTagId = harvest?.TagIds?.FirstOrDefault() ?? 0;
+        if (firstTagId <= 0)
+            return string.Empty;
+
+        var tagItem = TagCatalog.FindById(firstTagId);
+        return tagItem is null ? string.Empty : $"{tagItem.Icon} {tagItem.Name}";
+    }
+
     private void ToggleDeletePopup(int index)
     {
         if (_showDeletePopupIndex == index)
@@ -187,52 +236,46 @@
         }
     }
     
-    private void DeletePhoto(HarvestDetail item)
+    public void Dispose()
     {
-        if (item != null)
+        CurrentProfile.Onchange -= StateHasChanged;
+    }
+    
+    private async Task DeletePhoto(HarvestUploadDto harvestUpload)
+    {
+        if (harvestUpload is null)
+            return;
+
+        try
         {
-            _harvestDetails.Remove(item);
-            _showDeletePopupIndex = null; // Popup schließen
-            StateHasChanged(); // UI aktualisieren
+            //Löscht den HarvestUpload
+            UploadService.DeleteUpload(harvestUpload.UploadId);
+
+            //UI schließen
+            _showDeletePopupIndex = null;
+            if (_selectedHarvest?.UploadId == harvestUpload.UploadId)
+                _selectedHarvest = null;
+
+            //State neu laden + lokale Liste aktualisieren
+            CurrentProfile.RefreshProfile(ProfileMgm);
+            _profileHarvestUploads = CurrentProfile.HarvestUploads?.ToList() ?? new List<HarvestUploadDto>();
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("DeletePhoto failed:");
+            Console.WriteLine(ex);
         }
     }
     
-    // Detailansicht HarvestUploads
-    private List<HarvestDetail> _harvestDetails = new()
-    {
-        new() { ImageUrl="pictures/Testbilder/Gurken_01.jpg", Tag="Gurken 🥒", Weight="320g", Length="22cm", Width="5cm", Description="Sehr knackig dieses Jahr!" },
-        new() { ImageUrl="pictures/Testbilder/Karotten_01.jpg", Tag="Karotten 🥕", Weight="150g", Length="18cm", Width="3cm", Description="Direkt aus dem Hochbeet." },
-        new() { ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", Tag="Kürbis 🎃", Weight="4.2kg", Length="35cm", Width="40cm", Description="Prachtexemplar für Halloween." },
-        new() { ImageUrl="pictures/Testbilder/Auberginen_01.jpg", Tag="Auberginen 🍆", Weight="400g", Length="15cm", Width="8cm", Description="Viel Sonne getankt." },
-        new() { ImageUrl="pictures/Testbilder/Erdbeeren_01.jpg", Tag="Erdbeeren 🍓", Weight="45g", Length="5cm", Width="4cm", Description="Zuckersüß!" },
-        new() { ImageUrl="pictures/Testbilder/Trauben_01.jpg", Tag="Trauben 🍇", Weight="600g", Length="20cm", Width="12cm", Description="Sorte: Muskat." }
-    };
-    
-    private HarvestDetail? _selectedHarvest;
-    
+    //Navigation
     private bool _showLogout = false;
-    
-    public class GridItem {
-        public bool IsImage { get; set; }
-        public bool IsAddButton { get; set; }
-        public string Path { get; set; } = "";
-    }
-    
-    
     private void ToggleLogoutMenu() => _showLogout = !_showLogout;
     private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
     private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
+    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
     private void GoToManageProfile() => Nav.NavigateTo("/profil/profilverwaltung");
     private void AddPhoto() => Nav.NavigateTo("/ernte-hochladen");
-    
-    private class HarvestDetail {
-        public string ImageUrl { get; set; } = "";
-        public string Tag { get; set; } = "";
-        public string Weight { get; set; } = "";
-        public string Length { get; set; } = "";
-        public string Width { get; set; } = "";
-        public string Description { get; set; } = "";
-    }
 }

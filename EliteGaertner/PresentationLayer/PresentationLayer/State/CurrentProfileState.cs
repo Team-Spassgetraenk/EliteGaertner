@@ -28,9 +28,6 @@ public sealed class CurrentProfileState
     {
         Onchange?.Invoke();
     }
-    
-    //TODO KOMMT WEG -> DEBUGGEN
-    public Guid InstanceId { get; } = Guid.NewGuid();
 
     public void Login(PrivateProfileDto profile)
     {

@@ -118,6 +118,8 @@
 </div>
 
 @code {
+    
+    //TODO MUSS ERLEDIGT WERDEN
     private string? _hochgeladenesBild = null;
 
     public class TagItem(string name, string emoji)
@@ -238,7 +240,7 @@ _selectedTag = (_selectedTag == tag) ? null : tag;
         }
         
         Console.WriteLine($"Veröffentlicht: {_selectedTag}, Bildgröße: {_hochgeladenesBild.Length}");
-        Nav.NavigateTo("/ProfilTest");
+        Nav.NavigateTo("/EigenesUserProfil");
         
     }
 }

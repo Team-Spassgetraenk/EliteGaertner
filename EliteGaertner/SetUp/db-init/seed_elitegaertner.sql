@@ -267,7 +267,7 @@ SELECT 'pictures/uploads/uploadid05_profileid02.png',
        400, 15, 15, (:'seed_now')::timestamptz - interval '6 days' + interval '16 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'zucchinizauberer';
 
--- 3 GurkenGuru: 2 Uploads
+-- 3 GurkenGuru: 1 Upload
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
 SELECT 'pictures/uploads/uploadid06_profileid03.png',
@@ -280,7 +280,7 @@ INSERT INTO HARVESTUPLOADS
 SELECT 'pictures/uploads/uploadid07_profileid03.png',
        'Einlegegurken für den Winter.',
        200, 15, 4, (:'seed_now')::timestamptz - interval '5 days' + interval '13 hours', p.ProfileId
-FROM PROFILE p WHERE p.UserName = 'tomatentiger';
+FROM PROFILE p WHERE p.UserName = 'birnenbarde';
 
 -- 4 BeerenBoss: 3 Uploads
 INSERT INTO HARVESTUPLOADS
@@ -439,7 +439,7 @@ SELECT 'pictures/uploads/uploadid28_profileid13.png',
        2000, 22, 22, (:'seed_now')::timestamptz - interval '2 days' + interval '20 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'apfelalchemist';
 
--- 14 BirnenBarde: 1 Upload
+-- 14 BirnenBarde: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
 SELECT 'pictures/uploads/uploadid29_profileid14.png',

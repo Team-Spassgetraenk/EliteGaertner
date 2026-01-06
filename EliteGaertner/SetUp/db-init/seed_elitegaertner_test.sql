@@ -267,12 +267,12 @@ SELECT 'pictures/uploads/uploadid05_profileid02.png',
        400, 15, 15, (:'seed_now')::timestamptz - interval '6 days' + interval '16 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'zucchinizauberer';
 
--- 3 GurkenGuru: 2 Uploads
+-- 3 GurkenGuru: 1 Upload
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
 SELECT 'pictures/uploads/uploadid06_profileid03.png',
        'Gurke, super knackig.',
-       300, 25, 4, (:'seed_now')::timestamptz - interval '7 days' + interval '10 hours', p.ProfileId
+       300, 25, 18, (:'seed_now')::timestamptz - interval '7 days' + interval '10 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'gurkenguru';
 
 INSERT INTO HARVESTUPLOADS
@@ -280,7 +280,7 @@ INSERT INTO HARVESTUPLOADS
 SELECT 'pictures/uploads/uploadid07_profileid03.png',
        'Einlegegurken für den Winter.',
        200, 15, 4, (:'seed_now')::timestamptz - interval '5 days' + interval '13 hours', p.ProfileId
-FROM PROFILE p WHERE p.UserName = 'gurkenguru';
+FROM PROFILE p WHERE p.UserName = 'birnenbarde';
 
 -- 4 BeerenBoss: 3 Uploads
 INSERT INTO HARVESTUPLOADS
@@ -439,7 +439,7 @@ SELECT 'pictures/uploads/uploadid28_profileid13.png',
        2000, 22, 22, (:'seed_now')::timestamptz - interval '2 days' + interval '20 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'apfelalchemist';
 
--- 14 BirnenBarde: 1 Upload
+-- 14 BirnenBarde: 2 Uploads
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
 SELECT 'pictures/uploads/uploadid29_profileid14.png',
@@ -544,6 +544,7 @@ SELECT 'pictures/uploads/uploadid42_profileid20.png',
        1300, 25, 25, (:'seed_now')::timestamptz - interval '3 days' + interval '16 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'maismagier';
 
+
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
 SELECT 'pictures/uploads/uploadid43_profileid20.png',
@@ -552,9 +553,229 @@ SELECT 'pictures/uploads/uploadid43_profileid20.png',
 FROM PROFILE p WHERE p.UserName = 'maismagier';
 
 -- =============================
+-- ZUSÄTZLICHE HARVESTUPLOADS (Bilder-Pool)
+-- (zusätzliche Bilder, verteilt auf Profile)
+-- =============================
+
+-- Auberginen (3)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Auberginen_01.jpg',
+       'Frisch geerntete Auberginen aus dem Garten.',
+       420, 8, 18, (:'seed_now')::timestamptz - interval '6 days' + interval '09 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'zucchinizauberer';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Auberginen_02.jpg',
+       'Auberginen – glänzend und direkt vom Beet.',
+       380, 7, 17, (:'seed_now')::timestamptz - interval '5 days' + interval '18 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'paprikapiratin';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Auberginen_03.jpg',
+       'Zwei Auberginen frisch geerntet, bereit zum Kochen.',
+       560, 9, 20, (:'seed_now')::timestamptz - interval '4 days' + interval '12 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'apfelalchemist';
+
+-- Erdbeeren (1)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Erdbeeren_01.jpg',
+       'Erdbeeren – süß und frisch vom Feld.',
+       350, 14, 14, (:'seed_now')::timestamptz - interval '2 days' + interval '08 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'beerenboss';
+
+-- Gurken (5)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Gurken_01.jpg',
+       'Gurke, frisch geerntet und super knackig.',
+       320, 26, 29, (:'seed_now')::timestamptz - interval '3 days' + interval '10 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'karottenkönigin';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Gurken_02.jpg',
+       'Gurke für den Salat – direkt aus dem Hochbeet.',
+       290, 24, 22, (:'seed_now')::timestamptz - interval '2 days' + interval '18 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'salatsamurai';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Gurken_03.jpg',
+       'Gurke – frisch geerntet, noch mit etwas Erde.',
+       310, 25, 24, (:'seed_now')::timestamptz - interval '2 days' + interval '11 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'spinatspion';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Gurken_04.jpg',
+       'Gurken-Ernte: eine besonders gerade Gurke.',
+       340, 27, 26, (:'seed_now')::timestamptz - interval '1 days' + interval '19 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'zucchinizauberer';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Gurken_05.jpg',
+       'Gurke aus dem Gewächshaus – frisch geerntet.',
+       360, 28, 1, (:'seed_now')::timestamptz - interval '1 days' + interval '08 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'tomatentiger';
+
+-- Karotten (2)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Karotten_01.jpg',
+       'Karotten im Bund, frisch aus der Erde gezogen.',
+       900, 10, 28, (:'seed_now')::timestamptz - interval '6 days' + interval '14 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'karottenkönigin';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Karotten_02.png',
+       'Karotten – bunt gemischt und frisch geerntet.',
+       780, 9, 26, (:'seed_now')::timestamptz - interval '5 days' + interval '09 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'bohnenbaron';
+
+-- Kürbisse (2)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Kürbisse_01.jpg',
+       'Kürbis frisch geerntet – perfekt für Suppe.',
+       1400, 24, 24, (:'seed_now')::timestamptz - interval '8 days' + interval '17 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'kürbiskönig';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Kürbisse_02.jpg',
+       'Kleine Kürbisse für Deko, frisch geerntet.',
+       650, 16, 16, (:'seed_now')::timestamptz - interval '7 days' + interval '12 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'maismagier';
+
+-- Mais (3)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Mais_01.png',
+       'Maiskolben frisch geerntet vom Feld.',
+       1250, 26, 6, (:'seed_now')::timestamptz - interval '6 days' + interval '08 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'maismagier';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Mais_02.png',
+       'Mais – zwei Kolben frisch geerntet.',
+       2100, 28, 7, (:'seed_now')::timestamptz - interval '4 days' + interval '16 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'kürbiskönig';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Mais_03.png',
+       'Maiskolben – goldgelb und frisch geerntet.',
+       1150, 25, 6, (:'seed_now')::timestamptz - interval '3 days' + interval '07 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'kartoffelknight';
+
+-- Melonen (1)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Melonen_01.jpg',
+       'Melone – frisch geerntet und bereit zum Kühlen.',
+       2400, 22, 22, (:'seed_now')::timestamptz - interval '9 days' + interval '13 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'melonenmaster';
+
+-- Radieschen (4)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Radieschen_01.jpg',
+       'Radieschen – frisch geerntet und richtig scharf.',
+       320, 16, 16, (:'seed_now')::timestamptz - interval '3 days' + interval '19 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'radieschenrocker';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Radieschen_02.jpg',
+       'Radieschen als Topping, frisch geerntet.',
+       280, 15, 15, (:'seed_now')::timestamptz - interval '2 days' + interval '09 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'salatsamurai';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Radieschen_03.jpg',
+       'Radieschen aus dem Beet – frisch geerntet.',
+       300, 15, 15, (:'seed_now')::timestamptz - interval '1 days' + interval '11 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'zwiebelzauberin';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Radieschen_04.jpg',
+       'Bunte Radieschen – frisch geerntet und fotogen.',
+       340, 16, 16, (:'seed_now')::timestamptz - interval '1 days' + interval '06 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'beerenboss';
+
+-- Tomaten (1)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Tomaten_01.jpg',
+       'Tomaten frisch geerntet – ideal für Caprese.',
+       520, 14, 14, (:'seed_now')::timestamptz - interval '2 days' + interval '14 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'tomatentiger';
+
+-- Trauben (2)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Trauben_01.jpg',
+       'Trauben – frisch geerntet und sehr süß.',
+       700, 16, 16, (:'seed_now')::timestamptz - interval '4 days' + interval '09 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'traubentaktiker';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Trauben_02.jpg',
+       'Trauben aus dem Garten – frisch geerntet.',
+       820, 17, 17, (:'seed_now')::timestamptz - interval '3 days' + interval '08 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'birnenbarde';
+
+-- Zwiebeln (4)
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Zwiebeln_01.jpg',
+       'Zwiebeln – frisch geerntet und küchenbereit.',
+       900, 18, 18, (:'seed_now')::timestamptz - interval '6 days' + interval '21 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'zwiebelzauberin';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Zwiebeln_02.jpg',
+       'Zwiebeln frisch geerntet – milde Schärfe.',
+       850, 17, 17, (:'seed_now')::timestamptz - interval '5 days' + interval '07 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'kartoffelknight';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Zwiebeln_03.jpg',
+       'Zwiebeln für den Salat – frisch geerntet.',
+       780, 16, 16, (:'seed_now')::timestamptz - interval '3 days' + interval '16 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'salatsamurai';
+
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Zwiebeln_04.jpg',
+       'Zwiebeln – frisch geerntet, kräftig im Aroma.',
+       920, 18, 18, (:'seed_now')::timestamptz - interval '2 days' + interval '19 hours', p.ProfileId
+FROM PROFILE p WHERE p.UserName = 'brokkoliboss';
+
+
+-- =============================
 -- HARVESTTAGS
 -- =============================
 -- (unverändert)
+
+-- Auberginen
+INSERT INTO HARVESTTAGS (TagId, UploadId)
+SELECT t.TagId, h.UploadId
+FROM TAGS t
+         JOIN HARVESTUPLOADS h ON h.Description ILIKE '%Aubergin%'
+WHERE t.Label = 'Auberginen';
 
 -- Tomaten
 INSERT INTO HARVESTTAGS (TagId, UploadId)
@@ -706,6 +927,63 @@ FROM TAGS t
          JOIN HARVESTUPLOADS h ON h.Description ILIKE '%Mais%'
 WHERE t.Label = 'Mais';
 
+-- =============================
+-- RATINGS (inkl. „Matches“)
+-- =============================
+
+-- Match 1
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '2 days' + interval '11 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'tomatentiger'
+  AND p2.UserName = 'beerenboss';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '2 days' + interval '11 hours' + interval '35 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'tomatentiger'
+  AND p2.UserName = 'beerenboss';
+
+-- Match 2
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '3 days' + interval '18 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'zucchinizauberer'
+  AND p2.UserName = 'gurkenguru';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '3 days' + interval '18 hours' + interval '22 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'zucchinizauberer'
+  AND p2.UserName = 'gurkenguru';
+
+-- Match 3
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '1 days' + interval '20 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'melonenmaster'
+  AND p2.UserName = 'beerenboss';
+
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p2.ProfileId, p1.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '1 days' + interval '20 hours' + interval '08 minutes'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'melonenmaster'
+  AND p2.UserName = 'beerenboss';
+
+-- Positives Rating ohne Match
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, TRUE, (:'seed_now')::timestamptz - interval '4 days' + interval '09 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'apfelalchemist'
+  AND p2.UserName = 'birnenbarde';
+
+-- Negatives Rating
+INSERT INTO RATING (ContentCreatorId, ContentReceiverId, ProfileRating, RatingDate)
+SELECT p1.ProfileId, p2.ProfileId, FALSE, (:'seed_now')::timestamptz - interval '5 days' + interval '14 hours'
+FROM PROFILE p1, PROFILE p2
+WHERE p1.UserName = 'gurkenguru'
+  AND p2.UserName = 'tomatentiger';
+
 -- ==================================================
 -- Zusätzliche Ratings für mehr Verteilung / Matches
 -- ==================================================
@@ -844,7 +1122,6 @@ SELECT p1.ProfileId, p2.ProfileId, FALSE, (:'seed_now')::timestamptz - interval 
 FROM PROFILE p1, PROFILE p2
 WHERE p1.UserName = 'radieschenrocker'
   AND p2.UserName = 'salatsamurai';
-
 
 -- =============================
 -- REPORTS (10 Meldungen)

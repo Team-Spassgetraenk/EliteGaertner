@@ -26,6 +26,16 @@ public static class LeaderBoardCategories
             Goal = LeaderboardSearchGoal.Longest,
             PersonalEntry = null,
             Entries = null  
+        },
+        
+        new()
+        {
+            LeaderboardTitle = "Schwerste Aubergine 🍆",
+            LeaderboardId = 3,
+            TagId = TagCatalog.FindByName("Auberginen").TagId,
+            Goal = LeaderboardSearchGoal.Heaviest,
+            PersonalEntry = null,
+            Entries = null
         }
     };
 }

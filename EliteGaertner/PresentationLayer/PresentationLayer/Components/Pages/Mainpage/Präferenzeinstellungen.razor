@@ -74,13 +74,6 @@
         //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
         if (CurrentProfile.LoggedInProfile is null)
         {
-            //TODO TEST GEHÖRT WEG
-            Console.WriteLine("STARTSEITE GUARD TRIGGERED: LoggedInProfile is null -> redirect to /");
-
-            // optional: noch mehr Kontext
-            Console.WriteLine($"IsLoggedIn: {CurrentProfile.IsLoggedIn}");
-            Console.WriteLine($"UserName: '{CurrentProfile.UserName}'");
-            
             Nav.NavigateTo("/");
             return;
         }
