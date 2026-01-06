@@ -1,4 +1,6 @@
 @page "/profil/{Username}"
+@using PresentationLayer.Services
+@inject SessionService Session
 @inject NavigationManager Nav
 
 
@@ -20,7 +22,7 @@
             @if (_showLogout)
             {
                 <div class="logout-menu comic-box">
-                    <p @onclick="NavigateToLogout" style="cursor:pointer; padding: 5px 10px; margin:0;">Logout &lt;</p>
+                    <p @onclick="Session.Logout" style="cursor:pointer; padding: 5px 10px; margin:0;">Logout &lt;</p>
                 </div>
             }
         </div>
@@ -140,7 +142,7 @@
     public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
     
     private void ToggleLogoutMenu() => _showLogout = !_showLogout;
-    private void NavigateToLogout() => Nav.NavigateTo("/");
+    
     private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
     private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");

@@ -1,5 +1,7 @@
 @page "/ProfilTest"
 @using Microsoft.AspNetCore.Components.Web
+@using PresentationLayer.Services
+@inject SessionService Session
 @inject NavigationManager Nav
 
 
@@ -21,7 +23,7 @@
             @if (_showLogout)
             {
             <div class="logout-menu comic-box">
-                <p @onclick="NavigateToLogout">Logout ➜]</p>
+                <p @onclick="Session.Logout">Logout ➜]</p>
             </div>
             }
         </div>
@@ -218,7 +220,6 @@
     
     
     private void ToggleLogoutMenu() => _showLogout = !_showLogout;
-    private void NavigateToLogout() => Nav.NavigateTo("/");
     private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
     private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");

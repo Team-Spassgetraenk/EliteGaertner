@@ -5,7 +5,9 @@
 @using PresentationLayer.State
 @using PresentationLayer.Shared
 @using System.Timers
+@using PresentationLayer.Services
 @inject CurrentProfileState CurrentProfile
+@inject SessionService Session
 @inject IHarvestDbs HarvestDbs
 @inject IMatchesDbs MatchesDbs
 @inject IProfileDbs ProfileDbs
@@ -91,7 +93,7 @@
     @if (_showLogout)
     {
     <div class="logout-menu admin-menu-ext">
-        <p class="logout-link" @onclick="NavigateToLogout">Logout ➜]</p>
+        <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>
         <div class="admin-header" @onclick="NavigateToAboutUs">
             <span>ℹ️ Über uns</span>
         </div>
@@ -509,7 +511,7 @@
     }
 
     private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
-    private void NavigateToLogout() => Nav.NavigateTo("/");
+    
     private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
     private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
     private void GoToMatches() => Nav.NavigateTo("/matches");

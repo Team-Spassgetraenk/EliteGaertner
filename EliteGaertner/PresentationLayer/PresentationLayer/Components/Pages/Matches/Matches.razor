@@ -2,11 +2,13 @@
 @using AppLogic.Interfaces
 @using AppLogic.Services
 @using DataManagement.Interfaces
+@using PresentationLayer.Services
 @using PresentationLayer.State
 @inject CurrentProfileState CurrentProfile
 @inject IHarvestDbs HarvestDbs
 @inject IMatchesDbs MatchesDbs
 @inject IProfileDbs ProfileDbs
+@inject SessionService Session
 @inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -31,7 +33,7 @@
     @if (_showLogout)
     {
     <div class="logout-menu">
-        <p @onclick="NavigateToLogout">Logout &lt;</p>
+        <p @onclick="Session.Logout">Logout &lt;</p>
     </div>
     }
 
@@ -122,7 +124,7 @@
     }
     
     //Navigation
-    private void NavigateToLogout() => Nav.NavigateTo("/");
+    
     private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
     private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");

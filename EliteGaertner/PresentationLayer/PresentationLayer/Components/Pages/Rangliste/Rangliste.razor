@@ -1,5 +1,9 @@
 @page "/RanglisteTest"
+@using PresentationLayer.Services
+@using PresentationLayer.State
 
+@inject CurrentProfileState CurrentProfile
+@inject SessionService Session
 @inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -23,7 +27,7 @@
     @if (_showLogout)
     {
     <div class="logout-menu">
-        <p @onclick="NavigateToLogout">Logout ➜]</p>
+        <p @onclick="Session.Logout">Logout ➜]</p>
     </div>
     }
 
@@ -84,6 +88,21 @@
 </div>
 
 @code {
+
+    private bool _showLogout = false; 
+    private bool _showCategoryMenu = false;
+    private Category _currentCategory = new();
+    
+    protected override void OnInitialized()
+    {
+        _currentCategory = _categories.First();
+    }
+    
+    
+    
+    
+    
+    
     public class RankEntry
     {
         public int Rank { get; set; }
@@ -97,17 +116,13 @@
         public string DisplayName { get; set; } = "";
         public List<RankEntry> Ranking { get; set; } = new();
     }
-
-    private bool _showLogout = false;
-    private bool _showCategoryMenu = false;
-    private Category _currentCategory = new();
     
     private readonly List<Category> _categories = new()
     {
         new Category
         {
-            Id = "gurke",
-            DisplayName = "Längste Gurke",
+            Id = "Likes",
+            DisplayName = "Meisten Likes 💚",
             Ranking = new List<RankEntry>
             {
                 new RankEntry { Rank = 1, Username = "@user_name01" },
@@ -120,8 +135,8 @@
         },
         new Category
         {
-            Id = "aubergine",
-            DisplayName = "Größte Aubergine",
+            Id = "Gurke",
+            DisplayName = "Längste Gurke 🥒",
             Ranking = new List<RankEntry>
             {
                 new RankEntry { Rank = 1, Username = "@AuberginenKing" },
@@ -133,11 +148,6 @@
             }
         }
     };
-
-    protected override void OnInitialized()
-    {
-        _currentCategory = _categories.First();
-    }
     
     private string GetRankCssClass(int rank)
     {

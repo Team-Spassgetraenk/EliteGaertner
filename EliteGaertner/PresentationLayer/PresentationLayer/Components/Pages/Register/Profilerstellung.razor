@@ -142,7 +142,7 @@
             return;
         }
         
-        var profile = ProfileMgm.VisitPrivateProfile(RegistrationState.ProfileId);
+        var profile = ProfileMgm.GetPrivProfile(RegistrationState.ProfileId);
         var updatedProfile = profile with 
         { 
             ProfilepictureUrl = SelectedProfile,

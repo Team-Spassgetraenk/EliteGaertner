@@ -5,6 +5,7 @@ using AppLogic.Interfaces;
 using AppLogic.Services;
 using DataManagement.Interfaces;
 using PresentationLayer.Components.Pages.Register;
+using PresentationLayer.Services;
 using PresentationLayer.State;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<UserRegistrationState>();
 builder.Services.AddScoped<CurrentProfileState>();
 builder.Services.AddScoped<PreferenceState>();
+//Kümmert sich um das Logout Handling
+builder.Services.AddScoped<SessionService>();
 
 var app = builder.Build();
 
