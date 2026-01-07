@@ -2,6 +2,9 @@ namespace PresentationLayer.State;
 
 public class UserRegistrationState
 {
+    //UserID
+    public int ProfileId { get; set; } = 0;
+
     // Kontaktdaten
     public string Email { get; set; } = "";
     public string Telephone { get; set; } = "";

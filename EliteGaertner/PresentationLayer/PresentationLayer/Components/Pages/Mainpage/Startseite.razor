@@ -5,7 +5,9 @@
 @using PresentationLayer.State
 @using PresentationLayer.Shared
 @using System.Timers
+@using PresentationLayer.Services
 @inject CurrentProfileState CurrentProfile
+@inject SessionService Session
 @inject IHarvestDbs HarvestDbs
 @inject IMatchesDbs MatchesDbs
 @inject IProfileDbs ProfileDbs
@@ -81,7 +83,6 @@
                 </div>
 
                 <div class="match-actions">
-                    <button class="match-btn contact-btn" @onclick='() => NavTo("/matchestest")'>Kontakt aufnehmen</button>
                     <button class="match-btn continue-btn" @onclick="CloseMatchOverlay">Weiter gärtnern</button>
                 </div>
             </div>
@@ -91,35 +92,13 @@
     @if (_showLogout)
     {
     <div class="logout-menu admin-menu-ext">
-        <p class="logout-link" @onclick="NavigateToLogout">Logout ➜]</p>
+        <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>
         <div class="admin-header" @onclick="NavigateToAboutUs">
             <span>ℹ️ Über uns</span>
         </div>
-        <div class="admin-nav-section">
-            <div class="admin-header" @onclick="ToggleAdminNav">
-                <span>🛠 Admin-Navigation</span>
-                <span style="font-size: 12px;">@(_showAdminNav ? " ▲" : " ▼")</span>
-            </div>
-            @if (_showAdminNav)
-            {
-            <div class="admin-scroll-area">
-                <div class="admin-link" @onclick='() => NavTo("/")'>Login</div>
-                <div class="admin-link" @onclick='() => NavTo("/registrierung")'>Registrierung</div>
-                <div class="admin-link" @onclick='() => NavTo("/registrierung/interessen")'>Interessen</div>
-                <div class="admin-link" @onclick='() => NavTo("/registrierung/profilerstellung")'>Profilerstellung</div>
-                <div class="admin-link" @onclick='() => NavTo("/ernte-hochladen")'>Ernte Upload</div>
-                <div class="admin-link" @onclick='() => NavTo("/profiltest")'>Profil (Eigen)</div>
-                <div class="admin-link" @onclick='() => NavTo("/profil/profilverwaltung")'>Verwaltung</div>
-                <div class="admin-link" @onclick='() => NavTo("/profil/fremder-user")'>Profil (Fremd)</div>
-                <div class="admin-link" @onclick='() => NavTo("/startseite")'>Startseite</div>
-                <div class="admin-link" @onclick='() => NavTo("/präferenzeinstellungen")'>Präferenzen</div>
-                <div class="admin-link" @onclick='() => NavTo("/ranglistetest")'>Rangliste</div>
-                <div class="admin-link" @onclick='() => NavTo("/matchestest")'>Matches</div>
-            </div>
-            }
-        </div>
     </div>
     }
+    
     @* Standard Vorschlags Karte *@
     <div class="tinder-card-area">
         @if (_isProfileVisible && _currentHarvest != null)
@@ -135,7 +114,7 @@
                             <img src="@_currentHarvest.ProfileImageUrl" alt="User Avatar" />
                         </div>
                         <div class="username-tag-combo">
-                            <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
+                            <a class="username-link" href="@($"/profil/{GetProfileIdUrl()}")">
                                 <span class="username-label">@_currentHarvest.Username</span>
                             </a>
                             <div class="tag-label">
@@ -245,8 +224,14 @@
     </div>
 
     <footer class="bottom-nav">
-        <div class="nav-item active" @onclick="GoToMatches">
-            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
+        <div class="nav-item active matches-nav-container" @onclick="GoToMatches">
+            @if (CurrentMatchesCount() > 0)
+            {
+                <div class="matches-badge">
+                    @CurrentMatchesCount()
+                </div>
+            }
+            <img src="pictures/MatchesIcon.png" alt="Matches" height="40"/>
             <span>Matches</span>
         </div>
 
@@ -332,20 +317,10 @@
     // ----------------------------
     protected override void OnInitialized()
     {
-        //TODO KOMMT WEG
-        Console.WriteLine("Er kommt zumindest in OnInitialized");
-        Console.WriteLine($"STATE(Startseite): {CurrentProfile.InstanceId}");
-        
-        // Guard: wenn kein Profil im State liegt, sind wir nicht (mehr) eingeloggt.
-        // Dann zurück zur Login-Seite, bevor wir UserName/LoggedInProfile verwenden.
+        //Überprüfung
+        //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
         if (CurrentProfile.LoggedInProfile is null)
         {
-            //TODO TEST GEHÖRT WEG
-            Console.WriteLine("STARTSEITE GUARD TRIGGERED: LoggedInProfile is null -> redirect to /");
-
-            // optional: noch mehr Kontext
-            Console.WriteLine($"IsLoggedIn: {CurrentProfile.IsLoggedIn}");
-            Console.WriteLine($"UserName: '{CurrentProfile.UserName}'");
             
             Nav.NavigateTo("/");
             return;
@@ -381,15 +356,6 @@
         _adTimer.Enabled = true;
     }
     
-    //Subscription auf MatchManager Methode löst die Methode aus, falls es zu einem neuen Match kommt
-    private async void OnMatchCreated(PublicProfileDto matchProfile)
-    {
-        _matchedUser = matchProfile;
-        _showMatchOverlay = true;
-        await PlayMatchSound();
-        await InvokeAsync(StateHasChanged);
-    }
-    
     //Falls Seite verlassen wird
     public void Dispose()
     {
@@ -409,6 +375,38 @@
             _adTimer = null;
             _adTimerElapsedHandler = null;
         }
+    }
+    
+    // ----------------------------
+    // Current Matches Logik
+    // ----------------------------
+    private int _matchCount; 
+
+    //TODO KOMMENTAR FEHLT
+    private int CurrentMatchesCount()
+    {
+        if (_matchManager is null)
+            return 0;
+        
+        _matchCount = _matchManager.GetActiveMatches().Count;
+        return _matchCount;
+    }
+    
+    //Subscription auf MatchManager Methode löst die Methode aus, falls es zu einem neuen Match kommt
+    private async void OnMatchCreated(PublicProfileDto matchProfile)
+    {
+        //TODO AWAIT SYNC Aleks prüfen wie es sich bei mehreren Matches verhält
+        _matchedUser = matchProfile;
+        _showMatchOverlay = true;
+        _matchCount = _matchManager?.GetActiveMatches().Count ?? _matchCount;
+        await PlayMatchSound();
+        await InvokeAsync(StateHasChanged);
+    }
+    
+    private async Task PlayMatchSound()
+    {
+        // Spielt Konfetti-Sound ab bei Match
+        await JS.InvokeVoidAsync("eval", "new Audio('sounds/itsamatch.mp3').play()");
     }
 
     // ----------------------------
@@ -470,12 +468,6 @@
         }
     }
 
-    private async Task PlayMatchSound()
-    {
-        // Spielt Konfetti-Sound ab bei Match
-        await JS.InvokeVoidAsync("eval", "new Audio('sounds/itsamatch.mp3').play()");
-    }
-
     private void CloseMatchOverlay() => _showMatchOverlay = false;
 
     // ----------------------------
@@ -488,33 +480,7 @@
         _showAd = true;
         await InvokeAsync(StateHasChanged);
     }
-
-    // ----------------------------
-    // Menus / Navigation
-    // ----------------------------
-    private void ToggleLogoutMenu()
-    {
-        _showLogout = !_showLogout;
-        if (!_showLogout)
-            _showAdminNav = false;
-    }
-
-    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
-
-    private void NavTo(string path)
-    {
-        _showLogout = false;
-        Nav.NavigateTo(path);
-    }
-
-    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
-    private void NavigateToLogout() => Nav.NavigateTo("/");
-    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
-    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
-    private void GoToMatches() => Nav.NavigateTo("/MatchesTest");
-    private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
-
+    
     // ----------------------------
     // Report modal
     // ----------------------------
@@ -643,7 +609,7 @@
     // ----------------------------
     // Helpers
     // ----------------------------
-    private string GetUsernameUrl() => _currentHarvest?.Username.TrimStart('@') ?? "";
+    private int GetProfileIdUrl() => _currentHarvest.ProfileId;
     
     private void LoadNextSuggestion()
     {
@@ -660,6 +626,9 @@
         
         //Gib mir den ersten Eintrag aus der Vorschlagsliste zurück
         var next = _matchManager.GetNextSuggestion();
+        
+        Console.WriteLine($"Harvest UploadId: {next.Value.harvest.UploadId}");
+        Console.WriteLine($"TagIds: {(next.Value.harvest.TagIds is null ? "NULL" : string.Join(",", next.Value.harvest.TagIds))}");
         
         //Falls Vorschlagsliste leeren Key zurückgibt -> 
         //Zeigt die "Keine Vorschläge" Karte an
@@ -682,6 +651,7 @@
         _currentHarvest = new HarvestModel
         {
             Username = "@" + next.Value.creator.UserName,
+            ProfileId = next.Value.creator.ProfileId,
             ProfileImageUrl = next.Value.creator.ProfilepictureUrl,
             ImageUrl = next.Value.harvest.ImageUrl,
             Description = next.Value.harvest.Description,
@@ -734,6 +704,7 @@
     private sealed class HarvestModel
     {
         public string Username { get; set; } = "";
+        public int ProfileId { get; set; }
         public string Tag { get; set; } = "";
         public string ImageUrl { get; set; } = "";
         public string ProfileImageUrl { get; set; } = "";
@@ -742,4 +713,30 @@
         public string Width { get; set; } = "";
         public string Description { get; set; } = "";
     }
+    
+    // ----------------------------
+    // Menus / Navigation
+    // ----------------------------
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        if (!_showLogout)
+            _showAdminNav = false;
+    }
+
+    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
+
+    private void NavTo(string path)
+    {
+        _showLogout = false;
+        Nav.NavigateTo(path);
+    }
+
+    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
+    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
+    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
+    private void GoToMatches() => Nav.NavigateTo("/matches");
+    private void GoToMainpage() => Nav.NavigateTo("/startseite");
+    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
+
 }

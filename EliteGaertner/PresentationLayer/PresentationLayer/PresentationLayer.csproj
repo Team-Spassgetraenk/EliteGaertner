@@ -28,4 +28,9 @@
       <Folder Include="wwwroot\tempUploads\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Pages\PresentationLayerTest\Test01.razor" />
+      <_ContentIncludedByDefault Remove="Components\Pages\PresentationLayerTest\TutorialBubble.razor" />
+    </ItemGroup>
+
 </Project>

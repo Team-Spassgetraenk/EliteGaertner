@@ -9,7 +9,7 @@ public interface IProfileMgm
     
     public PublicProfileDto VisitPublicProfile(int profileId); //Für Besucher
 
-    public PrivateProfileDto VisitPrivateProfile(int profileId); //Für das eigene
+    public PrivateProfileDto GetPrivProfile(int profileId); //Für das eigene
 
     public bool UpdateProfile(PrivateProfileDto profile);
 

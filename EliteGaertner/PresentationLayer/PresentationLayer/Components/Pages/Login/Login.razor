@@ -7,8 +7,6 @@
 @inject NavigationManager Nav
 
 
-
-
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
 <div class="login-page-container">
@@ -96,20 +94,7 @@
             
             CurrentProfile.Login(loggedInProfile);
             
-            
-            //TODO TEST KOMMT WEG!
-            Console.WriteLine($"STATE(Login): {CurrentProfile.InstanceId}");
-            
-            //TODO TEST KOMMT WEG!
-            Console.WriteLine("LOGIN RESULT:");
-            Console.WriteLine($"ProfileId: {loggedInProfile?.ProfileId}");
-            Console.WriteLine($"UserName: {loggedInProfile?.UserName}");
-            
-            
             Nav.NavigateTo("/startseite");
-            
-            //TODO KOMMT WEG!
-            Console.WriteLine("NavigateTo(/startseite) wurde aufgerufen");
         }
         catch (UnauthorizedAccessException ex)
         {

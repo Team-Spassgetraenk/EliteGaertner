@@ -1,4 +1,5 @@
 using Contracts.Data_Transfer_Objects;
+using AppLogic.Interfaces;
 
 namespace PresentationLayer.State;
 
@@ -20,12 +21,30 @@ public sealed class CurrentProfileState
     public IReadOnlyList<HarvestUploadDto>? HarvestUploads => LoggedInProfile?.HarvestUploads;
     public IReadOnlyList<PreferenceDto>? PreferenceDtos => LoggedInProfile?.PreferenceDtos;
     
-    //TODO KOMMT WEG -> DEBUGGEN
-    public Guid InstanceId { get; } = Guid.NewGuid();
+    //Action die alle Seiten abbonieren, die Daten speichern/löschen müssen 
+    //Diese Action triggert einen Render Neustart auf der jeweiligen Seite
+    public event Action? Onchange;
+    private void NotifyStateChanged()
+    {
+        Onchange?.Invoke();
+    }
 
     public void Login(PrivateProfileDto profile)
     {
         LoggedInProfile = profile;
+    }
+    
+    public void RefreshProfile(IProfileMgm profileMgm)
+    {
+        //Prüft ob ProfilId vorhanden ist
+        if (ProfileId is null)
+            return;
+
+        //Lädt aus der Datenbank das PrivateProfileDto neu
+        LoggedInProfile = profileMgm.GetPrivProfile(ProfileId.Value);
+        
+        //Trigget den Render Neustart
+        NotifyStateChanged();
     }
 
     public void Logout()

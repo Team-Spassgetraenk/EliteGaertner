@@ -14,19 +14,24 @@ public class ProfileDbs : IProfileDbs
         _dbContext = dbContext;
     }   
     
-    public int? CheckPassword(string eMail, string passwordHash)
+    public int? CheckPassword(string eMail, string klartextPassword)
     {
-        if (string.IsNullOrWhiteSpace(eMail) || string.IsNullOrWhiteSpace(passwordHash))
+        if (string.IsNullOrWhiteSpace(eMail) || string.IsNullOrWhiteSpace(klartextPassword))
             return null;
         
         var normalizedEmail = eMail.Trim().ToLowerInvariant();
         var profile = _dbContext.Profiles
             .AsNoTracking()
             .SingleOrDefault(p => 
-                p.Email == normalizedEmail && 
-                p.Passwordhash == passwordHash);
+                p.Email == normalizedEmail);
         
-        return profile?.Profileid;
+        
+        if (profile == null)
+            return null;
+
+        bool isValid = BCrypt.Net.BCrypt.Verify(klartextPassword, profile.Passwordhash);
+    
+        return isValid ? profile.Profileid : null;
     }
     
 
@@ -106,8 +111,8 @@ public class ProfileDbs : IProfileDbs
             ProfilepictureUrl = profileEntity.Profilepictureurl,
             UserName = profileEntity.Username,
             FirstName = profileEntity.Firstname,
-            LastName = profileEntity.Lastname,
-            EMail = profileEntity.Email,
+            LastName = profileEntity.Lastname,  
+            EMail = profileEntity.Email,         
             Phonenumber = profileEntity.Phonenumber,
             Profiletext = profileEntity.Profiletext,
             ShareMail = profileEntity.Sharemail,
@@ -265,7 +270,7 @@ public class ProfileDbs : IProfileDbs
         return rowsAffected > 0;
     }
     
-        public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
+    public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
     {
         //Falls die profileId <= 0 ist, return ein leeres PreferenceDto Enumerable 
         if (profileId <= 0)

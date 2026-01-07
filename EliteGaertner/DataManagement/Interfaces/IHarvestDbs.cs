@@ -17,11 +17,15 @@ public interface IHarvestDbs
     
     public void CreateUploadDbs(HarvestUploadDto uploadDto);
     
+    //TODO KOMMENTAR FEHLT
     public HarvestUploadDto GetUploadDb(int uploadId);
     
+    //Löscht einen HarvestUpload
     public void DeleteHarvestUpload(int uploadId);
     
+    //Speichert einen Report der jeweiligen HarvestUpload ab
     public void SetReportHarvestUpload(int uploadId, ReportReasons reason);
     
+    //Gibt zurück wie oft ein HarvestUpload Reported worden ist
     public int GetReportCount(int uploadId);
 }

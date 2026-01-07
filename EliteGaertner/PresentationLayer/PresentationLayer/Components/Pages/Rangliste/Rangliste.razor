@@ -1,5 +1,14 @@
 @page "/RanglisteTest"
+@using PresentationLayer.Services
+@using PresentationLayer.Shared
+@using PresentationLayer.State
+@using AppLogic.Interfaces
+@using AppLogic.Services
+@using DataManagement.Interfaces
 
+@inject ILeaderBoardDbs LeaderBoardDbs
+@inject CurrentProfileState CurrentProfile
+@inject SessionService Session
 @inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -23,24 +32,24 @@
     @if (_showLogout)
     {
     <div class="logout-menu">
-        <p @onclick="NavigateToLogout">Logout ➜]</p>
+        <p @onclick="Session.Logout">Logout ➜</p>
     </div>
     }
 
     <div class="scroll-content rangliste-content">
         
         <div class="category-selector">
-            <span class="current-category">@_currentCategory.DisplayName</span>
+            <span class="current-category">@_currentLeaderboard.LeaderboardTitle</span>
             <span class="dropdown-arrow" @onclick="ToggleCategoryMenu">▼</span>
         </div>
         
-        @if (_showCategoryMenu)
+        @if (_showLeaderboardMenu)
         {
             <div class="category-dropdown-menu comic-box-dropdown">
-                @foreach (var cat in _categories)
+                @foreach (var cat in _leaderboardList)
                 {
                     <div class="dropdown-item" @onclick="() => SelectCategory(cat)">
-                        @cat.DisplayName
+                        @cat.LeaderboardTitle
                     </div>
                 }
             </div>
@@ -51,17 +60,46 @@
                 <img src="pictures/Rangliste.png" alt="Rangliste" height="80" /> 
             </div>
 
-            @foreach (var rank in _currentCategory.Ranking)
+            @foreach (var entry in _currentLeaderboard.Entries)
             {
-                <div class="rank-entry @GetRankCssClass(rank.Rank)">
-                    <div class="rank-info" @onclick="() => GoToProfile(rank.Username)">
-                        <span class="rank-number">@GetRankPrefix(rank.Username)@rank.Rank</span>
-                        <span class="username-display">@rank.Username</span>
+                <div class="rank-entry @GetRankCssClass(entry.Rank)" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <div class="rank-info" @onclick="() => GoToProfile(entry.ProfileId)">
+                        <span class="rank-number">#@entry.Rank</span>
+                        <span class="username-display">@entry.UserName</span>
+                    </div>
+                    <div class="rank-value" style="margin-left:auto; white-space:nowrap;">
+                        <span style="font-weight:600;">@FormatValue(entry.Value, _currentLeaderboard.Goal)</span>
                     </div>
                 </div>
             }
         </div>
         
+        @* Meine Platzierung *@
+        @if (_currentLeaderboard?.PersonalEntry is not null && _currentLeaderboard.PersonalEntry.Rank > 0)
+        {
+            <div class="rangliste-card comic-box-card my-rank-card">
+                <div class="rank-entry current-user-rank" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <div class="rank-info">
+                        <span class="rank-number">#@_currentLeaderboard.PersonalEntry.Rank</span>
+                        <span class="username-display">@_currentLeaderboard.PersonalEntry.UserName</span>
+                    </div>
+                    <div class="rank-value" style="margin-left:auto; white-space:nowrap;">
+                        @* Value ist je nach Goal Likes / cm / g *@
+                        <span style="font-weight:600;">@FormatValue(_currentLeaderboard.PersonalEntry.Value, _currentLeaderboard.Goal)</span>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="rangliste-card comic-box-card my-rank-card">
+                <div class="rank-entry default-rank">
+                    <div class="rank-info">
+                        <span class="username-display">Keine persönliche Platzierung für diese Kategorie.</span>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 
     <footer class="bottom-nav">
@@ -84,84 +122,78 @@
 </div>
 
 @code {
-    public class RankEntry
-    {
-        public int Rank { get; set; }
-        public string Username { get; set; } = "";
-        public bool IsCurrentUser { get; set; }
-    }
-    
-    public class Category
-    {
-        public string Id { get; set; } = "";
-        public string DisplayName { get; set; } = "";
-        public List<RankEntry> Ranking { get; set; } = new();
-    }
 
-    private bool _showLogout = false;
-    private bool _showCategoryMenu = false;
-    private Category _currentCategory = new();
+    private bool _showLogout = false; 
+    private bool _showLeaderboardMenu = false;
+    private List<LeaderboardDto> _leaderboardList = new();
+    private LeaderboardDto _currentLeaderboard;
     
-    private readonly List<Category> _categories = new()
-    {
-        new Category
-        {
-            Id = "gurke",
-            DisplayName = "Längste Gurke",
-            Ranking = new List<RankEntry>
-            {
-                new RankEntry { Rank = 1, Username = "@user_name01" },
-                new RankEntry { Rank = 2, Username = "@user_name02" },
-                new RankEntry { Rank = 3, Username = "@user_name03" },
-                new RankEntry { Rank = 4, Username = "@user_name04" },
-                new RankEntry { Rank = 5, Username = "@user_name05" },
-                new RankEntry { Rank = 17, Username = "Ich", IsCurrentUser = true }, 
-            }
-        },
-        new Category
-        {
-            Id = "aubergine",
-            DisplayName = "Größte Aubergine",
-            Ranking = new List<RankEntry>
-            {
-                new RankEntry { Rank = 1, Username = "@AuberginenKing" },
-                new RankEntry { Rank = 2, Username = "@TomatenMann" },
-                new RankEntry { Rank = 3, Username = "@Gemüsegärtnerin" },
-                new RankEntry { Rank = 4, Username = "@KrautundRüben" },
-                new RankEntry { Rank = 5, Username = "@Karotte33" },
-                new RankEntry { Rank = 12, Username = "Ich", IsCurrentUser = true }, 
-            }
-        }
-    };
-
+    
+    
     protected override void OnInitialized()
     {
-        _currentCategory = _categories.First();
+        
+        //Überprüfung
+        //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
+        if (CurrentProfile.LoggedInProfile is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+        
+        //Er erstellt hier aus LeaderBoardCategories die Leaderboards die wir benötigen
+        foreach (var leaderboard in LeaderBoardCategories.Leaderboards)
+        {
+            var service = new LeaderboardService(
+                leaderboard.LeaderboardTitle,
+                leaderboard.LeaderboardId,
+                CurrentProfile.ProfileId.Value,
+                leaderboard.TagId,
+                leaderboard.Goal,
+                LeaderBoardDbs
+            );
+
+            _leaderboardList.Add(service.GetLeaderBoardDto());
+        }
+
+        _currentLeaderboard = _leaderboardList.First();
     }
     
+
     private string GetRankCssClass(int rank)
     {
         if (rank == 1) return "rank-1";
         if (rank == 2) return "rank-2";
         if (rank == 3) return "rank-3";
-        if (_currentCategory.Ranking.Any(r => r.Rank == rank && r.IsCurrentUser)) return "current-user-rank";
         return "default-rank";
     }
 
-    private string GetRankPrefix(string username)
+    // Formatiert den Ranglistenwert abhängig vom Ziel (Likes / cm / g).
+    private string FormatValue(float value, LeaderboardSearchGoal goal)
     {
-        return username == "Ich" ? "" : "#";
+        // Use compact formatting for floats.
+        var n = value.ToString("0.##");
+
+        return goal switch
+        {
+            LeaderboardSearchGoal.MostLikes => $"{n} 💚",
+            LeaderboardSearchGoal.Longest   => $"{n} cm",
+            LeaderboardSearchGoal.Widest    => $"{n} cm",
+            LeaderboardSearchGoal.Heaviest  => $"{n} g",
+            _ => n
+        };
     }
 
     private void ToggleCategoryMenu()
     {
-        _showCategoryMenu = !_showCategoryMenu;
+        _showLeaderboardMenu = !_showLeaderboardMenu;
     }
     
-    private void SelectCategory(Category category)
+    //Weist dem currentLeaderboard die im Menü ausgewählte Rangliste zu
+    private void SelectCategory(LeaderboardDto leaderboard)
     {
-        _currentCategory = category;
-        _showCategoryMenu = false;
+        _currentLeaderboard = leaderboard;
+        _showLeaderboardMenu = false;
     }
 
     // --- Navigations-Methoden ---
@@ -169,26 +201,13 @@
     {
         _showLogout = !_showLogout;
     }
-
-    private void NavigateToLogout()
+    
+    private void GoToProfile(int profileId)
     {
-        Nav.NavigateTo("/Login");
-    }
-
-    private void GoToProfile(string username)
-    {
-        string userUrl = username.TrimStart('@');
-        if (username.ToLower() == "ich")
-        {
-            Nav.NavigateTo("/ProfilTest");
-        }
-        else
-        {
-            Nav.NavigateTo($"/profil/{userUrl}");
-        }
+        Nav.NavigateTo($"/profil/{profileId}");
     }
     
-    private void GoToMatches() => Nav.NavigateTo("/MatchesTest");
+    private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
+    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
 }

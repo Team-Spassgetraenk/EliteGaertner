@@ -1,4 +1,14 @@
-@page "/profil/{Username}"
+@page "/profil/{ProfileId:int}"
+@using AppLogic.Interfaces
+@using AppLogic.Services
+@using PresentationLayer.Services
+@using PresentationLayer.State
+@using Contracts.Data_Transfer_Objects
+@using Microsoft.AspNetCore.Components
+@using PresentationLayer.Shared
+@inject IProfileMgm ProfileMgm
+@inject CurrentProfileState CurrentProfile
+@inject SessionService Session
 @inject NavigationManager Nav
 
 
@@ -20,7 +30,7 @@
             @if (_showLogout)
             {
                 <div class="logout-menu comic-box">
-                    <p @onclick="NavigateToLogout" style="cursor:pointer; padding: 5px 10px; margin:0;">Logout &lt;</p>
+                    <p @onclick="Session.Logout" style="cursor:pointer; padding: 5px 10px; margin:0;">Logout &lt;</p>
                 </div>
             }
         </div>
@@ -31,9 +41,9 @@
         <aside class="left-column">
             <div class="profile-header-box comic-box">
                 <div class="profile-pic-placeholder">
-                    <img src="pictures/Profil_03.png" alt="Profilbild" class="profile-pic" />
+                    <img src="@_profilePictureUrl" alt="Profilbild" class="profile-pic" />
                 </div>
-                <h2 class="username-display">@@@UsernameDisplay</h2>
+                <h2 class="username-display">@_profileName</h2>
                 <div class="divider"></div>
                 <p class="profile-description">@_bioText</p>
             </div>
@@ -42,7 +52,7 @@
         <main class="right-column">
             <div class="harvest-gallery-box comic-box gallery-scroll-container">
                 <div class="harvest-grid">
-                    @foreach (var h in _harvestDetails)
+                    @foreach (var h in _profileHarvestUploads)
                     {
                         <div class="grid-item comic-grid-item" @onclick="() => _selectedHarvest = h" style="cursor: pointer;">
                             <img src="@h.ImageUrl" alt="Erntebild" class="harvest-photo" />
@@ -65,7 +75,10 @@
                             <img src="@_selectedHarvest.ImageUrl" alt="Ernte" class="harvest-image" />
                         </div>
                         <div class="username-tag-combo">
-                            <span class="username-label">@_selectedHarvest.Tag</span>
+                            <span class="username-label">@_profileName</span>
+                            <div class="tag-label">
+                                <span>@GetPrimaryTagLabel(_selectedHarvest)</span>
+                            </div>
                         </div>
                     </div>
 
@@ -75,21 +88,21 @@
                                 <div class="param-icon-circle">⚖️</div>
                                 <div class="param-content-wrapper">
                                     <p class="param-title">Gewicht</p>
-                                    <p class="param-value">@_selectedHarvest.Weight</p>
+                                    <p class="param-value">@_selectedHarvest.WeightGram</p>
                                 </div>
                             </div>
                             <div class="white-comic-box">
                                 <div class="param-icon-circle">📏</div>
                                 <div class="param-content-wrapper">
                                     <p class="param-title">Länge</p>
-                                    <p class="param-value">@_selectedHarvest.Length</p>
+                                    <p class="param-value">@_selectedHarvest.LengthCm</p>
                                 </div>
                             </div>
                             <div class="white-comic-box">
                                 <div class="param-icon-circle">📐</div>
                                 <div class="param-content-wrapper">
                                     <p class="param-title">Breite</p>
-                                    <p class="param-value">@_selectedHarvest.Width</p>
+                                    <p class="param-value">@_selectedHarvest.WidthCm</p>
                                 </div>
                             </div>
                         </div>
@@ -122,36 +135,57 @@
 </div>
 
 @code {
-    [Parameter] public string Username { get; set; } = "";
-    private string _bioText = "Hier steht die Profilbeschreibung des fremden Users... Ein leidenschaftlicher Hobbygärtner, der sich auf seltene Chilisorten spezialisiert hat.";
     
-    private List<HarvestDetail> _harvestDetails = new()
-    {
-        new() { ImageUrl="pictures/Testbilder/Gurken_01.jpg", Tag="Gurken 🥒", Weight="320g", Length="22cm", Width="5cm", Description="Sehr knackig dieses Jahr!" },
-        new() { ImageUrl="pictures/Testbilder/Karotten_01.jpg", Tag="Karotten 🥕", Weight="150g", Length="18cm", Width="3cm", Description="Direkt aus dem Hochbeet." },
-        new() { ImageUrl="pictures/Testbilder/Kürbisse_01.jpg", Tag="Kürbis 🎃", Weight="4.2kg", Length="35cm", Width="40cm", Description="Prachtexemplar für Halloween." },
-        new() { ImageUrl="pictures/Testbilder/Auberginen_01.jpg", Tag="Auberginen 🍆", Weight="400g", Length="15cm", Width="8cm", Description="Viel Sonne getankt." },
-        new() { ImageUrl="pictures/Testbilder/Erdbeeren_01.jpg", Tag="Erdbeeren 🍓", Weight="45g", Length="5cm", Width="4cm", Description="Zuckersüß!" },
-        new() { ImageUrl="pictures/Testbilder/Trauben_01.jpg", Tag="Trauben 🍇", Weight="600g", Length="20cm", Width="12cm", Description="Sorte: Muskat." }
-    };
+    //TODO MUSS ERLEDIGT WERDEN
+    //Profildaten
+    [Parameter]
+    public int ProfileId { get; set; }
+    private string _profileName = string.Empty;
+    private string _profilePictureUrl = string.Empty;
+    private string _bioText = string.Empty;
+    private List<HarvestUploadDto> _profileHarvestUploads = new();
 
-    private HarvestDetail? _selectedHarvest;
-    private bool _showLogout = false;
-    public string UsernameDisplay => Username.StartsWith('@') ? Username.TrimStart('@') : Username;
+    private HarvestUploadDto? _selectedHarvest;
+
+    protected override void OnParametersSet()
+    {
+        // Guard: not logged in
+        if (CurrentProfile.LoggedInProfile is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+
+        var publicProfile = ProfileMgm.VisitPublicProfile(ProfileId);
+        if (publicProfile is null)
+        {
+            // Profil existiert nicht (oder Zugriff nicht möglich)
+            Nav.NavigateTo("/matches");
+            return;
+        }
+
+        // Zuweisung des PublicProfiles
+        _profileName = "@" + (publicProfile.UserName ?? string.Empty);
+        _profilePictureUrl = publicProfile.ProfilepictureUrl ?? string.Empty;
+        _bioText = publicProfile.Profiletext ?? string.Empty;
+        _profileHarvestUploads = publicProfile.HarvestUploads?.ToList() ?? new List<HarvestUploadDto>();
+    }
+    
+    //Nimm erste TagId, mappe sie mit dem TagCatalog und rendere den passenden String
+    private static string GetPrimaryTagLabel(HarvestUploadDto? harvest)
+    {
+        var firstTagId = harvest?.TagIds?.FirstOrDefault() ?? 0;
+        if (firstTagId <= 0)
+            return string.Empty;
+
+        var tagItem = TagCatalog.FindById(firstTagId);
+        return tagItem is null ? string.Empty : $"{tagItem.Icon} {tagItem.Name}";
+    }
     
     private void ToggleLogoutMenu() => _showLogout = !_showLogout;
-    private void NavigateToLogout() => Nav.NavigateTo("/");
+    private bool _showLogout = false;
     private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
-    private void GoToMatches() => Nav.NavigateTo("/MatchesTest");
+    private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/ProfilTest");
-
-    private class HarvestDetail {
-        public string ImageUrl { get; set; } = "";
-        public string Tag { get; set; } = "";
-        public string Weight { get; set; } = "";
-        public string Length { get; set; } = "";
-        public string Width { get; set; } = "";
-        public string Description { get; set; } = "";
-    }
+    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
 }

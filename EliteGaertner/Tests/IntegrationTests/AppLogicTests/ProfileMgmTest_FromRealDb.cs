@@ -86,7 +86,7 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
         var harvestDbs = new HarvestDbs(db);
         var sut = new ProfileMgm(profileDbs, harvestDbs);
 
-        var result = sut.VisitPrivateProfile(profileId);
+        var result = sut.GetPrivProfile(profileId);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(profileId, result.ProfileId);

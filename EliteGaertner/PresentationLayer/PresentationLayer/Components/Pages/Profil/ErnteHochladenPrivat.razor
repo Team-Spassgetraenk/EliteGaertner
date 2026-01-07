@@ -1,0 +1,249 @@
+@page "/ernte-hochladen-privat"
+
+@inject NavigationManager Nav
+@using AppLogic.Interfaces
+@using PresentationLayer.Services
+@using PresentationLayer.Shared
+@using PresentationLayer.State
+@using Microsoft.AspNetCore.Components.Forms
+@inject CurrentProfileState CurrentProfile
+@inject IUploadService UploadService
+@inject IProfileMgm ProfileMgm
+@inject IImageUploadService ImageUploadService
+
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<div class="register-page-container">
+    <div class="login-center">
+
+        <div class="register-card ernte-parameter-card">
+
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <h2 class="elitegaertner-title">EliteGärtner.</h2>
+            </div>
+
+            <h3 class="register-title">Deine Ernte veröffentlichen</h3>
+
+            <div class="form-layout">
+
+                @* --- LINKA SPALTE: Bild und Upload-Button (Vertikal zentriert zur rechten Spalte) --- *@
+                <div class="left-column">
+                    @* --- Flexibler Bild-Container (Passt sich der Bildgröße an) --- *@
+                    <div class="ernte-image-container">
+                        @if (string.IsNullOrEmpty(_hochgeladenesBild))
+                        {
+                        @* **Platzhalter-Bild** (Hier ein statisches Bild zur besseren Visualisierung) *@
+                        <img src="pictures/PlatzhalterBild.jpg" alt="Bild-Platzhalter" class="ernte-image placeholder-img" />
+                        <div class="placeholder-text-overlay">
+                            <span class="bi bi-camera" style="font-size: 3rem;"></span>
+                        </div>
+                        }
+                        else
+                        {
+                        @* Flexibles hochgeladenes Bild *@
+                        <img src="@_hochgeladenesBild" alt="Erntebild" class="ernte-image" />
+                        }
+                    </div>
+
+                    <InputFile id="file-upload" OnChange="HandleFileSelection" hidden />
+                    <label for="file-upload" class="app-button secondary-button upload-button">
+                        <span class="bi bi-upload"></span> Erntebild hochladen
+                    </label>
+
+                </div>
+
+                @* --- RECHTE SPALTE: Tags und Parameter --- *@
+                <div class="right-column">
+                    
+                    <h4 class="tag-headline">Gemüse</h4>
+                    <div class="tag-grid">
+                        @foreach (var tag in TagCatalog.Gemuese)
+                        {
+                            <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                                 @onclick="() => ToggleTag(tag.TagId)">
+                                <span>@tag.Icon</span> <span>@tag.Name</span>
+                            </div>
+                        }
+                    </div>
+
+                    <h4 class="tag-headline">Obst</h4>
+                    <div class="tag-grid">
+                        @foreach (var tag in TagCatalog.Obst)
+                        {
+                            <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                                 @onclick="() => ToggleTag(tag.TagId)">
+                                <span>@tag.Icon</span> <span>@tag.Name</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="parameter-row">
+                        @* Eingabefelder werden durch CSS-Regeln auf max-width begrenzt *@
+                        <div class="input-group">
+                            <label class="input-label">Gewicht (in g)</label>
+                            <input type="number" class="app-input" @bind="Gewicht" placeholder="z.B. 300"/>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Länge (in cm)</label>
+                            <input type="number" class="app-input" @bind="Laenge" placeholder="z.b. 67"/>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Breite (in cm)</label>
+                            <input type="number" class="app-input" @bind="Breite" placeholder="z.B. 25"/>
+                        </div>
+                    </div>
+
+                    <h4 class="tag-headline">Kommentar</h4>
+                    <div class="input-group">
+                        <textarea class="app-input" maxlength="150" @bind="Kommentar"
+                                  placeholder="Beschreibe kurz deine Ernte..."></textarea>
+                        <div class="char-counter">@Kommentar.Length / 150</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="app-button primary-button weiter-button"
+                    disabled="@(
+                        _selectedTagIds.Count == 0 ||
+                        string.IsNullOrWhiteSpace(_hochgeladenesBild) ||
+                        Kommentar is null || string.IsNullOrWhiteSpace(Kommentar) ||
+                        Gewicht is null || Gewicht <= 0 ||
+                        Laenge is null || Laenge <= 0 ||
+                        Breite is null || Breite <= 0
+                    )"
+                    @onclick="VeröffentlichenAsync">
+                Ernte veröffentlichen
+            </button>
+
+            @if (
+                _selectedTagIds.Count == 0 ||
+                string.IsNullOrWhiteSpace(_hochgeladenesBild) ||
+                Kommentar is null || string.IsNullOrWhiteSpace(Kommentar) ||
+                Gewicht is null || Gewicht <= 0 ||
+                Laenge is null || Laenge <= 0 ||
+                Breite is null || Breite <= 0
+            )
+            {
+                <p class="disabled-hint">
+                    Bitte lade zuerst ein Bild hoch, wähle mindestens ein Tag aus, schreibe eine Beschreibung und fülle Gewicht, Länge und Breite aus.
+                </p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    
+    //TODO MUSS ERLEDIGT WERDEN
+    private string? _hochgeladenesBild = null;
+    
+    private List<int> _selectedTagIds = new ();
+    private int? Gewicht { get; set; }
+    private int? Laenge { get; set; }
+    private int? Breite { get; set; }
+    private string Kommentar { get; set; } = "";
+
+
+    protected override void OnInitialized()
+    {
+        //Überprüfung
+        if (CurrentProfile.LoggedInProfile is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+    }
+    
+    void ToggleTag(int tagId)
+    {
+        //Über UI soll nur ein Tag pro Upload erlaubt sein
+        //Für die Zukunft könnten wir aber umstellen, dass er mehrere Tags animmt
+        if (_selectedTagIds.Contains(tagId))
+        {
+            //Nochmal klicken -> abwählen
+            _selectedTagIds.Clear();
+            return;
+        }
+
+        // Neues Tag wählen -> alle anderen abwählen
+        _selectedTagIds.Clear();
+        _selectedTagIds.Add(tagId);
+    }
+
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file is null)
+            return;
+
+        try
+        {
+            // Speichern passiert im Service (inkl. Ordner anlegen / Dateiname generieren etc.)
+            // Rückgabe ist ein relativer Pfad (z.B. "/tempUploads/<guid>.jpg"), den wir direkt rendern können.
+            _hochgeladenesBild = await ImageUploadService.SaveImageAsync(file);
+
+            Console.WriteLine($"Bild gespeichert: {_hochgeladenesBild}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Hochladen: {ex.Message}");
+        }
+    }
+
+    private async Task VeröffentlichenAsync()
+    {
+        //Überprüfung
+        if (CurrentProfile.ProfileId is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+        //Tags + Bild müssen da sein
+        if (string.IsNullOrWhiteSpace(_hochgeladenesBild) || _selectedTagIds.Count == 0)
+            return;
+        
+        //Beschreibung (Kommentar) muss vorhanden sein
+        if (string.IsNullOrWhiteSpace(Kommentar))
+            return;
+        //Gewicht, Breite, Länge müssen da sein
+        if (Gewicht is null || Laenge is null || Breite is null)
+            return;
+
+        //TODO überprüfen ob wir das brauchen
+        // Optional: Bildpfad normalisieren (falls Service "/uploads/.." liefert)
+        //var imageUrl = _hochgeladenesBild.Trim();
+
+        var harvestUpload = new HarvestUploadDto
+        {
+            ProfileId = CurrentProfile.ProfileId.Value,
+            ImageUrl = _hochgeladenesBild,
+            Description = Kommentar.Trim(),
+            WeightGram = Gewicht.Value,
+            LengthCm = Laenge.Value,
+            WidthCm = Breite.Value,
+            UploadDate = DateTime.UtcNow,
+            TagIds = _selectedTagIds.ToList()
+        };
+
+        try
+        {
+            UploadService.CreateHarvestUpload(harvestUpload);
+
+            // State aktualisieren, damit neues Bild sofort sichtbar ist
+            CurrentProfile.RefreshProfile(ProfileMgm);
+
+            // Zur Profilseite zurück
+            Nav.NavigateTo("/EigenesUserProfil");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("VeröffentlichenAsync failed:");
+            Console.WriteLine(ex);
+        }
+    }
+}

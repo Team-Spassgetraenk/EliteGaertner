@@ -5,9 +5,8 @@ namespace PresentationLayer.Shared;
 
 public static class TagCatalog
 {
-    // TagId muss mit DB (TAGS.TagId) übereinstimmen
     public sealed record TagItem(int TagId, string Name, string Icon);
-
+    
     public static readonly IReadOnlyList<TagItem> Gemuese = new List<TagItem>
     {
         new(1,  "Auberginen", "🍆"),
@@ -37,18 +36,23 @@ public static class TagCatalog
         new(16, "Erdbeeren", "🍓"),
         new(17, "Trauben",   "🍇"),
     };
-
     
-    //TODO KOMMENTARE/VERSTÄNDNIS FEHLT
+    //Gibt die vollständige Liste aus Gemüse und Obst TagItems zurück
     private static readonly IReadOnlyList<TagItem> _all =
         Gemuese.Concat(Obst).ToList();
 
+    //Gibt dir anhand der TagId das passende Tag zurück
+    //Benötigen wir um die TagIds aus der Datenbank mit den Tags auf der UI zu mappen
     private static readonly Dictionary<int, TagItem> _byId =
         _all.ToDictionary(t => t.TagId, t => t);
 
+    //Gibt die passenden TagItems anhand des Namens zurück
     private static readonly Dictionary<string, TagItem> _byName =
         _all.ToDictionary(t => t.Name, t => t);
-
+    
+    //Diese Methoden rufen die einzelnen Field ab
+    //Die Liste ändert sich während der Programmlaufzeit nicht, also werden die benötigten Listen 
+    //in den Fields einmal bei Programmstart initialisiert und dann nur noch von den Methoden bei Bedarf abgefragt
     public static TagItem? FindById(int tagId)
         => _byId.TryGetValue(tagId, out var item) ? item : null;
 

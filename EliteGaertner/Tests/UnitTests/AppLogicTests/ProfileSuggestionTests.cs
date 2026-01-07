@@ -73,14 +73,16 @@ public class ProfileSuggestionTests
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
             => Enumerable.Empty<HarvestUploadDto>();
 
-        public bool CreateUploadDbs(HarvestUploadDto uploadDto)
+        public void CreateUploadDbs(HarvestUploadDto uploadDto)
             => throw new NotImplementedException();
 
         public HarvestUploadDto GetUploadDb(int uploadId)
             => throw new NotImplementedException();
 
-        public bool DeleteHarvestUpload(int uploadId)
-            => true;
+        public void DeleteHarvestUpload(int uploadId)
+        {
+            return;
+        }
 
         public void SetReportHarvestUpload(int uploadId, ReportReasons reason) { }
         public int GetReportCount(int uploadId) => 0;
@@ -115,6 +117,11 @@ public class ProfileSuggestionTests
 
         public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
             => throw new NotImplementedException();
+
+        public void EditPassword(CredentialProfileDto credentials)
+        {
+            throw new NotImplementedException();
+        }
 
         public DataManagement.Entities.Profile? GetProfile(int profileId)
             => null; // im ProfileSuggestion-Test nicht benötigt

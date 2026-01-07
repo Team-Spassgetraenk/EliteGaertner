@@ -1,5 +1,14 @@
-@page "/MatchesTest"
-
+@page "/matches"
+@using AppLogic.Interfaces
+@using AppLogic.Services
+@using DataManagement.Interfaces
+@using PresentationLayer.Services
+@using PresentationLayer.State
+@inject CurrentProfileState CurrentProfile
+@inject IHarvestDbs HarvestDbs
+@inject IMatchesDbs MatchesDbs
+@inject IProfileDbs ProfileDbs
+@inject SessionService Session
 @inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -24,7 +33,7 @@
     @if (_showLogout)
     {
     <div class="logout-menu">
-        <p @onclick="NavigateToLogout">Logout &lt;</p>
+        <p @onclick="Session.Logout">Logout &lt;</p>
     </div>
     }
 
@@ -33,7 +42,7 @@
         {
         <div class="match-card">
             <div class="card-inner">
-                <a class="username-link" href="@($"/profil/{match.UsernameUrl}")">
+                <a class="username-link" href="@($"/profil/{match.ProfileId}")">
                     <div class="username">@match.UserName</div>
                 </a>
 
@@ -67,55 +76,56 @@
 </div>
 
 @code {
-// NEU: Logout-Variable
-private bool _showLogout = false;
 
-public class UserMatch
-{
-public string UserName { get; set; } = "";
-public string Phone { get; set; } = "";
-public string Email { get; set; } = "";
+    private readonly List<UserMatch> _matches = new List<UserMatch>();
+    private IMatchManager _matchManager;
+    private bool _showLogout = false; 
 
-// Liefert den Namen ohne '@' für die URL
-public string UsernameUrl => UserName.TrimStart('@');
-}
+    
+    protected override void OnInitialized()
+    {
+        //Überprüfung
+        if (CurrentProfile.LoggedInProfile is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
 
-private List<UserMatch> _matches = new List<UserMatch>
-{
-new UserMatch { UserName = "@user_name1", Phone = "+49 12345678901", Email = "max.mustermann@gmail.com" },
-new UserMatch { UserName = "@user_name3", Phone = "+49 8415 7563344", Email = "reiner.zufall@gmx.de" },
-new UserMatch { UserName = "@user_name4", Phone = "+49 98765432109", Email = "elite.gaertner69@gmail.com" },
-new UserMatch { UserName = "@user_name5", Phone = "+49 34523045646", Email = "6sieben.atze3@web.de" },
-};
+        _matchManager = new MatchManager(MatchesDbs, ProfileDbs, HarvestDbs, CurrentProfile.LoggedInProfile);
 
-// NEU: Logout-Methoden
-private void ToggleLogoutMenu()
-{
-_showLogout = !_showLogout;
-}
 
-private void NavigateToLogout()
-{
-Nav.NavigateTo("/");
-}
+        var matchDtos = _matchManager.GetActiveMatches();
 
-private void GoToRanks()
-{
-Nav.NavigateTo("/RanglisteTest");
-}
+        foreach (var dto in matchDtos)
+        {
+            _matches.Add(new UserMatch
+            {
+                UserName = dto.UserName,
+                ProfileId = dto.ProfileId,
+                Phone = dto.Phonenumber,
+                Email = dto.EMail
+            });
+        }
+    }
 
-private void GoToMatches()
-{
-Nav.NavigateTo("/MatchesTest");
-}
-
-private void GoToMainpage()
-{
-Nav.NavigateTo("/startseite");
-}
-
-private void GoToProfile()
-{
-Nav.NavigateTo("/ProfilTest");
-}
+    public record UserMatch
+    {
+        public string UserName { get; init; }
+        public int ProfileId { get; init; }
+        public string Phone { get; init; } 
+        public string Email { get; init; } 
+    }
+    
+    // NEU: Logout-Methoden
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+    }
+    
+    //Navigation
+    
+    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
+    private void GoToMatches() => Nav.NavigateTo("/matches");
+    private void GoToMainpage() => Nav.NavigateTo("/startseite");
+    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
 }

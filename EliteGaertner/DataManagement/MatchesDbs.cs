@@ -53,6 +53,7 @@ public class MatchesDbs : IMatchesDbs
                     //Wir benötigen für die Matchübersicht nur ProfileId, Username
                     //und möglicherweise Email und Phonenumber 
                     ProfileId = p.Profileid,
+                    ProfilepictureUrl = p.Profilepictureurl,
                     UserName = p.Username,
                     //Prüft ob der Creator seine Mail und/oder Telefonnummer freigegeben hat
                     EMail = p.Sharemail ? p.Email : null,

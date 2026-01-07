@@ -122,7 +122,7 @@ public class ProfileMgmUnitTests
             FirstName = "Max",
             LastName = "Mustermann",
             EMail = "private@example.com",
-            PasswordHash = "hash123",
+            //PasswordHash = "hash123",
             Phonenumber = "987654321",
             Profiletext = "Private profile text",
             ShareMail = true,
@@ -143,7 +143,7 @@ public class ProfileMgmUnitTests
         _mockProfileDbs.Setup(x => x.GetPrivateProfile(profileId)).Returns(expectedProfileInfo);
 
         // Act
-        var result = _profileMgm.VisitPrivateProfile(profileId);
+        var result = _profileMgm.GetPrivProfile(profileId);
 
         // Assert
         Assert.AreEqual(expectedProfileInfo.ProfileId, result.ProfileId);
@@ -278,9 +278,15 @@ public class ProfileMgmUnitTests
             FirstName = "New",
             LastName = "User",
             EMail = "new@example.com",
-            PasswordHash = "newhash",
+            //PasswordHash = "newhash",
             HarvestUploads = null,
             PreferenceDtos = null
+        };
+
+        var newCredential = new CredentialProfileDto()
+        {
+            EMail = "new@example.com",
+            PasswordHash = "newhash"
         };
 
         var registeredProfile = new PrivateProfileDto
@@ -295,10 +301,10 @@ public class ProfileMgmUnitTests
             PreferenceDtos = null
         };
 
-        _mockProfileDbs.Setup(x => x.SetNewProfile(newProfile)).Returns(registeredProfile);
+        _mockProfileDbs.Setup(x => x.SetNewProfile(newProfile,newCredential)).Returns(registeredProfile);
 
         // Act
-        var result = _profileMgm.RegisterProfile(newProfile, TODO);
+        var result = _profileMgm.RegisterProfile(newProfile, newCredential);
 
         // Assert
         Assert.AreEqual(1, result.ProfileId);
@@ -308,7 +314,7 @@ public class ProfileMgmUnitTests
         Assert.IsNull(result.HarvestUploads);
         Assert.IsNull(result.PreferenceDtos);
 
-        _mockProfileDbs.Verify(x => x.SetNewProfile(newProfile), Times.Once);
+        _mockProfileDbs.Verify(x => x.SetNewProfile(newProfile, newCredential), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }
@@ -317,7 +323,7 @@ public class ProfileMgmUnitTests
     public void LoginProfile_ValidCredentials_ReturnsCompletePrivateProfile()
     {
         // Arrange
-        var loginProfile = new PrivateProfileDto
+        var loginProfile = new CredentialProfileDto()
         {
             EMail = "test@example.com",
             PasswordHash = "hash123"
@@ -364,7 +370,7 @@ public class ProfileMgmUnitTests
     public void LoginProfile_InvalidCredentials_ThrowsUnauthorizedAccessException()
     {
         // Arrange
-        var loginProfile = new PrivateProfileDto
+        var loginProfile = new CredentialProfileDto()
         {
             EMail = "invalid@example.com",
             PasswordHash = "wrong"
