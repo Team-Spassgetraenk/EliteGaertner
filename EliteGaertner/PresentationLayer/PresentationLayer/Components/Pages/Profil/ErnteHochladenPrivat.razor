@@ -2,11 +2,14 @@
 
 @inject NavigationManager Nav
 @using AppLogic.Interfaces
-@using Contracts.Data_Transfer_Objects
-@inject IUploadService UploadService
-@inject IWebHostEnvironment Env
+@using PresentationLayer.Services
+@using PresentationLayer.Shared
+@using PresentationLayer.State
 @using Microsoft.AspNetCore.Components.Forms
-
+@inject CurrentProfileState CurrentProfile
+@inject IUploadService UploadService
+@inject IProfileMgm ProfileMgm
+@inject IImageUploadService ImageUploadService
 
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -54,25 +57,26 @@
 
                 @* --- RECHTE SPALTE: Tags und Parameter --- *@
                 <div class="right-column">
+                    
                     <h4 class="tag-headline">Gemüse</h4>
                     <div class="tag-grid">
-                        @foreach (var tag in _gemueseTags)
+                        @foreach (var tag in TagCatalog.Gemuese)
                         {
-                        <div class="tag app-tag @(_selectedTag == tag.Name ? "selected" : "")"
-                             @onclick="() => ToggleTag(tag.Name)">
-                            <span>@tag.Emoji</span> <span>@tag.Name</span>
-                        </div>
+                            <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                                 @onclick="() => ToggleTag(tag.TagId)">
+                                <span>@tag.Icon</span> <span>@tag.Name</span>
+                            </div>
                         }
                     </div>
 
                     <h4 class="tag-headline">Obst</h4>
                     <div class="tag-grid">
-                        @foreach (var tag in _obstTags)
+                        @foreach (var tag in TagCatalog.Obst)
                         {
-                        <div class="tag app-tag @(_selectedTag == tag.Name ? "selected" : "")"
-                             @onclick="() => ToggleTag(tag.Name)">
-                            <span>@tag.Emoji</span> <span>@tag.Name</span>
-                        </div>
+                            <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                                 @onclick="() => ToggleTag(tag.TagId)">
+                                <span>@tag.Icon</span> <span>@tag.Name</span>
+                            </div>
                         }
                     </div>
 
@@ -80,17 +84,17 @@
                         @* Eingabefelder werden durch CSS-Regeln auf max-width begrenzt *@
                         <div class="input-group">
                             <label class="input-label">Gewicht (in g)</label>
-                            <input type="number" class="app-input" @bind="Gewicht" placeholder="z.B. 300" />
+                            <input type="number" class="app-input" @bind="Gewicht" placeholder="z.B. 300"/>
                         </div>
 
                         <div class="input-group">
                             <label class="input-label">Länge (in cm)</label>
-                            <input type="number" class="app-input" @bind="Laenge" placeholder="z.b. 67" />
+                            <input type="number" class="app-input" @bind="Laenge" placeholder="z.b. 67"/>
                         </div>
 
                         <div class="input-group">
                             <label class="input-label">Breite (in cm)</label>
-                            <input type="number" class="app-input" @bind="Breite" placeholder="z.B. 25" />
+                            <input type="number" class="app-input" @bind="Breite" placeholder="z.B. 25"/>
                         </div>
                     </div>
 
@@ -104,14 +108,30 @@
             </div>
 
             <button class="app-button primary-button weiter-button"
-                    disabled="@( string.IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild) )"
-                    @onclick="Veröffentlichen">
+                    disabled="@(
+                        _selectedTagIds.Count == 0 ||
+                        string.IsNullOrWhiteSpace(_hochgeladenesBild) ||
+                        Kommentar is null || string.IsNullOrWhiteSpace(Kommentar) ||
+                        Gewicht is null || Gewicht <= 0 ||
+                        Laenge is null || Laenge <= 0 ||
+                        Breite is null || Breite <= 0
+                    )"
+                    @onclick="VeröffentlichenAsync">
                 Ernte veröffentlichen
             </button>
 
-            @if (string.IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild))
+            @if (
+                _selectedTagIds.Count == 0 ||
+                string.IsNullOrWhiteSpace(_hochgeladenesBild) ||
+                Kommentar is null || string.IsNullOrWhiteSpace(Kommentar) ||
+                Gewicht is null || Gewicht <= 0 ||
+                Laenge is null || Laenge <= 0 ||
+                Breite is null || Breite <= 0
+            )
             {
-            <p class="disabled-hint">Bitte lade zuerst ein Bild hoch und wähle ein Tag aus.</p>
+                <p class="disabled-hint">
+                    Bitte lade zuerst ein Bild hoch, wähle mindestens ein Tag aus, schreibe eine Beschreibung und fülle Gewicht, Länge und Breite aus.
+                </p>
             }
         </div>
     </div>
@@ -121,85 +141,53 @@
     
     //TODO MUSS ERLEDIGT WERDEN
     private string? _hochgeladenesBild = null;
+    
+    private List<int> _selectedTagIds = new ();
+    private int? Gewicht { get; set; }
+    private int? Laenge { get; set; }
+    private int? Breite { get; set; }
+    private string Kommentar { get; set; } = "";
 
-    public class TagItem(string name, string emoji)
+
+    protected override void OnInitialized()
     {
-        public string Name { get; set; } = name;
-        public string Emoji { get; set; } = emoji;
+        //Überprüfung
+        if (CurrentProfile.LoggedInProfile is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
     }
     
-    List<TagItem> _gemueseTags = new()
+    void ToggleTag(int tagId)
     {
-        new("Auberginen", "🍆"),
-        new("Gurken", "🥒"),
-        new("Tomaten", "🍅"),
-        new("Kürbisse", "🎃"),
-        new("Paprika", "🌶️"),
-        new("Zucchini", "🥒"),
-        new("Kartoffeln", "🥔"),
-        new("Karotten", "🥕"),
-        new("Salate", "🥬"),
-        new("Zwiebeln", "🧅"),
-        new ("Bohnen", "🌿"),
-        new ("Spinat", "🍃"),
-        new ("Radieschen", "🌱"),
-        new ("Brokkoli", "🥦"),
-        new ("Mais", "🌽"),
-    };
+        //Über UI soll nur ein Tag pro Upload erlaubt sein
+        //Für die Zukunft könnten wir aber umstellen, dass er mehrere Tags animmt
+        if (_selectedTagIds.Contains(tagId))
+        {
+            //Nochmal klicken -> abwählen
+            _selectedTagIds.Clear();
+            return;
+        }
 
-    List<TagItem> _obstTags = new()
-    {
-        new("Melonen", "🍉"),
-        new("Äpfel", "🍎"),
-        new("Birnen", "🍐"),
-        new("Pfirsiche", "🍑"),
-        new("Kirschen", "🍒"),
-        new("Erdbeeren", "🍓"),
-        new("Trauben", "🍇")
-    };
-
-string? _selectedTag = null;
-int? Gewicht { get; set; }
-int? Laenge { get; set; }
-int? Breite { get; set; }
-string Kommentar { get; set; } = "";
-
-void ToggleTag(string tag)
-{
-_selectedTag = (_selectedTag == tag) ? null : tag;
-}
+        // Neues Tag wählen -> alle anderen abwählen
+        _selectedTagIds.Clear();
+        _selectedTagIds.Add(tagId);
+    }
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
     {
         var file = e.File;
-        if (file == null) return;
+        if (file is null)
+            return;
 
         try
         {
-            var maxFileSize = 5 * 1024 * 1024;
-            if (file.Size > maxFileSize)
-            {
-                Console.WriteLine("Die Datei ist zu groß.");
-                return;
-            }
-        
-            //tempUploads-Ordner erstellen (falls nicht vorhanden)
-            var uploadsDir = Path.Combine(Env.WebRootPath, "tempUploads");
-            Directory.CreateDirectory(uploadsDir);
-        
-            //UUID-Dateiname generieren + Extension behalten
-            var extension = Path.GetExtension(file.Name);
-            var fileName = $"{Guid.NewGuid().ToString("N")}{extension}";
-            var filePath = Path.Combine(uploadsDir, fileName);
-        
-            // Datei in Ordner speichern
-            using var stream = file.OpenReadStream(maxFileSize);
-            using var fileStream = new FileStream(filePath, FileMode.Create);
-            await stream.CopyToAsync(fileStream);
-            
-            _hochgeladenesBild = $"/tempUploads/{fileName}";
-        
-            Console.WriteLine($"Bild gespeichert: {filePath}");
+            // Speichern passiert im Service (inkl. Ordner anlegen / Dateiname generieren etc.)
+            // Rückgabe ist ein relativer Pfad (z.B. "/tempUploads/<guid>.jpg"), den wir direkt rendern können.
+            _hochgeladenesBild = await ImageUploadService.SaveImageAsync(file);
+
+            Console.WriteLine($"Bild gespeichert: {_hochgeladenesBild}");
         }
         catch (Exception ex)
         {
@@ -207,40 +195,55 @@ _selectedTag = (_selectedTag == tag) ? null : tag;
         }
     }
 
-    void Veröffentlichen()
+    private async Task VeröffentlichenAsync()
     {
-        if (string  .IsNullOrEmpty(_selectedTag) || string.IsNullOrEmpty(_hochgeladenesBild)) return;
-
-        // TODO: echten profileId z.B. aus Auth/Context holen
-        int profileId = 1;
-
-        float weightGram = (Gewicht ?? 0);
-        float lengthCm = Laenge ?? 0;
-        float widthCm = Breite ?? 0;
-
-        var dto = new HarvestUploadDto
+        //Überprüfung
+        if (CurrentProfile.ProfileId is null)
         {
-            UploadId = 0, //Von Upload Service
-            ImageUrl = _hochgeladenesBild!, // aktuell Data-URL; später URL aus Storage
-            Description = Kommentar,
-            WeightGram = weightGram,
-            WidthCm = widthCm,
-            LengthCm = lengthCm,
+            Nav.NavigateTo("/");
+            return;
+        }
+        //Tags + Bild müssen da sein
+        if (string.IsNullOrWhiteSpace(_hochgeladenesBild) || _selectedTagIds.Count == 0)
+            return;
+        
+        //Beschreibung (Kommentar) muss vorhanden sein
+        if (string.IsNullOrWhiteSpace(Kommentar))
+            return;
+        //Gewicht, Breite, Länge müssen da sein
+        if (Gewicht is null || Laenge is null || Breite is null)
+            return;
+
+        //TODO überprüfen ob wir das brauchen
+        // Optional: Bildpfad normalisieren (falls Service "/uploads/.." liefert)
+        //var imageUrl = _hochgeladenesBild.Trim();
+
+        var harvestUpload = new HarvestUploadDto
+        {
+            ProfileId = CurrentProfile.ProfileId.Value,
+            ImageUrl = _hochgeladenesBild,
+            Description = Kommentar.Trim(),
+            WeightGram = Gewicht.Value,
+            LengthCm = Laenge.Value,
+            WidthCm = Breite.Value,
             UploadDate = DateTime.UtcNow,
-            ProfileId = profileId
+            TagIds = _selectedTagIds.ToList()
         };
 
         try
         {
-            UploadService.CreateHarvestUpload(dto);
+            UploadService.CreateHarvestUpload(harvestUpload);
+
+            // State aktualisieren, damit neues Bild sofort sichtbar ist
+            CurrentProfile.RefreshProfile(ProfileMgm);
+
+            // Zur Profilseite zurück
+            Nav.NavigateTo("/EigenesUserProfil");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex + "Upload fehlgeschlagen");
+            Console.WriteLine("VeröffentlichenAsync failed:");
+            Console.WriteLine(ex);
         }
-        
-        Console.WriteLine($"Veröffentlicht: {_selectedTag}, Bildgröße: {_hochgeladenesBild.Length}");
-        Nav.NavigateTo("/EigenesUserProfil");
-        
     }
 }

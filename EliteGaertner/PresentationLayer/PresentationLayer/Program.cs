@@ -37,6 +37,8 @@ builder.Services.AddScoped<CurrentProfileState>();
 builder.Services.AddScoped<PreferenceState>();
 //Kümmert sich um das Logout Handling
 builder.Services.AddScoped<SessionService>();
+//Kümmert sich um den Upload und Löschservice
+builder.Services.AddScoped<IImageUploadService, ImageUploadService>();
 
 var app = builder.Build();
 

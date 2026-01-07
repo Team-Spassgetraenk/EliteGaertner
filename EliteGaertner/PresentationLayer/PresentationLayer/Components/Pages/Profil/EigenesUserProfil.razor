@@ -10,6 +10,7 @@
 @inject IHarvestDbs HarvestDbs
 @inject IUploadService UploadService
 @inject IProfileMgm ProfileMgm
+@inject IImageUploadService ImageUploadService
 @inject CurrentProfileState CurrentProfile
 @inject SessionService Session
 @inject NavigationManager Nav
@@ -248,8 +249,10 @@
 
         try
         {
-            //Löscht den HarvestUpload
-            UploadService.DeleteUpload(harvestUpload.UploadId);
+            
+            //TODO URL löschen lassen auf webroot
+            //Löscht den HarvestUpload aus Datenbank + Webroot
+            ImageUploadService.TryDeleteByRelativeUrl(UploadService.DeleteUpload(harvestUpload.UploadId));
 
             //UI schließen
             _showDeletePopupIndex = null;
@@ -277,5 +280,5 @@
     private void GoToMainpage() => Nav.NavigateTo("/startseite");
     private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
     private void GoToManageProfile() => Nav.NavigateTo("/profil/profilverwaltung");
-    private void AddPhoto() => Nav.NavigateTo("/ernte-hochladen");
+    private void AddPhoto() => Nav.NavigateTo("/ernte-hochladen-privat");
 }
