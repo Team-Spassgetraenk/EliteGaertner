@@ -1,10 +1,17 @@
 @page "/profil/profilverwaltung"
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using System.IO
+@using AppLogic.Interfaces
+@using PresentationLayer.Services
+@using PresentationLayer.State
+@using PresentationLayer.Shared
+
+@inject IProfileMgm ProfileMgm
+@inject CurrentProfileState CurrentProfile
 @inject SessionService Session
 @inject NavigationManager Nav
 
-@using System.Text.RegularExpressions
-@using System.ComponentModel.DataAnnotations
-@using PresentationLayer.Services
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -51,21 +58,21 @@
 
                 @* Vorschau Links (Vorgänger-Bild)*@
                 <div class="profile-preview-container-hybrid">
-                    <img src="@($"pictures/Profilbilder/{GetProfileName(CurrentIndex - 1)}")"
+                    <img src="@($"pictures/Profilbilder/{GetProfileName(_currentIndex - 1)}")"
                          alt="Vorschau"
                          class="profile-image-preview" />
                 </div>
 
                 @* Zentrales, ausgewähltes Bild*@
                 <div class="profile-main-image-container-hybrid selected-outline-hybrid">
-                    <img src="@($"pictures/Profilbilder/{SelectedProfile}")"
+                    <img src="@($"pictures/Profilbilder/{_selectedProfilePicture}")"
                          alt="Aktuelles Profilbild"
                          class="profile-image-large" />
                 </div>
 
                 @* Vorschau Rechts (Nachfolger-Bild)*@
                 <div class="profile-preview-container-hybrid">
-                    <img src="@($"pictures/Profilbilder/{GetProfileName(CurrentIndex + 1)}")"
+                    <img src="@($"pictures/Profilbilder/{GetProfileName(_currentIndex + 1)}")"
                          alt="Vorschau"
                          class="profile-image-preview" />
                 </div>
@@ -99,17 +106,17 @@
 
             <div class="info-item">
                 <label>Nachname:</label>
-                <p>@_sirname</p>
+                <p>@_lastName</p>
             </div>
 
             <div class="info-item">
                 <label>Vorname:</label>
-                <p>@_prename</p>
+                <p>@_firstName</p>
             </div>
 
             <div class="info-item">
                 <label>Benutzername:</label>
-                <p>@_username</p>
+                <p>@_profileName</p>
             </div>
         </div>
 
@@ -141,7 +148,7 @@
                        class="app-input"
                        type="tel"
                        placeholder="+49123456789"
-                       @bind="_fullTelephoneNumber"
+                       @bind="_phoneNumber"
                        @bind:event="oninput" />
             </div>
 
@@ -157,7 +164,7 @@
 
                 <div class="form-check-group">
                     <div class="form-check-custom">
-                        <input class="app-check-input" type="checkbox" id="shareTel" @bind="_shareTelephone" @bind:event="onchange" />
+                        <input class="app-check-input" type="checkbox" id="shareTel" @bind="_sharePhoneNumber" @bind:event="onchange" />
                         <label class="app-check-label" for="shareTel">Telefon freigeben</label>
                     </div>
                 </div>
@@ -229,7 +236,7 @@
         @if (!CanSaveChanges)
         {
             <div class="disabled-hint save-hint">
-                @if (!HasAtLeastOneContact)
+                @if (!CanSaveChanges)
                 {
                     <p class="error-text">⚠️ Bitte geben Sie mindestens eine Kontaktmöglichkeit an (Email oder Telefon).</p>
                 }
@@ -250,99 +257,125 @@
 </div>
 
 @code {
-// --- Statische (nicht änderbare) Benutzerdaten ---
-string _sirname = "Mustermann";
-string _prename = "Max";
-string _username = "MaxiGärtner";
+    // --- Statische (nicht änderbare) Benutzerdaten ---
+    private string _lastName = "";
+    private string _firstName = "";
+    private string _profileName = "";
+    
+    // --- Bearbeitbare Felder ---
+    private string _profilePicture = "";
+    //------
+    
+    private string _bioText = "";
+    private string _email = "";
+    private string _phoneNumber = "";
+    private bool _shareEmail;
+    private bool _sharePhoneNumber;
+    // --- Passwort Felder ---                
+    private string _newPassword = "";         
+    private string _confirmNewPassword = "";  
+    
+    private string _selectedProfilePicture = ""; 
+    private int _currentIndex = 0;
+    
+    // UI/Steuerungsfelder
+    private bool _showLogout = false;
+    private int? _showDeletePopupIndex = null;
+    private int? _hoveredIndex = null;
 
-// --- Bearbeitbare Felder ---
-string _email = "max.mustermann@gmail.com";
-string _fullTelephoneNumber = "+49174123456789";
-bool _shareEmail = true;
-bool _shareTelephone = false;
+    protected override void OnInitialized()
+    {
+        //Überprüfung
+        //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
+        if (CurrentProfile.LoggedInProfile is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+    
+        if (CurrentProfile.ShareMail is null || CurrentProfile.Phonenumber is null)
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+    
+        //Initialisierung der Profildaten
+        _profilePicture = CurrentProfile.ProfilepictureUrl ?? "";
+        _lastName = CurrentProfile.LastName ?? "";
+        _firstName = CurrentProfile.FirstName ?? "";
+        _profileName = CurrentProfile.UserName ?? "";
+        _bioText = CurrentProfile.Profiletext ?? "";
+        _email = CurrentProfile.EMail ?? "";
+        _phoneNumber = CurrentProfile.Phonenumber ?? "";
+        _shareEmail = CurrentProfile.ShareMail.Value;
+        _sharePhoneNumber = CurrentProfile.SharePhoneNumber.Value;
+    
+        //ProfilBild-"Karusell" vorbereitenPasswort1!
+        var currentFileName = Path.GetFileName(_profilePicture);
+    
+        var idx = ProfilePictureCatalog.profilePictures
+            .Select((name, index) => new { name, index })
+            .Where(x => x.name == currentFileName)
+            .Select(x => x.index)
+            .DefaultIfEmpty(-1)
+            .First();
+    
+        if (idx >= 0)
+        {
+            _currentIndex = idx;
+            _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+        }
+        else
+        {
+            // Fallback: erstes Bild aus dem Catalog
+            _currentIndex = 0;
+            _selectedProfilePicture = ProfilePictureCatalog.profilePictures.Count > 0
+                ? ProfilePictureCatalog.profilePictures[0]
+                : "";
+        }
+    }
+    
+    // ====================================== 
+    // PROFILEPICTURE-HANDLING            
+    // ====================================== 
+    
+    private string GetProfileName(int index)
+    {
+        int count = ProfilePictureCatalog.profilePictures.Count;
+        int effectiveIndex = (index % count + count) % count;
+        return ProfilePictureCatalog.profilePictures[effectiveIndex];
+    }
+    
+    private void SelectNextProfile()
+    {
+        _currentIndex = (_currentIndex + 1) % ProfilePictureCatalog.profilePictures.Count;
+        _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+    }
+    //
+    private void SelectPreviousProfile()
+    {
+        _currentIndex = (_currentIndex - 1 + ProfilePictureCatalog.profilePictures.Count) 
+                       % ProfilePictureCatalog.profilePictures.Count;
+        _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+    }
+    
+    // ======================================
+    // VALIDIERUNG & LOGIK (C#)
+    // ======================================
 
-// --- Passwort Felder ---
-string _newPassword = "";
-string _confirmNewPassword = "";
+    //Email Validierung
+    public static bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return true;
+        try
+        {
+            var addr = new EmailAddressAttribute();
+            return addr.IsValid(email);
+        }
+        catch { return false; }
+    }
 
-// --- Bio und Bilder ---
-private string _bioText = "Hier steht die Profilbeschreibung... Leidenschaftlicher Züchter seltener Tomatensorten und Gurken-Enthusiast seit 2020.";
-private List<string> _uploadedImages = new List<string>
-{
-"pictures/Testbilder/Gurken_01.jpg",
-"pictures/Testbilder/Tomaten_01.jpg",
-"pictures/Testbilder/Mais_02.png",
-"pictures/Testbilder/Melonen_01.jpg",
-"pictures/Testbilder/Karotten_02.png",
-"pictures/Testbilder/Erdbeeren_01.jpg"
-};
-
-// --- Profilbild Karussell Logik ---
-private List<string> _availableProfiles = new()
-{
-"Profilbild_01.png", "Profilbild_02.png", "Profilbild_03.png", "Profilbild_04.png",
-"Profilbild_05.png", "Profilbild_06.png", "Profilbild_07.png", "Profilbild_08.png",
-"Profilbild_09.png", "Profilbild_10.png", "Profilbild_11.png", "Profilbild_12.png",
-"Profilbild_13.png", "Profilbild_14.png", "Profilbild_15.png", "Profilbild_16.png",
-"Profilbild_17.png", "Profilbild_18.png", "Profilbild_19.png", "Profilbild_20.png",
-"Profilbild_21.png", "Profilbild_22.png", "Profilbild_23.png", "Profilbild_24.png",
-"Profilbild_25.png", "Profilbild_26.png", "Profilbild_27.png", "Profilbild_28.png"
-};
-
-private string SelectedProfile { get; set; }
-private int CurrentIndex { get; set; } = 0;
-
-// UI/Steuerungsfelder
-private bool _showLogout = false;
-private int? _showDeletePopupIndex = null;
-private int? _hoveredIndex = null;
-
-protected override void OnInitialized()
-{
-// Simuliertes Laden des gespeicherten Profilbildes
-CurrentIndex = 27; // Index von "Profilbild_05.png"
-SelectedProfile = _availableProfiles[CurrentIndex];
-}
-
-private string GetProfileName(int index)
-{
-int count = _availableProfiles.Count;
-int effectiveIndex = (index % count + count) % count;
-return _availableProfiles[effectiveIndex];
-}
-
-private void SelectNextProfile()
-{
-CurrentIndex = (CurrentIndex + 1) % _availableProfiles.Count;
-SelectedProfile = _availableProfiles[CurrentIndex];
-}
-
-private void SelectPreviousProfile()
-{
-CurrentIndex = (CurrentIndex - 1 + _availableProfiles.Count) % _availableProfiles.Count;
-SelectedProfile = _availableProfiles[CurrentIndex];
-}
-
-// ======================================
-// 1. VALIDIERUNG & LOGIK (C#)
-// ======================================
-
-private bool EmailValid => string.IsNullOrWhiteSpace(_email) || IsValidEmail(_email);
-public static bool IsValidEmail(string email)
-{
-if (string.IsNullOrWhiteSpace(email)) return true;
-try
-{
-var addr = new EmailAddressAttribute();
-return addr.IsValid(email);
-}
-catch { return false; }
-}
-
-// -- Prüfung ob mind. ein Kontaktfeld aufgewählt ist --
-    private bool HasAtLeastOneContact => !string.IsNullOrWhiteSpace(_email) || !string.IsNullOrWhiteSpace(_fullTelephoneNumber);
-
-// -- Passwort Validierung --
+    // -- Passwort Validierung --
     private bool HasMinimumLength => _newPassword.Length >= 8;
     private bool HasUppercase => Regex.IsMatch(_newPassword, @"[A-Z]");
     private bool HasLowercase => Regex.IsMatch(_newPassword, @"[a-z]");
@@ -362,51 +395,64 @@ catch { return false; }
         passed ? (MarkupString)"<span class=\"check-icon\">✔</span>" : (MarkupString)"<span class=\"fail-icon\">✗</span>";
     private string GetSpecialChars() => "#?!@$%^&*-";
 
-// -- Gesamt Validierung für Speichern Button --
-    private bool CanSaveChanges => EmailValid && PasswordChangeValid && HasAtLeastOneContact;
+    // Email ist Pflichtfeld und muss gültig sein
+    private bool EmailProvidedAndValid => !string.IsNullOrWhiteSpace(_email) && IsValidEmail(_email);
 
-// ======================================
-// 2. AKTIONEN
-// ======================================
+    // Telefon ist Pflichtfeld
+    private bool PhoneProvided => !string.IsNullOrWhiteSpace(_phoneNumber);
 
-private void ToggleLogoutMenu() => _showLogout = !_showLogout;
+    // Mindestens eine Freigabe muss aktiv sein
+    private bool HasAtLeastOneContactShared => _shareEmail || _sharePhoneNumber;
 
+    // Für UI (rot markieren)
+    private bool EmailValid => EmailProvidedAndValid;
 
-// Bild-Lösch Logik
-private void SetHoveredIndex(int index) => _hoveredIndex = index;
-private void ResetHoveredIndex() => _hoveredIndex = null;
+    // Gesamt: Speichern nur erlaubt, wenn Email + Telefon gesetzt sind, mind. eine Freigabe aktiv ist und Passwortteil ok ist
+    private bool CanSaveChanges => EmailProvidedAndValid && PhoneProvided && HasAtLeastOneContactShared && PasswordChangeValid;
 
-private void ToggleDeletePopup(int index)
-{
-if (_showDeletePopupIndex == index)
-{
-_showDeletePopupIndex = null;
-}
-else
-{
-_showDeletePopupIndex = index;
-}
-}
+    // ======================================
+    // AKTIONEN
+    // ======================================
+    
+    private void ToggleLogoutMenu() => _showLogout = !_showLogout;
+    
+    private void SaveChanges()
+    {
+        if (!CanSaveChanges)
+            return;
 
-private void DeletePhoto(string path)
-{
-_uploadedImages.Remove(path);
-_showDeletePopupIndex = null;
-Console.WriteLine($"Foto gelöscht: {path}");
-StateHasChanged();
-}
+        var updateProfileDto = new PrivateProfileDto
+        {
+            ProfileId = CurrentProfile.ProfileId.Value,
+            ProfilepictureUrl = $"pictures/Profilbilder/{_selectedProfilePicture}",
+            EMail = _email.Trim(),
+            Phonenumber = _phoneNumber.Trim(),
+            Profiletext = _bioText.Trim(),
+            ShareMail = _shareEmail,
+            SharePhoneNumber = _sharePhoneNumber,
+        };
 
-private void SaveChanges()
-{
-if (!CanSaveChanges)
-{
-Console.WriteLine("Speichern abgebrochen: Ungültige Eingaben.");
-return;
-}
+        try
+        {
+            ProfileMgm.UpdateProfile(updateProfileDto);
 
-Console.WriteLine("Änderungen gespeichert:");
-// ... Speicherlogik
+            if (PasswordChangeValid && !string.IsNullOrWhiteSpace(_newPassword))
+            {
+                var credentialDto = new CredentialProfileDto
+                {
+                    EMail = _email.Trim(),
+                    PasswordHash = _newPassword
+                };
 
-Nav.NavigateTo("/EigenesUserProfil"); // Zurück zum Profil
-}
+                ProfileMgm.UpdateCredentials(credentialDto);
+            }
+
+            CurrentProfile.RefreshProfile(ProfileMgm);
+            Nav.NavigateTo("/EigenesUserProfil");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
 }

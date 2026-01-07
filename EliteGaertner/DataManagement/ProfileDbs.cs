@@ -123,22 +123,6 @@ public class ProfileDbs : IProfileDbs
         return result;
     }
 
-    //public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
-    //{
-    //    if (privateProfile == null)
-    //        return new PrivateProfileDto();
-    //    
-    //    // Credential DTO aus PrivateProfileDto kopieren
-    //    var credentials = new CredentialProfileDto
-    //    {
-    //        EMail = privateProfile.EMail,
-    //        PasswordHash = privateProfile.PasswordHash
-    //    };
-    //
-    //    return SetNewProfile(privateProfile, credentials);
-    //}
-
-
     public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
     {
         if (privateProfile == null || privateProfile.ProfileId <= 0)
@@ -153,9 +137,8 @@ public class ProfileDbs : IProfileDbs
 
         // DTO-Werte auf Entity mappen (alle editierbaren Felder)
         profile.Profilepictureurl = privateProfile.ProfilepictureUrl;
-        profile.Username = privateProfile.UserName?.Trim().ToLowerInvariant();
-        profile.Firstname = privateProfile.FirstName?.Trim();
-        profile.Lastname = privateProfile.LastName?.Trim();
+        profile.Email = privateProfile.EMail;
+        profile.Phonenumber = privateProfile.Phonenumber;
         profile.Profiletext = privateProfile.Profiletext;
         profile.Sharemail = privateProfile.ShareMail;
         profile.Sharephonenumber = privateProfile.SharePhoneNumber;
@@ -310,7 +293,9 @@ public class ProfileDbs : IProfileDbs
         if (profile is null)
             throw new ArgumentException("Profil mit dieser E-Mail nicht gefunden.", nameof(credentials.EMail));
 
-        profile.Passwordhash = credentials.PasswordHash;
+        //Passwort hashen (BCrypt)
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(credentials.PasswordHash);
+        profile.Passwordhash = hashedPassword;
 
         _dbContext.SaveChanges();
     }
