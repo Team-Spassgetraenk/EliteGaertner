@@ -114,7 +114,7 @@
                             <img src="@_currentHarvest.ProfileImageUrl" alt="User Avatar" />
                         </div>
                         <div class="username-tag-combo">
-                            <a class="username-link" href="@($"/profil/{GetUsernameUrl()}")">
+                            <a class="username-link" href="@($"/profil/{GetProfileIdUrl()}")">
                                 <span class="username-label">@_currentHarvest.Username</span>
                             </a>
                             <div class="tag-label">
@@ -480,33 +480,7 @@
         _showAd = true;
         await InvokeAsync(StateHasChanged);
     }
-
-    // ----------------------------
-    // Menus / Navigation
-    // ----------------------------
-    private void ToggleLogoutMenu()
-    {
-        _showLogout = !_showLogout;
-        if (!_showLogout)
-            _showAdminNav = false;
-    }
-
-    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
-
-    private void NavTo(string path)
-    {
-        _showLogout = false;
-        Nav.NavigateTo(path);
-    }
-
-    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
     
-    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
-    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
-    private void GoToMatches() => Nav.NavigateTo("/matches");
-    private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
-
     // ----------------------------
     // Report modal
     // ----------------------------
@@ -635,7 +609,7 @@
     // ----------------------------
     // Helpers
     // ----------------------------
-    private string GetUsernameUrl() => _currentHarvest?.Username.TrimStart('@') ?? "";
+    private int GetProfileIdUrl() => _currentHarvest.ProfileId;
     
     private void LoadNextSuggestion()
     {
@@ -677,6 +651,7 @@
         _currentHarvest = new HarvestModel
         {
             Username = "@" + next.Value.creator.UserName,
+            ProfileId = next.Value.creator.ProfileId,
             ProfileImageUrl = next.Value.creator.ProfilepictureUrl,
             ImageUrl = next.Value.harvest.ImageUrl,
             Description = next.Value.harvest.Description,
@@ -729,6 +704,7 @@
     private sealed class HarvestModel
     {
         public string Username { get; set; } = "";
+        public int ProfileId { get; set; }
         public string Tag { get; set; } = "";
         public string ImageUrl { get; set; } = "";
         public string ProfileImageUrl { get; set; } = "";
@@ -737,4 +713,30 @@
         public string Width { get; set; } = "";
         public string Description { get; set; } = "";
     }
+    
+    // ----------------------------
+    // Menus / Navigation
+    // ----------------------------
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        if (!_showLogout)
+            _showAdminNav = false;
+    }
+
+    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
+
+    private void NavTo(string path)
+    {
+        _showLogout = false;
+        Nav.NavigateTo(path);
+    }
+
+    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
+    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
+    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
+    private void GoToMatches() => Nav.NavigateTo("/matches");
+    private void GoToMainpage() => Nav.NavigateTo("/startseite");
+    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
+
 }

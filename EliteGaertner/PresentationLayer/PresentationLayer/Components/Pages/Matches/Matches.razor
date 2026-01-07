@@ -42,7 +42,7 @@
         {
         <div class="match-card">
             <div class="card-inner">
-                <a class="username-link" href="@($"/profil/{match.UsernameUrl}")">
+                <a class="username-link" href="@($"/profil/{match.ProfileId}")">
                     <div class="username">@match.UserName</div>
                 </a>
 
@@ -101,6 +101,7 @@
             _matches.Add(new UserMatch
             {
                 UserName = dto.UserName,
+                ProfileId = dto.ProfileId,
                 Phone = dto.Phonenumber,
                 Email = dto.EMail
             });
@@ -110,11 +111,9 @@
     public record UserMatch
     {
         public string UserName { get; init; }
+        public int ProfileId { get; init; }
         public string Phone { get; init; } 
         public string Email { get; init; } 
-        
-        // Liefert den Namen ohne '@' für die URL
-        public string UsernameUrl => UserName.TrimStart('@');
     }
     
     // NEU: Logout-Methoden

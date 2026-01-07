@@ -63,7 +63,7 @@
             @foreach (var entry in _currentLeaderboard.Entries)
             {
                 <div class="rank-entry @GetRankCssClass(entry.Rank)" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-                    <div class="rank-info" @onclick="() => GoToProfile(entry.UserName)">
+                    <div class="rank-info" @onclick="() => GoToProfile(entry.ProfileId)">
                         <span class="rank-number">#@entry.Rank</span>
                         <span class="username-display">@entry.UserName</span>
                     </div>
@@ -202,10 +202,9 @@
         _showLogout = !_showLogout;
     }
     
-    private void GoToProfile(string username)
+    private void GoToProfile(int profileId)
     {
-        var userUrl = username.TrimStart('@');
-        Nav.NavigateTo($"/profil/{userUrl}");
+        Nav.NavigateTo($"/profil/{profileId}");
     }
     
     private void GoToMatches() => Nav.NavigateTo("/matches");
