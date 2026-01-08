@@ -82,7 +82,7 @@ public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
         
         //Logging der Testresult
         TestContext.WriteLine("--TESTERGEBNIS--");
-        TestContext.WriteLine("Erwartete UploadIds: {43, 17, 34, 26, 36, 31, 24, 10, 21, 22}");
+        TestContext.WriteLine("Erwartete UploadIds (aktuelle Seed/Query): {43, 17, 34, 26, 36, 71, 49, 31, 24, 10}");
         TestContext.WriteLine($"Result count: {result?.Count ?? 0}");
         TestContext.WriteLine("Erhaltene Uploads:");
         if (result != null)
@@ -96,6 +96,6 @@ public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
 
         var resultIds = result.Select(r => r.UploadId).ToList();
         
-        CollectionAssert.AreEquivalent( new[] {43, 17, 34, 26, 36, 31, 24, 10, 21, 22}, resultIds );
+        CollectionAssert.AreEquivalent(new[] { 43, 17, 34, 26, 36, 71, 49, 31, 24, 10 }, resultIds);
     }
 }

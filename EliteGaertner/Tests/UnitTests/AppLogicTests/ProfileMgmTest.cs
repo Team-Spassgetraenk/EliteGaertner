@@ -349,7 +349,7 @@ public class ProfileMgmUnitTests
         _mockProfileDbs.Setup(x => x.GetPrivateProfile(profileId)).Returns(profileInfo);
 
         // Act
-        var result = _profileMgm.LoginProfile(TODO);
+        var result = _profileMgm.LoginProfile(loginProfile);
 
         // Assert
         Assert.AreEqual(profileId, result.ProfileId);
@@ -359,7 +359,7 @@ public class ProfileMgmUnitTests
         Assert.AreEqual(1, result.HarvestUploads.Count);
         Assert.AreEqual(31, result.HarvestUploads[0].UploadId);
 
-        _mockProfileDbs.Verify(x => x.CheckPassword(loginProfile.EMail, loginProfile.PasswordHash), Times.Once);
+        _mockProfileDbs.Verify(x => x.CheckPassword("test@example.com", "hash123"), Times.Once);
         _mockHarvestDbs.Verify(x => x.GetProfileHarvestUploads(profileId), Times.Once);
         _mockProfileDbs.Verify(x => x.GetPrivateProfile(profileId), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
@@ -379,8 +379,10 @@ public class ProfileMgmUnitTests
         _mockProfileDbs.Setup(x => x.CheckPassword(loginProfile.EMail, loginProfile.PasswordHash)).Returns((int?)null);
 
         // Act & Assert
-        Assert.ThrowsException<UnauthorizedAccessException>(() => _profileMgm.LoginProfile(TODO));
+        Assert.ThrowsException<UnauthorizedAccessException>(() => _profileMgm.LoginProfile(loginProfile));
         _mockProfileDbs.Verify(x => x.CheckPassword(loginProfile.EMail, loginProfile.PasswordHash), Times.Once);
+        _mockProfileDbs.Verify(x => x.GetPrivateProfile(It.IsAny<int>()), Times.Never);
+        _mockHarvestDbs.Verify(x => x.GetProfileHarvestUploads(It.IsAny<int>()), Times.Never);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }

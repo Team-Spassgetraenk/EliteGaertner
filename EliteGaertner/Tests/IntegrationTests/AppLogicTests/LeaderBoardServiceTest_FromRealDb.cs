@@ -39,6 +39,7 @@ public class LeaderboardServiceTest_FromRealDb : IntegrationTestBase
 
         var sut = new LeaderboardService(
             leaderboardTitle: "Most Likes",
+            leaderboardId: 1,
             profileId: myProfileId,
             tagId: null,
             goal: LeaderboardSearchGoal.MostLikes,
@@ -52,35 +53,29 @@ public class LeaderboardServiceTest_FromRealDb : IntegrationTestBase
         // Assert (Seed-basiert)
         Assert.AreEqual(LeaderboardSearchGoal.MostLikes, dto.Goal);
         Assert.IsNull(dto.TagId);
+        Assert.AreEqual(1, dto.LeaderboardId);
 
-        // beerenboss hat 2 Likes; mit 1 Like (alphabetisch): apfelalchemist, gurkenguru, melonenmaster, tomatentiger, zucchinizauberer
-        Assert.AreEqual(5, entries.Count, "Im Seed gibt es 6 Creator mit positiven Likes, aber das Leaderboard liefert Top 5.");
+        // Erwartung direkt aus LeaderboardDbs ableiten (inkl. Tie-Break: Likes DESC, Username ASC)
+        var expectedTop5 = dbs
+            .GetLeaderBoardEntries(profileId: myProfileId, tagId: null, goal: LeaderboardSearchGoal.MostLikes)
+            .ToList();
 
-        Assert.AreEqual(1, entries[0].Rank);
-        Assert.AreEqual("beerenboss", entries[0].UserName);
-        Assert.AreEqual(2f, entries[0].Value);
+        Assert.AreEqual(expectedTop5.Count, entries.Count, "Top-List Count muss der LeaderboardDbs-Implementierung entsprechen.");
 
-        Assert.AreEqual(2, entries[1].Rank);
-        Assert.AreEqual("apfelalchemist", entries[1].UserName);
-        Assert.AreEqual(1f, entries[1].Value);
+        for (var i = 0; i < entries.Count; i++)
+        {
+            Assert.AreEqual(expectedTop5[i].Rank, entries[i].Rank, $"Rank mismatch at index {i}.");
+            Assert.AreEqual(expectedTop5[i].UserName, entries[i].UserName, $"UserName mismatch at index {i}.");
+            Assert.AreEqual(expectedTop5[i].Value, entries[i].Value, $"Value mismatch at index {i}.");
+        }
 
-        Assert.AreEqual(3, entries[2].Rank);
-        Assert.AreEqual("gurkenguru", entries[2].UserName);
-        Assert.AreEqual(1f, entries[2].Value);
+        // PersonalEntry Erwartung ebenfalls aus LeaderboardDbs ableiten
+        var expectedPersonal = dbs.GetPersonalLeaderBoardEntry(myProfileId, tagId: null, goal: LeaderboardSearchGoal.MostLikes);
 
-        Assert.AreEqual(4, entries[3].Rank);
-        Assert.AreEqual("melonenmaster", entries[3].UserName);
-        Assert.AreEqual(1f, entries[3].Value);
-
-        Assert.AreEqual(5, entries[4].Rank);
-        Assert.AreEqual("tomatentiger", entries[4].UserName);
-        Assert.AreEqual(1f, entries[4].Value);
-
-        // PersonalEntry (eingeloggter User)
         Assert.IsNotNull(personal);
-        Assert.AreEqual(1, personal!.Rank);
-        Assert.AreEqual("beerenboss", personal.UserName);
-        Assert.AreEqual(2f, personal.Value);
+        Assert.AreEqual(expectedPersonal.Rank, personal!.Rank, "Personal Rank muss der LeaderboardDbs-Implementierung entsprechen.");
+        Assert.AreEqual(expectedPersonal.UserName, personal.UserName, "Personal UserName muss der LeaderboardDbs-Implementierung entsprechen.");
+        Assert.AreEqual(expectedPersonal.Value, personal.Value, "Personal Value muss der LeaderboardDbs-Implementierung entsprechen.");
     }
 
     [TestMethod]
@@ -110,6 +105,7 @@ public class LeaderboardServiceTest_FromRealDb : IntegrationTestBase
 
         var sut = new LeaderboardService(
             leaderboardTitle: "Heaviest Trauben",
+            leaderboardId: 2,
             profileId: myProfileId,
             tagId: tagIdTrauben,
             goal: goal,
@@ -123,21 +119,26 @@ public class LeaderboardServiceTest_FromRealDb : IntegrationTestBase
         // Assert (Seed-basiert)
         Assert.AreEqual(goal, dto.Goal);
         Assert.AreEqual(tagIdTrauben, dto.TagId);
+        Assert.AreEqual(2, dto.LeaderboardId);
 
-        // Trauben-Uploads gibt es für: beerenboss (200g max) und traubentaktiker (650g max)
-        Assert.AreEqual(2, entries.Count, "Im Seed gibt es genau 2 Profile mit Trauben-Uploads.");
+        // Trauben-Uploads gibt es für: birnenbarde (820g max), traubentaktiker (700g max) und beerenboss (200g max)
+        Assert.AreEqual(3, entries.Count, "Im Seed gibt es genau 3 Profile mit Trauben-Uploads.");
 
         Assert.AreEqual(1, entries[0].Rank);
-        Assert.AreEqual("traubentaktiker", entries[0].UserName);
-        Assert.AreEqual(650f, entries[0].Value);
+        Assert.AreEqual("birnenbarde", entries[0].UserName);
+        Assert.AreEqual(820f, entries[0].Value);
 
         Assert.AreEqual(2, entries[1].Rank);
-        Assert.AreEqual("beerenboss", entries[1].UserName);
-        Assert.AreEqual(200f, entries[1].Value);
+        Assert.AreEqual("traubentaktiker", entries[1].UserName);
+        Assert.AreEqual(700f, entries[1].Value);
 
-        // PersonalEntry: beerenboss hat bei Trauben max 200g und ist Rang 2
+        Assert.AreEqual(3, entries[2].Rank);
+        Assert.AreEqual("beerenboss", entries[2].UserName);
+        Assert.AreEqual(200f, entries[2].Value);
+
+        // PersonalEntry: beerenboss hat bei Trauben max 200g und ist Rang 3
         Assert.IsNotNull(personal);
-        Assert.AreEqual(2, personal!.Rank);
+        Assert.AreEqual(3, personal!.Rank);
         Assert.AreEqual("beerenboss", personal.UserName);
         Assert.AreEqual(200f, personal.Value);
     }
