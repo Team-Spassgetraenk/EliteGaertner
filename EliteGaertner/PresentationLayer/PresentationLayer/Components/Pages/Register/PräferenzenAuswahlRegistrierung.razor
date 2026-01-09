@@ -1,4 +1,4 @@
-@page "/registrierung/interessen"
+@page "/registrierung/praeferenzendatenregistrierung"
 
 @layout Layout.MainLayout
 
@@ -6,7 +6,6 @@
 @using PresentationLayer.Shared
 @using AppLogic.Interfaces
 
-@inject IProfileMgm ProfileMgm
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
 
@@ -32,8 +31,8 @@
             <div class="tag-grid">
                 @foreach (var tag in TagCatalog.Gemuese)
                 {
-                    <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
-                         @onclick="() => ToggleTag(tag.Name)">
+                    <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                         @onclick="() => ToggleTag(tag.TagId)">
                         <span>@tag.Icon</span>
                         <span>@tag.Name</span>
                     </div>
@@ -44,8 +43,8 @@
             <div class="tag-grid">
                 @foreach (var tag in TagCatalog.Obst)
                 {
-                    <div class="tag app-tag @(RegistrationState.SelectedTags.Contains(tag.Name) ? "selected" : "")"
-                         @onclick="() => ToggleTag(tag.Name)">
+                    <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                         @onclick="() => ToggleTag(tag.TagId)">
                         <span>@tag.Icon</span>
                         <span>@tag.Name</span>
                     </div>
@@ -53,12 +52,12 @@
             </div>
 
             <button class="app-button primary-button weiter-button"
-                    disabled="@( !RegistrationState.SelectedTags.Any() )"
-                    @onclick="Speichern">
+                    disabled="@( !_selectedTagIds.Any() )"
+                    @onclick="NextRegistrationStep">
                 Speichern
             </button>
             
-            @if ( !RegistrationState.SelectedTags.Any() )
+            @if ( !_selectedTagIds.Any() )
             {
                 <p class="disabled-hint">Bitte mindestens ein Tag auswählen.</p>
             }
@@ -69,44 +68,50 @@
 </div>
 
 @code {
-    void ToggleTag(string tag)
+
+    private HashSet<int> _selectedTagIds = new();
+
+    protected override void OnInitialized()
     {
-        if (RegistrationState.SelectedTags.Contains(tag))
+        //Überprüfung, ob alle nötigen Registrierungsseiten durchlaufen worden sind
+        if (!RegistrationState.IsStepProfilDataValid || !RegistrationState.IsStepProfilPictureValid)
         {
-            RegistrationState.SelectedTags.Remove(tag);
+            Nav.NavigateTo("/registrierung");
+        }
+    }
+
+
+    void ToggleTag(int tagId)
+    {
+        if (_selectedTagIds.Contains(tagId))
+        {
+            _selectedTagIds.Remove(tagId);
         }
         else
-        {RegistrationState.SelectedTags.Add(tag);}
+        {
+            _selectedTagIds.Add(tagId);
+        }
+        
         StateHasChanged();
     }
 
-    void Speichern()
+    void NextRegistrationStep()
     {
-        if (RegistrationState.ProfileId == 0) //Überprüfung: Ist neues Profil angelegt? 
+        //Überprüfung
+        if (!_selectedTagIds.Any())
         {
-            Nav.NavigateTo("/registrierung");
             return;
         }
-
-        var preferences = RegistrationState.SelectedTags
-            .Select(tagName => TagCatalog.FindByName(tagName))
-            .Select(tag => new PreferenceDto 
-            { 
-                TagId = tag.TagId, 
-                Profileid = RegistrationState.ProfileId,
-                DateUpdated = DateTime.UtcNow 
-            }).ToList();
-
-        bool success = ProfileMgm.SetPreference(preferences);
-    
-        if (success)
+        
+        //Den State vorsichtshalber zurücksetzen
+        RegistrationState.SelectedTagIdsPreferences.Clear();
+        
+        //TagIds hinzufügen zu RegistrationState
+        foreach (var id in _selectedTagIds)
         {
-            Console.WriteLine($"Tags für ProfileId {RegistrationState.ProfileId} gespeichert");
-            Nav.NavigateTo("/registrierung/profilerstellung");
+            RegistrationState.SelectedTagIdsPreferences.Add(id);
         }
-        else
-        {
-            Console.WriteLine("Fehler beim Speichern der Tags.");
-        }
+        
+        Nav.NavigateTo("/registrierung/erntehochladenregistrierung");
     }
 }

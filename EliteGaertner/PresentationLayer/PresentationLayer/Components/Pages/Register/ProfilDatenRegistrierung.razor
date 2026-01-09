@@ -1,0 +1,332 @@
+@page "/registrierung"
+@layout Layout.MainLayout
+@using System.Text.RegularExpressions
+@using PresentationLayer.State
+@using PresentationLayer.Shared
+@using AppLogic.Interfaces
+@inject UserRegistrationState RegistrationState
+@inject IProfileMgm ProfileMgm
+@inject NavigationManager Nav
+
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<div class="register-page-container">
+    <div class="login-center">
+
+        <div class="register-card">
+
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <h2 class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 2.5rem;">EliteGärtner.</h2>
+            </div>
+
+            <h3 class="register-title">Neuen Account erstellen</h3>
+
+            <div class="two-column-grid">
+
+                <div class="input-column">
+                    <div class="input-group">
+                        <label for="sirname-input">Nachname</label>
+                        <input id="sirname-input" class="app-input" placeholder="Nachname eingeben" @bind="_lastName" @bind:event="oninput" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="prename-input">Vorname</label>
+                        <input id="prename-input" class="app-input" placeholder="Vorname eingeben" @bind="_firstName" @bind:event="oninput" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="username-input">Benutzername</label>
+                        <input id="username-input" class="app-input" placeholder="Benutzername eingeben" @bind="_userName" @bind:event="oninput" />
+                    </div>
+
+                    <div class="input-group">
+                        <label for="telephone-input">Telefonnummer</label>
+
+                        <div class="phone-input-container">
+                            <select class="country-code-select" @bind="SelectedCountryCode" @bind:event="onchange">
+                                @foreach (var country in CountryCodeCatalog.CountryCodes)
+                                {
+                                <option value="@country.Code">
+                                    @country.Flag @country.Code
+                                </option>
+                                }
+                            </select>
+
+                            <input id="telephone-input"
+                                   class="app-input phone-number-input"
+                                   placeholder="✆"
+                                   type="text"
+                                   @bind="TelephoneNumberLocal"
+                                   @bind:event="oninput" />
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-0"> @* mb-0 am letzten Element der linken Spalte ist gut für die Optik *@
+                        <label for="email-input">Email</label>
+                        <input id="email-input"
+                               class="app-input @(!string.IsNullOrWhiteSpace(_email) && !EmailValid ? "input-error" : "")"
+                               placeholder="Email eingeben"
+                               @bind="_email" @bind:event="oninput"/>
+
+                        @if (!string.IsNullOrWhiteSpace(_email) && !EmailValid)
+                        {
+                        <p class="inline-error error-text">⚠️ Die eingegebene Email-Adresse ist ungültig.</p>
+                        }
+                    </div>
+
+                </div>
+
+                <div class="input-column">
+
+                    <div class="password-section">
+
+                        <div class="input-group">
+                            <label for="password-input">Passwort</label>
+                            <input id="password-input"
+                                   class="app-input @(!IsPasswordStrong && !string.IsNullOrWhiteSpace(_password) ? "input-error" : "")"
+                                   type="password"
+                                   placeholder="Passwort eingeben"
+                                   @bind="_password" @bind:event="oninput"/>
+
+                            <div class="password-requirements mt-2">
+                                <h5 class="req-title">Passwortanforderungen:</h5>
+                                <ul>
+                                    <li class="@(HasMinimumLength ? "passed" : "")">
+                                        @GetRequirementIcon(HasMinimumLength) Mindestens 8 Zeichen Länge.
+                                    </li>
+                                    <li class="@(HasUppercase ? "passed" : "")">
+                                        @GetRequirementIcon(HasUppercase) Mindestens einen Großbuchstaben.
+                                    </li>
+                                    <li class="@(HasLowercase ? "passed" : "")">
+                                        @GetRequirementIcon(HasLowercase) Mindestens einen Kleinbuchstaben.
+                                    </li>
+                                    <li class="@(HasDigit ? "passed" : "")">
+                                        @GetRequirementIcon(HasDigit) Mindestens eine Ziffer (0-9).
+                                    </li>
+                                    <li class="@(HasSpecialChar ? "passed" : "")">
+                                        @GetRequirementIcon(HasSpecialChar) Mindestens ein Sonderzeichen (@GetSpecialChars()).
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="input-group mb-0"> @* mb-0 am letzten Element in der Sektion *@
+                            <label for="password-confirm-input">Passwort bestätigen</label>
+                            <input id="password-confirm-input"
+                                   class="app-input @(PasswordMismatch ? "input-error" : "")"
+                                   type="password"
+                                   placeholder="Passwort wiederholen"
+                                   @bind="_passwordConfirm" @bind:event="oninput" />
+
+                            @if (PasswordMismatch)
+                            {
+                            <p class="inline-error error-text">⚠️ Die Passwörter stimmen nicht überein.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-share-section mt-4">
+                <h4 class="share-title">Kontaktdaten freigeben</h4>
+                <p class="share-description">Wähle, welche Kontaktdaten du mit gematchten Gärtnern teilen möchtest.</p>
+
+                <div class="share-options-grid">
+                    <div class="form-check-group">
+                        <div class="form-check-custom">
+                            <input class="app-check-input" type="checkbox" id="shareEmail" @bind="_shareEmail" @bind:event="onchange" />
+                            <label class="app-check-label" for="shareEmail">
+                                Email
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-check-group">
+                        <div class="form-check-custom">
+                            <input class="app-check-input" type="checkbox" id="shareTel" @bind="_sharePhoneNumber" @bind:event="onchange" />
+                            <label class="app-check-label" for="shareTel">
+                                Telefonnummer
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="app-button primary-button mt-4"
+                    @onclick="NextRegistrationStep"
+                    disabled="@(!RegisterEnabled)">
+                Registrieren
+            </button>
+            
+            @if (!string.IsNullOrEmpty(RegistrationError))
+            {
+                <div class="alert alert-danger">@RegistrationError</div>
+            }
+
+            @if (!RegisterEnabled)
+            {
+            <p class="disabled-hint">
+                @(
+                (
+                !RequiredFieldsFilled
+                ? "Bitte alle Registrierungsfelder ausfüllen."
+                : (PasswordMismatch
+                ? "⚠️ Die Passwörter stimmen nicht überein."
+                : (!IsPasswordStrong
+                ? "⚠️ Das Passwort erfüllt nicht alle Sicherheitsanforderungen."
+                : (!ContactShareSelected
+                ? "Bitte mindestens eine Kontaktmethode zur Freigabe auswählen."
+                : ""
+                )
+                )
+                )
+                )
+                )
+            </p>
+            }
+
+            <div class="register-text">
+                <p>Ich habe bereits einen Account?</p>
+                <a href="/" class="register-link">Jetzt Anmelden</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    
+    //Eingabefeld-Variablen 
+    string _lastName = "";
+    string _firstName = "";
+    string _email = "";
+    string _userName = "";
+    string _password = "";
+    string _passwordConfirm = "";
+    
+    //Telefon-Variablen
+    public string SelectedCountryCode { get; set; } = "+49";
+    private string _telephoneNumberLocal = "";
+    
+    // Checkbox-Zustände der Freigabe-Optionen
+    bool _shareEmail = false;
+    bool _sharePhoneNumber = false;
+    
+    // Public Property zur Speicherung in der Datenbank (Zusammengesetzte Nummer)
+    public string FullTelephoneNumber =>
+        $"{SelectedCountryCode}{TelephoneNumberLocal}";
+    
+    private string RegistrationError = "";
+    
+    protected override void OnInitialized()
+    {
+        //Vorsichtshalber immer den Registrationstate auf der ersten Registrierungsseite leeren
+        RegistrationState.Reset();
+    }
+
+    //Erstellt die lokale Telefonnummer
+    private string TelephoneNumberLocal
+    {
+        get => _telephoneNumberLocal;
+        set
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+            // Regex: Entferne alle Zeichen, die KEINE Ziffer (\D) sind.
+            _telephoneNumberLocal = Regex.Replace(value, @"\D", "");
+            }
+            else
+            {
+            _telephoneNumberLocal = "";
+            }
+        }
+    }
+    
+    //Passwort Validierung
+    private bool HasMinimumLength => _password.Length >= 8;
+    private bool HasUppercase => Regex.IsMatch(_password, @"[A-Z]");
+    private bool HasLowercase => Regex.IsMatch(_password, @"[a-z]");
+    private bool HasDigit => Regex.IsMatch(_password, @"[0-9]");
+    private bool HasSpecialChar => Regex.IsMatch(_password, @"[#?!@$%^&*-]");
+    private bool IsPasswordStrong =>
+    HasMinimumLength && HasUppercase && HasLowercase && HasDigit && HasSpecialChar;
+    private MarkupString GetRequirementIcon(bool passed) =>
+    passed ? (MarkupString)"<span class=\"check-icon\">✔</span>" : (MarkupString)"<span class=\"fail-icon\">✗</span>";
+    private string GetSpecialChars() => "#?!@$%^&*-";
+    
+    
+    //Gesamt Validierung
+    private bool PasswordMismatch =>
+    !string.IsNullOrWhiteSpace(_password) && !string.IsNullOrWhiteSpace(_passwordConfirm) && (_password != _passwordConfirm);
+    private bool EmailValid => string.IsNullOrWhiteSpace(_email) || IsValidEmail(_email);
+    private bool IsTelephoneNumberValid => !string.IsNullOrWhiteSpace(TelephoneNumberLocal);
+    private bool RequiredFieldsFilled =>
+    !string.IsNullOrWhiteSpace(_lastName) && !string.IsNullOrWhiteSpace(_firstName) &&
+    !string.IsNullOrWhiteSpace(_email) && !string.IsNullOrWhiteSpace(_userName) &&
+    IsTelephoneNumberValid && !string.IsNullOrWhiteSpace(_password) && !string.IsNullOrWhiteSpace(_passwordConfirm);
+    private bool ContactShareSelected => _shareEmail || _sharePhoneNumber;
+    private bool RegisterEnabled =>
+    RequiredFieldsFilled && !PasswordMismatch && ContactShareSelected && EmailValid && IsPasswordStrong;
+
+    //Methode: Registrierung und Weiterleitung
+    private void NextRegistrationStep()
+    { 
+        // Eingaben normalisieren (trimmen)
+        _userName = _userName?.Trim() ?? "";
+        _firstName = _firstName?.Trim() ?? "";
+        _lastName = _lastName?.Trim() ?? "";
+        _email = _email?.Trim() ?? "";
+
+        
+        if (!RegisterEnabled)
+        {
+            RegistrationError = "Bitte prüfe deine Eingaben.";
+            return;
+        }
+
+        if (ProfileMgm.CheckUsernameExists(_userName))
+        {
+            RegistrationError = "Benutzername existiert bereits";
+            return;
+        }
+
+        //RegistrationState setzen
+        RegistrationState.UserName = _userName;
+        RegistrationState.FirstName = _firstName;
+        RegistrationState.LastName = _lastName;
+        RegistrationState.Email = _email;
+        RegistrationState.PlainPassword = _password;
+        RegistrationState.ConfirmPassword = _passwordConfirm;
+        RegistrationState.PhoneNumber = FullTelephoneNumber;
+        RegistrationState.ShareEmail = _shareEmail;
+        RegistrationState.SharePhoneNumber = _sharePhoneNumber;
+        
+        //Zur nächsten Seite wechseln
+        Nav.NavigateTo("/registrierung/profilbildregistrierung");
+    }
+    
+    // Statische Methode: Email-Validierung (Regex)
+    private static bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return true;
+        
+        string pattern = @"^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|" + @"([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)" + @"@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$";
+        
+        try
+        {
+            var regex = new Regex(pattern, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
+            return regex.IsMatch(email);
+        }
+        catch (RegexParseException)
+        {
+            return false;
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return false;
+        }
+    }
+}

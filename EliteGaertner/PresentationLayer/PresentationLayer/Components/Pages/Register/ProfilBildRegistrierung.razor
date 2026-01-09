@@ -1,0 +1,156 @@
+@page "/registrierung/profilbildregistrierung"
+@layout Layout.MainLayout
+@using PresentationLayer.State
+@using PresentationLayer.Shared
+
+@inject UserRegistrationState RegistrationState
+@inject NavigationManager Nav
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<div class="register-page-container">
+    <div class="login-center">
+
+        <div class="register-card profil-card">
+
+            <div class="logo-container">
+                @* HIER KEINE ÄNDERUNG, da die Aubergine NICHT im Unterordner Profilbilder liegt *@
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo-large" />
+                <h2 class="elitegaertner-title-large">EliteGärtner.</h2>
+            </div>
+
+            <h3 class="register-title-comic">Erstelle dein Gärtnerprofil</h3>
+            
+            <div class="form-layout">
+                
+                <h4 class="tag-headline">Wähle dein Profilbild</h4>
+                
+                <div class="profile-carousel-hybrid">
+                    
+                    @* Pfeil Links *@
+                    <button class="arrow-nav-button secondary-button" 
+                            @onclick="SelectPreviousProfilePicture">
+                        <i class="bi bi-caret-left-fill"></i>
+                    </button>
+
+                    @* Vorschau Links (Vorgänger-Bild)*@
+                    <div class="profile-preview-container-hybrid">
+                        <img src="@($"pictures/Profilbilder/{GetProfilePictureName(_currentIndex - 1)}")" 
+                             alt="Vorschau" 
+                             class="profile-image-preview" />
+                    </div>
+
+                    @* Zentrales, ausgewähltes Bild*@
+                    <div class="profile-main-image-container-hybrid selected-outline-hybrid">
+                        <img src="@($"pictures/Profilbilder/{_selectedProfilePicture}")" 
+                             alt="Aktuelles Profilbild" 
+                             class="profile-image-large" />
+                    </div>
+                    
+                    @* Vorschau Rechts (Nachfolger-Bild)*@
+                    <div class="profile-preview-container-hybrid">
+                        <img src="@($"pictures/Profilbilder/{GetProfilePictureName(_currentIndex + 1)}")" 
+                             alt="Vorschau" 
+                             class="profile-image-preview" />
+                    </div>
+                    
+                    @* Pfeil Rechts *@
+                    <button class="arrow-nav-button secondary-button" 
+                            @onclick="SelectNextProfilePicture">
+                        <i class="bi bi-caret-right-fill"></i>
+                    </button>
+                    
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Profilbeschreibung</label>
+                    <textarea class="app-input-comic" @bind="_bio" placeholder="Erzähle kurz, wer du bist und was du anbaust..." maxlength="150"></textarea>
+                    <div class="char-counter">@_bio.Length / 150</div>
+                </div>
+
+                <button class="app-button primary-button weiter-button"
+                        @onclick="NextRegistrationStep" 
+                        disabled="@(!RegisterEnabled)">
+                    Weiter zur Ernte
+                </button>
+                
+                @if (!RegisterEnabled)
+                {
+                    <p class="disabled-hint mt-2">Bitte gib eine Profilbeschreibung (Bio) ein, um fortzufahren.</p>
+                }
+                
+                @if (!string.IsNullOrEmpty(RegistrationError))
+                {
+                    <div class="alert alert-danger mt-2">@RegistrationError</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    
+    private string _bio = "";
+    private string _selectedProfilePicture = "";
+    private int _currentIndex;
+
+    private bool RegisterEnabled =>
+        !string.IsNullOrWhiteSpace(_bio?.Trim());
+    
+    private string RegistrationError = "";
+    
+    protected override void OnInitialized()
+    {
+        //Überprüfung, ob alle nötigen Registrierungsseiten durchlaufen worden sind
+        if (!RegistrationState.IsStepProfilDataValid)
+        {
+            Nav.NavigateTo("/registrierung");
+        }
+
+        _currentIndex = 0;
+        
+        //Setzen vom Profilbild
+        _selectedProfilePicture = ProfilePictureCatalog.profilePictures.First();
+    }
+    
+    //Profilepicture Handling
+    private string GetProfilePictureName(int index)
+    {
+        int count = ProfilePictureCatalog.profilePictures.Count;
+        int effectiveIndex = (index % count + count) % count;
+        return ProfilePictureCatalog.profilePictures[effectiveIndex];
+    }
+    
+    private void SelectNextProfilePicture()
+    {
+        _currentIndex = (_currentIndex + 1) % ProfilePictureCatalog.profilePictures.Count;
+        _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+    }
+    
+    private void SelectPreviousProfilePicture()
+    {
+        _currentIndex = (_currentIndex - 1 + ProfilePictureCatalog.profilePictures.Count) 
+                        % ProfilePictureCatalog.profilePictures.Count;
+        _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+    }
+    
+    private void NextRegistrationStep()
+    {
+        //Fehlermeldung zurücksetzen
+        RegistrationError = "";
+        
+        if (string.IsNullOrWhiteSpace(_bio?.Trim()))
+        {
+            RegistrationError = "Bitte gib eine Profilbeschreibung (Bio) ein.";
+            return;
+        }
+
+        //RegistrationState
+        RegistrationState.ProfileText = _bio.Trim();
+        RegistrationState.ProfilePictureUrl = $"pictures/Profilbilder/{_selectedProfilePicture}";
+        
+        Nav.NavigateTo("/registrierung/praeferenzendatenregistrierung");
+    }
+}

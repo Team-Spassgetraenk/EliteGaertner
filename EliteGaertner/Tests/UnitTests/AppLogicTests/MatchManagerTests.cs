@@ -248,7 +248,7 @@ public class MatchManagerTests
         public bool CheckUsernameExists(string username)
             => throw new NotImplementedException();
 
-        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
+        public void SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
             => throw new NotImplementedException();
 
         public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)

@@ -272,6 +272,11 @@
     private PublicProfileDto? _matchedUser;
     private readonly string[] _confettiColors = { "#FFC107", "#2196F3", "#FF5722", "#4CAF50", "#E91E63" };
 
+    // Queue for multiple matches created in quick succession
+    private readonly Queue<PublicProfileDto> _pendingMatches = new();
+    private bool _isShowingMatch = false;
+    private readonly object _matchQueueLock = new();
+
     // Logout/admin menu
     private bool _showLogout = false;
     private bool _showAdminNav = false;
@@ -392,13 +397,61 @@
         return _matchCount;
     }
     
-    //Subscription auf MatchManager Methode löst die Methode aus, falls es zu einem neuen Match kommt
-    private async void OnMatchCreated(PublicProfileDto matchProfile)
+    //Subscription auf MatchManager Event: wird aufgerufen, sobald ein neuer Match entsteht
+    private void OnMatchCreated(PublicProfileDto matchProfile)
     {
-        //TODO AWAIT SYNC Aleks prüfen wie es sich bei mehreren Matches verhält
-        _matchedUser = matchProfile;
+        _ = EnqueueAndShowMatchAsync(matchProfile);
+    }
+    
+    //Implementierung der Match Anzeigen Logik, sodass mehrere Matches hintereinander angezeigt werden können
+    private async Task EnqueueAndShowMatchAsync(PublicProfileDto matchProfile)
+    {
+        bool shouldStartShowing = false;
+
+        lock (_matchQueueLock)
+        {
+            _pendingMatches.Enqueue(matchProfile);
+
+            //Wenn gerade kein Match-Overlay läuft, starten wir die Anzeige
+            if (!_isShowingMatch)
+            {
+                _isShowingMatch = true;
+                shouldStartShowing = true;
+            }
+        }
+
+        if (shouldStartShowing)
+        {
+            await ShowNextMatchOverlayAsync();
+        }
+    }
+
+    private async Task ShowNextMatchOverlayAsync()
+    {
+        PublicProfileDto? next;
+
+        lock (_matchQueueLock)
+        {
+            next = _pendingMatches.Count > 0 ? _pendingMatches.Dequeue() : null;
+        }
+
+        if (next is null)
+        {
+            // Queue leer -> wir sind fertig
+            lock (_matchQueueLock)
+            {
+                _isShowingMatch = false;
+            }
+
+            _showMatchOverlay = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        _matchedUser = next;
         _showMatchOverlay = true;
         _matchCount = _matchManager?.GetActiveMatches().Count ?? _matchCount;
+
         await PlayMatchSound();
         await InvokeAsync(StateHasChanged);
     }
@@ -468,7 +521,12 @@
         }
     }
 
-    private void CloseMatchOverlay() => _showMatchOverlay = false;
+    private async Task CloseMatchOverlay()
+    {
+        // Wenn noch weitere neue Matches warten, zeigen wir direkt das nächste Overlay.
+        // Sonst schließen wir komplett.
+        await ShowNextMatchOverlayAsync();
+    }
 
     // ----------------------------
     // Ads

@@ -80,13 +80,16 @@ public class ProfileMgm : IProfileMgm
         return false;
     }
 
-    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials)
+    public int RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials)
     {
-        
-        return _profileDbs.SetNewProfile(newProfile, credentials);
-        
-        // HarvestUploads und PreferenceDtos sind null - wie in der Doku beschrieben
-        // Hier können ggf. Default-Werte gesetzt werden
+        try
+        {
+            return _profileDbs.SetNewProfile(newProfile, credentials);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Registrierung konnte nicht durchgeführt werden.", ex);
+        }
     }
 
     public PrivateProfileDto LoginProfile(CredentialProfileDto credentials) 
@@ -127,8 +130,15 @@ public class ProfileMgm : IProfileMgm
         return _profileDbs.GetUserPreference(profileId).ToList();
     }
 
-    public bool SetPreference(List<PreferenceDto> preferences)
+    public void SetPreference(List<PreferenceDto> preferences)
     {
-        return _profileDbs.SetUserPreference(preferences);
+        try
+        {
+            _profileDbs.SetUserPreference(preferences);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Präferenzen konnten nicht gespeichert werden.", ex);
+        }
     }
 }

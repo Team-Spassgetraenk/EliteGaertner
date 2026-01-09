@@ -1,15 +1,18 @@
-@page "/ernte-hochladen-privat"
+@page "/registrierung/erntehochladenregistrierung"
 
+@layout Layout.MainLayout
 @using AppLogic.Interfaces
-@using PresentationLayer.Services
 @using PresentationLayer.Shared
 @using PresentationLayer.State
+@using PresentationLayer.Services
 
-@inject CurrentProfileState CurrentProfile
+
 @inject IUploadService UploadService
 @inject IProfileMgm ProfileMgm
+@inject UserRegistrationState RegistrationState
 @inject IImageUploadService ImageUploadService
 @inject NavigationManager Nav
+
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -83,17 +86,17 @@
                         @* Eingabefelder werden durch CSS-Regeln auf max-width begrenzt *@
                         <div class="input-group">
                             <label class="input-label">Gewicht (in g)</label>
-                            <input type="number" class="app-input" @bind="Gewicht" placeholder="z.B. 300"/>
+                            <input type="number" step="0.1" class="app-input" @bind="Gewicht" placeholder="z.B. 300"/>
                         </div>
 
                         <div class="input-group">
                             <label class="input-label">Länge (in cm)</label>
-                            <input type="number" class="app-input" @bind="Laenge" placeholder="z.b. 67"/>
+                            <input type="number" step="0.1" class="app-input" @bind="Laenge" placeholder="z.b. 67"/>
                         </div>
 
                         <div class="input-group">
                             <label class="input-label">Breite (in cm)</label>
-                            <input type="number" class="app-input" @bind="Breite" placeholder="z.B. 25"/>
+                            <input type="number" step="0.1" class="app-input" @bind="Breite" placeholder="z.B. 25"/>
                         </div>
                     </div>
 
@@ -107,30 +110,21 @@
             </div>
 
             <button class="app-button primary-button weiter-button"
-                    disabled="@(
-                        _selectedTagIds.Count == 0 ||
-                        string.IsNullOrWhiteSpace(_hochgeladenesBild) ||
-                        Kommentar is null || string.IsNullOrWhiteSpace(Kommentar) ||
-                        Gewicht is null || Gewicht <= 0 ||
-                        Laenge is null || Laenge <= 0 ||
-                        Breite is null || Breite <= 0
-                    )"
+                    disabled="@(!IsFormValid)"
                     @onclick="VeröffentlichenAsync">
                 Ernte veröffentlichen
             </button>
 
-            @if (
-                _selectedTagIds.Count == 0 ||
-                string.IsNullOrWhiteSpace(_hochgeladenesBild) ||
-                Kommentar is null || string.IsNullOrWhiteSpace(Kommentar) ||
-                Gewicht is null || Gewicht <= 0 ||
-                Laenge is null || Laenge <= 0 ||
-                Breite is null || Breite <= 0
-            )
+            @if (!IsFormValid)
             {
                 <p class="disabled-hint">
                     Bitte lade zuerst ein Bild hoch, wähle mindestens ein Tag aus, schreibe eine Beschreibung und fülle Gewicht, Länge und Breite aus.
                 </p>
+            }
+
+            @if (!string.IsNullOrEmpty(RegistrationError))
+            {
+                <div class="alert alert-danger mt-2">@RegistrationError</div>
             }
         </div>
     </div>
@@ -140,21 +134,28 @@
     
     private string? _hochgeladenesBild = null;
     private List<int> _selectedTagIds = new ();
-    private int? Gewicht { get; set; }
-    private int? Laenge { get; set; }
-    private int? Breite { get; set; }
+    private float? Gewicht { get; set; }
+    private float? Laenge { get; set; }
+    private float? Breite { get; set; }
     private string Kommentar { get; set; } = "";
+    private string RegistrationError { get; set; } = "";
 
+    private bool IsFormValid =>
+        _selectedTagIds.Count > 0 &&
+        !string.IsNullOrWhiteSpace(_hochgeladenesBild) &&
+        !string.IsNullOrWhiteSpace(Kommentar) &&
+        Gewicht.HasValue && Gewicht.Value > 0 &&
+        Laenge.HasValue && Laenge.Value > 0 &&
+        Breite.HasValue && Breite.Value > 0;
 
     protected override void OnInitialized()
     {
-        //Überprüfung
-        if (CurrentProfile.LoggedInProfile is null)
+        if (!RegistrationState.IsStepProfilDataValid || !RegistrationState.IsStepProfilPictureValid || !RegistrationState.IsStepPreferenceValid)
         {
-            Nav.NavigateTo("/");
+            Nav.NavigateTo("/registrierung");
         }
     }
-    
+
     private void ToggleTag(int tagId)
     {
         //Über UI soll nur ein Tag pro Upload erlaubt sein
@@ -194,49 +195,117 @@
 
     private async Task VeröffentlichenAsync()
     {
-        //Überprüfung
-        if (CurrentProfile.ProfileId is null)
+        RegistrationError = "";
+
+        // Defensive: falls Button trotzdem auslöst
+        if (!IsFormValid)
         {
-            Nav.NavigateTo("/");
+            RegistrationError = "Bitte lade ein Bild hoch, wähle ein Tag aus, schreibe einen Kommentar und fülle Gewicht, Länge und Breite aus.";
             return;
         }
-        //Tags + Bild müssen da sein
-        if (string.IsNullOrWhiteSpace(_hochgeladenesBild) || _selectedTagIds.Count == 0)
-            return;
-        
-        //Beschreibung (Kommentar) muss vorhanden sein
-        if (string.IsNullOrWhiteSpace(Kommentar))
-            return;
-        //Gewicht, Breite, Länge müssen da sein
-        if (Gewicht is null || Laenge is null || Breite is null)
-            return;
 
-        var harvestUpload = new HarvestUploadDto
+        //Werte in den RegistrationState übernehmen
+        RegistrationState.ImageUrl = _hochgeladenesBild!;
+        RegistrationState.Description = Kommentar.Trim();
+        RegistrationState.WeightGram = Gewicht;
+        RegistrationState.LengthCm = Laenge;
+        RegistrationState.WidthCm = Breite;
+
+        RegistrationState.SelectedTagIdsHarvestUpload.Clear();
+        foreach (var id in _selectedTagIds)
         {
-            ProfileId = CurrentProfile.ProfileId.Value,
-            ImageUrl = _hochgeladenesBild,
-            Description = Kommentar.Trim(),
-            WeightGram = Gewicht.Value,
-            LengthCm = Laenge.Value,
-            WidthCm = Breite.Value,
-            UploadDate = DateTime.UtcNow,
-            TagIds = _selectedTagIds.ToList()
+            RegistrationState.SelectedTagIdsHarvestUpload.Add(id);
+        }
+
+        //Prüfen ob alle vorherigen Schritte erfüllt sind
+        if (!RegistrationState.IsReadyForRegistration)
+        {
+            RegistrationError = "Registrierung ist unvollständig. Bitte gehe die vorherigen Schritte erneut durch.";
+            Nav.NavigateTo("/registrierung");
+            return;
+        }
+
+        int profileId;
+
+        //Profil registrieren
+        var newProfileDto = new PrivateProfileDto
+        {
+            ProfilepictureUrl = RegistrationState.ProfilePictureUrl,
+            UserName = RegistrationState.UserName,
+            FirstName = RegistrationState.FirstName,
+            LastName = RegistrationState.LastName,
+            EMail = RegistrationState.Email,
+            Phonenumber = RegistrationState.PhoneNumber,
+            Profiletext = RegistrationState.ProfileText,
+            ShareMail = RegistrationState.ShareEmail,
+            SharePhoneNumber = RegistrationState.SharePhoneNumber,
+        };
+
+        //Credentials setzen
+        var newCredentialDto = new CredentialProfileDto
+        {
+            EMail = RegistrationState.Email,
+            PasswordHash = RegistrationState.PlainPassword
         };
 
         try
         {
-            UploadService.CreateHarvestUpload(harvestUpload);
-
-            // State aktualisieren, damit neues Bild sofort sichtbar ist
-            CurrentProfile.RefreshProfile(ProfileMgm);
-
-            // Zur Profilseite zurück
-            Nav.NavigateTo("/EigenesUserProfil");
+            profileId = ProfileMgm.RegisterProfile(newProfileDto, newCredentialDto);
         }
         catch (Exception ex)
         {
-            Console.WriteLine("VeröffentlichenAsync failed:");
-            Console.WriteLine(ex);
+            RegistrationError = ex.Message;
+            return;
         }
+
+        //Preferences setzen
+        var preferences = RegistrationState.SelectedTagIdsPreferences
+            .Select(tagId => new PreferenceDto
+            {
+                TagId = tagId,
+                Profileid = profileId,
+                DateUpdated = default
+            })
+            .ToList();
+
+        try
+        {
+            ProfileMgm.SetPreference(preferences);
+        }
+        catch (Exception ex)
+        {
+            RegistrationError = ex.Message;
+            return;
+        }
+
+        //HarvestUpload erstellen
+        var newHarvestUploadDto = new HarvestUploadDto
+        {
+            ProfileId = profileId,
+            ImageUrl = RegistrationState.ImageUrl,
+            Description = RegistrationState.Description,
+            WeightGram = RegistrationState.WeightGram!.Value,
+            WidthCm = RegistrationState.WidthCm!.Value,
+            LengthCm = RegistrationState.LengthCm!.Value,
+            TagIds = RegistrationState.SelectedTagIdsHarvestUpload.ToList(),
+        };
+
+        try
+        {
+            UploadService.CreateHarvestUpload(newHarvestUploadDto);
+        }
+        catch (Exception ex)
+        {
+            RegistrationError = ex.Message;
+            return;
+        }
+
+        //RegistrationState zurücksetzen
+        RegistrationState.Reset();
+
+        
+        Nav.NavigateTo("/registrierung/willkommenregistrierung");
+
+        await Task.CompletedTask;
     }
 }

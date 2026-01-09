@@ -17,11 +17,11 @@ public interface IProfileMgm
 
     public bool UpdateContactVisibility(ContactVisibilityDto dto);
     
-    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials);
+    public int RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials);
 
     public PrivateProfileDto LoginProfile(CredentialProfileDto credentials);
 
     public List<PreferenceDto> GetPreference(int profileId);
     
-    public bool SetPreference(List<PreferenceDto> preferences);
+    public void SetPreference(List<PreferenceDto> preferences);
 }

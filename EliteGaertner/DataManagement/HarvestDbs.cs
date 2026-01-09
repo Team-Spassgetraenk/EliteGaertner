@@ -73,7 +73,7 @@ public class HarvestDbs : IHarvestDbs
             Weightgramm = uploadDto.WeightGram,
             Widthcm = uploadDto.WidthCm,
             Lengthcm = uploadDto.LengthCm,
-            Uploaddate = uploadDto.UploadDate,
+            Uploaddate = DateTime.UtcNow,
             Tags = tags, 
             Profileid = uploadDto.ProfileId
         };

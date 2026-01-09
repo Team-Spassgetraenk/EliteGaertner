@@ -49,13 +49,16 @@ public class ProfileDbs : IProfileDbs
             .Any(p => p.Username == normalizedUsername);
     }
 
-    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
+    //TODO KOMMENTAR ÜBERARBEITEN
+    public int SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
     {
-        
         //Es ist nicht möglich, Stand jetzt, eine PrivateProfileDto/CredentialProfileDto
         //zu übergeben die = null ist. Trotzdem defensive Programmierung.
-        if (privateProfile is null || credentials is null)
-            return new PrivateProfileDto();
+        if (privateProfile is null)
+            throw new ArgumentNullException(nameof(privateProfile));
+
+        if (credentials is null)
+            throw new ArgumentNullException(nameof(credentials));
         
         //UserName und Email normalisieren. Uppercase -> Lowercase
         var userName = privateProfile.UserName?.Trim().ToLowerInvariant();
@@ -66,7 +69,9 @@ public class ProfileDbs : IProfileDbs
             string.IsNullOrWhiteSpace(eMail) ||
             string.IsNullOrWhiteSpace(credentials.PasswordHash))
             //Falls nicht -> return leeres PrivateProfileDto
-            return new PrivateProfileDto();
+            throw new ArgumentException(
+                "Username, E-Mail und Passwort sind Pflichtfelder."
+            );
         
         //Prüfe Mail und Username auf Duplikate
         var userNameExists = _dbContext.Profiles
@@ -79,9 +84,12 @@ public class ProfileDbs : IProfileDbs
         //Nicht in einem Statement zusammengelegt, um für die Zukunft festellen zu können
         //welcher Wert bereits vorhanden ist
         if (userNameExists)
-            return new PrivateProfileDto();
+            throw new InvalidOperationException("Der Benutzername ist bereits vergeben.");
         if (eMailExists)
-            return new PrivateProfileDto();
+            throw new InvalidOperationException("Die Email ist bereits vergeben.");
+        
+        //Passwort hashen (BCrypt)
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(credentials.PasswordHash);
         
         //Dto auf Entity mappen
         var profileEntity = new Profile()
@@ -92,7 +100,7 @@ public class ProfileDbs : IProfileDbs
             Lastname = privateProfile.LastName,
             //Die Email und Passwort kommen aus dem CredentialDto
             Email = eMail,
-            Passwordhash = credentials.PasswordHash,
+            Passwordhash = hashedPassword,
             Phonenumber = privateProfile.Phonenumber,
             Profiletext = privateProfile.Profiletext,
             Sharemail = privateProfile.ShareMail,
@@ -103,24 +111,9 @@ public class ProfileDbs : IProfileDbs
         //Entity wird in Datenbank gespeichert
         _dbContext.Profiles.Add(profileEntity);
         _dbContext.SaveChanges();
-        
-        //Dto wird erstellt und zurückgegeben
-        var result = new PrivateProfileDto()
-        {
-            ProfileId = profileEntity.Profileid,
-            ProfilepictureUrl = profileEntity.Profilepictureurl,
-            UserName = profileEntity.Username,
-            FirstName = profileEntity.Firstname,
-            LastName = profileEntity.Lastname,  
-            EMail = profileEntity.Email,         
-            Phonenumber = profileEntity.Phonenumber,
-            Profiletext = profileEntity.Profiletext,
-            ShareMail = profileEntity.Sharemail,
-            SharePhoneNumber = profileEntity.Sharephonenumber,
-            UserCreated = profileEntity.Usercreated,
-        };
 
-        return result;
+        //ProfileId zurückgeben
+        return profileEntity.Profileid;
     }
 
     public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
@@ -300,42 +293,47 @@ public class ProfileDbs : IProfileDbs
         _dbContext.SaveChanges();
     }
 
-    public bool SetUserPreference(List<PreferenceDto> preferences) //Wichtiger Hinweis: Methode kann bei Aufruf nur für
-                                                                   //eine ProfileID (die erste in der Liste) überschreiben, damit
-                                                                   //werden nicht ausversehen andere Nutzer editiert
+    public void SetUserPreference(List<PreferenceDto> preferences) // Wichtiger Hinweis: Methode überschreibt nur für
+                                                                   // eine ProfileID (die erste in der Liste), damit
+                                                                   // nicht aus Versehen andere Nutzer editiert werden
     {
         // Input-Validierung (Write-Operation -> Exceptions)
-        if (preferences == null || preferences.Count <= 0)
-        {
-            Console.WriteLine("Keine Perferences Ausgewählt mindestens 1");
-            return false;   //Fehler aus PresLayer abfangen
-        }
+        if (preferences is null)
+            throw new ArgumentNullException(nameof(preferences));
 
-        //ProfileId muss bei allen gleich sein
-        var profileId = preferences.First().Profileid;
+        if (preferences.Count == 0)
+            throw new ArgumentException("Die Preference-Liste darf nicht leer sein.", nameof(preferences));
+
+        // ProfileId muss vorhanden und bei allen gleich sein
+        var profileId = preferences[0].Profileid;
         if (profileId <= 0)
-        {throw new ArgumentException("ProfileId muss größer als 0 sein.", nameof(preferences));}
-        
-        // 1. Bestehende Preferences dieses Profils löschen
+            throw new ArgumentException("ProfileId muss größer als 0 sein.", nameof(preferences));
+
+        if (preferences.Any(p => p.Profileid != profileId))
+            throw new ArgumentException("Alle PreferenceDtos müssen die gleiche ProfileId haben.", nameof(preferences));
+
+        // Optional: TagId validieren
+        if (preferences.Any(p => p.TagId <= 0))
+            throw new ArgumentException("TagId muss größer als 0 sein.", nameof(preferences));
+
+        // 1) Bestehende Preferences dieses Profils löschen
         var existingPreferences = _dbContext.Profilepreferences
             .Where(pp => pp.Profileid == profileId);
-    
+
         _dbContext.Profilepreferences.RemoveRange(existingPreferences);
-    
-        // 2. Neue Preferences hinzufügen
+
+        // 2) Neue Preferences hinzufügen
         var newPreferences = preferences.Select(p => new Profilepreference
         {
             Tagid = p.TagId,
             Profileid = p.Profileid,
-            Dateupdated = p.DateUpdated == default 
-                ? DateTime.UtcNow 
+            Dateupdated = p.DateUpdated == default
+                ? DateTime.UtcNow
                 : p.DateUpdated
         }).ToList();
-    
+
         _dbContext.Profilepreferences.AddRange(newPreferences);
-        
-        var rowsAffected = _dbContext.SaveChanges();
-    
-        return rowsAffected > 0;
+
+        _dbContext.SaveChanges();
     }
 }

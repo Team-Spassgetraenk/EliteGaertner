@@ -12,7 +12,7 @@ public interface IProfileDbs
     
     public bool CheckUsernameExists(string username);
     
-    public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials);
+    public int SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials);
 
     public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile);
 
@@ -30,5 +30,5 @@ public interface IProfileDbs
     
     public IEnumerable<PreferenceDto> GetUserPreference(int profileId);
     
-    public bool SetUserPreference(List<PreferenceDto> preferences);
+    public void SetUserPreference(List<PreferenceDto> preferences);
 }

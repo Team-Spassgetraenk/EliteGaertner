@@ -1,11 +1,12 @@
-@page "/welcome"
+@page "/registrierung/willkommenregistrierung"
 
 @layout Layout.MainLayout
 
-@inject NavigationManager Nav
+
 @using AppLogic.Interfaces
 @using PresentationLayer.State
 @inject UserRegistrationState RegistrationState
+@inject NavigationManager Nav
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -38,6 +39,6 @@
 @code {
     private void GoToStartseite()
     {
-        Nav.NavigateTo("/");
+        Nav.NavigateTo("/", forceLoad: true);
     }
 }

@@ -52,13 +52,13 @@
 
                 @* Pfeil Links *@
                 <button class="arrow-nav-button secondary-button"
-                        @onclick="SelectPreviousProfile">
+                        @onclick="SelectPreviousProfilePicture">
                     <i class="bi bi-caret-left-fill"></i>
                 </button>
 
                 @* Vorschau Links (Vorgänger-Bild)*@
                 <div class="profile-preview-container-hybrid">
-                    <img src="@($"pictures/Profilbilder/{GetProfileName(_currentIndex - 1)}")"
+                    <img src="@($"pictures/Profilbilder/{GetProfilePictureName(_currentIndex - 1)}")"
                          alt="Vorschau"
                          class="profile-image-preview" />
                 </div>
@@ -72,14 +72,14 @@
 
                 @* Vorschau Rechts (Nachfolger-Bild)*@
                 <div class="profile-preview-container-hybrid">
-                    <img src="@($"pictures/Profilbilder/{GetProfileName(_currentIndex + 1)}")"
+                    <img src="@($"pictures/Profilbilder/{GetProfilePictureName(_currentIndex + 1)}")"
                          alt="Vorschau"
                          class="profile-image-preview" />
                 </div>
 
                 @* Pfeil Rechts *@
                 <button class="arrow-nav-button secondary-button"
-                        @onclick="SelectNextProfile">
+                        @onclick="SelectNextProfilePicture">
                     <i class="bi bi-caret-right-fill"></i>
                 </button>
 
@@ -310,7 +310,7 @@
         _shareEmail = CurrentProfile.ShareMail.Value;
         _sharePhoneNumber = CurrentProfile.SharePhoneNumber.Value;
     
-        //ProfilBild-"Karusell" vorbereitenPasswort1!
+        //ProfilBild-"Karusell" 
         var currentFileName = Path.GetFileName(_profilePicture);
     
         var idx = ProfilePictureCatalog.profilePictures
@@ -335,34 +335,28 @@
         }
     }
     
-    // ====================================== 
-    // PROFILEPICTURE-HANDLING            
-    // ====================================== 
-    
-    private string GetProfileName(int index)
+    //ProfilePicture Handling
+    private string GetProfilePictureName(int index)
     {
         int count = ProfilePictureCatalog.profilePictures.Count;
         int effectiveIndex = (index % count + count) % count;
         return ProfilePictureCatalog.profilePictures[effectiveIndex];
     }
     
-    private void SelectNextProfile()
+    private void SelectNextProfilePicture()
     {
         _currentIndex = (_currentIndex + 1) % ProfilePictureCatalog.profilePictures.Count;
         _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
     }
-    //
-    private void SelectPreviousProfile()
+    
+    private void SelectPreviousProfilePicture()
     {
         _currentIndex = (_currentIndex - 1 + ProfilePictureCatalog.profilePictures.Count) 
                        % ProfilePictureCatalog.profilePictures.Count;
         _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
     }
     
-    // ======================================
-    // VALIDIERUNG & LOGIK (C#)
-    // ======================================
-
+    //Validierung und Logik
     //Email Validierung
     public static bool IsValidEmail(string email)
     {
@@ -410,10 +404,7 @@
     // Gesamt: Speichern nur erlaubt, wenn Email + Telefon gesetzt sind, mind. eine Freigabe aktiv ist und Passwortteil ok ist
     private bool CanSaveChanges => EmailProvidedAndValid && PhoneProvided && HasAtLeastOneContactShared && PasswordChangeValid;
 
-    // ======================================
-    // AKTIONEN
-    // ======================================
-    
+    //Aktionen
     private void ToggleLogoutMenu() => _showLogout = !_showLogout;
     
     private void SaveChanges()

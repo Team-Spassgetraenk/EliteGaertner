@@ -191,9 +191,6 @@
 
     private HarvestUploadDto? _selectedHarvest;
 
-    //TODO KOMMENTIEREN ALEKS
-    //Navigation Profilbild hochladen
-
     protected override void OnInitialized()
     {
         //Überprüfung
@@ -213,7 +210,6 @@
         _profileHarvestUploads = CurrentProfile.HarvestUploads?.ToList() ?? new List<HarvestUploadDto>();
     }
     
-
     //Nimm TagId, mappe ihm mit dem TagCatalog und render den passenden String
     private static string GetPrimaryTagLabel(HarvestUploadDto? harvest)
     {
@@ -249,8 +245,6 @@
 
         try
         {
-            
-            //TODO URL löschen lassen auf webroot
             //Löscht den HarvestUpload aus Datenbank + Webroot
             ImageUploadService.TryDeleteByRelativeUrl(UploadService.DeleteUpload(harvestUpload.UploadId));
 
