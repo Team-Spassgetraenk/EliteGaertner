@@ -26,7 +26,7 @@ public class ProfileMgm : IProfileMgm
         //Da wir die Datenbankzugriffe auf verschiedene Klassen aufgesplittet haben, müssen wir 
         //hier zwei verschiedene Datenbankzugriffe durchführen (Profilinfos, Harvestuploads)
         var profileHarvests = _harvestDbs.GetProfileHarvestUploads(profileId);
-        var profileInfo = _profileDbs.GetPrivateProfile(profileId);
+        var profileInfo = _profileDbs.GetPublicProfile(profileId);
         var publicProfile = new PublicProfileDto
         {
             ProfileId = profileInfo.ProfileId,
@@ -53,33 +53,20 @@ public class ProfileMgm : IProfileMgm
             
         return privateProfile;
     }
-
-    public bool UpdateProfile(PrivateProfileDto dto) //update
+    
+    public void UpdateProfile(PrivateProfileDto dto) //update
     {
-        var privateProfile = _profileDbs.EditProfile(dto);
-
-        if (privateProfile.ProfileId <= 0)
+        try
         {
-            Console.WriteLine("Profildaten konnten nicht geändert werden");
-            return false;
+            _profileDbs.EditProfile(dto);
         }
-        
-        Console.WriteLine("Profildaten geändert");
-        return true;
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Profil konnte nicht mit neuen Informationen aktualisert werden.", ex);
+        }
     }
 
-    public bool UpdateContactVisibility(ContactVisibilityDto dto) //update Visibility
-    {
-        if (_profileDbs.UpdateContactVisibility(dto))
-        { 
-            Console.WriteLine("Kontaktdaten geändert");
-            return true;
-        }
-        
-        Console.WriteLine("Kontaktdaten konnten nicht geändert werden");
-        return false;
-    }
-
+    //Int als Rückgabe, weil beim Registrierungsprozess für Präferenzen und HarvestUpload die ProfileId benötigen
     public int RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials)
     {
         try
@@ -91,26 +78,34 @@ public class ProfileMgm : IProfileMgm
             throw new InvalidOperationException("Registrierung konnte nicht durchgeführt werden.", ex);
         }
     }
-
-    public PrivateProfileDto LoginProfile(CredentialProfileDto credentials) 
+    
+    public PrivateProfileDto LoginProfile(CredentialProfileDto credentials)
     {
-        int? profileId = _profileDbs.CheckPassword(credentials.EMail, credentials.PasswordHash);
-        
-        if (profileId.HasValue)
+        int? profileId;
+
+        //Überprüf, ob eingegebene Credentials korrekt waren
+        try
         {
-            //Da wir die Datenbankzugriffe auf verschiedene Klassen aufgesplittet haben, müssen wir 
-            //hier zwei verschiedene Datenbankzugriffe durchführen (Profilinfos, Harvestuploads)
-            var profileHarvests = _harvestDbs.GetProfileHarvestUploads(profileId.Value);
-            var profileInfo = _profileDbs.GetPrivateProfile(profileId.Value);
-            var dto = profileInfo with 
-            {
-                HarvestUploads = profileHarvests.ToList(),
-            };
-            
-            return dto;
+            profileId = _profileDbs.CheckPassword(credentials.EMail, credentials.PasswordHash);
         }
-        
-        throw new UnauthorizedAccessException("Ungültige Anmeldedaten");
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Login konnte technisch nicht durchgeführt werden.", ex);
+        }
+
+        //Falls nicht -> Exception werfen
+        if (!profileId.HasValue)
+            throw new UnauthorizedAccessException("Ungültige Anmeldedaten");
+
+        //Benötigte Profilinformationen von der Datenbank holen
+        var profileHarvests = _harvestDbs.GetProfileHarvestUploads(profileId.Value);
+        var profileInfo = _profileDbs.GetPrivateProfile(profileId.Value);
+
+        //ProfileInfo um HarvestUploads ergänzen
+        return profileInfo with
+        {
+            HarvestUploads = profileHarvests.ToList(),
+        };
     }
 
     public void UpdateCredentials(CredentialProfileDto credentials)
@@ -123,11 +118,6 @@ public class ProfileMgm : IProfileMgm
         {
             throw new InvalidOperationException("Anmeldedaten konnten nicht aktualisiert werden.", ex);
         }
-    }
-
-    public List<PreferenceDto> GetPreference(int profileId)
-    {
-        return _profileDbs.GetUserPreference(profileId).ToList();
     }
 
     public void SetPreference(List<PreferenceDto> preferences)

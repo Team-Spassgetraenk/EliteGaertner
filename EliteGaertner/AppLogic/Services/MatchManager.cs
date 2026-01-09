@@ -64,28 +64,42 @@ public class MatchManager : IMatchManager
     
     public void RateUser(PublicProfileDto creatorProfile, bool value)
     {
-        //Erstelle neue MatchDto mit der Bewertung und Zeitpunkt
-        var dto = new RateDto
-        {
-            ContentReceiver = _profileId,
-            ContentCreator = creatorProfile.ProfileId,
-            ContentReceiverValue = value,
-            ContentReceiverRatingDate = DateTime.UtcNow,
-        };
-        _matchesDbs.SaveMatchInfo(dto);
-        
-        //Entferne Profil + HarvestUpload aus der Liste
-        var keyToRemove = _profileSuggestionList.Keys
-            .SingleOrDefault(p => p.ProfileId == creatorProfile.ProfileId);
-        if (keyToRemove != null)
-            _profileSuggestionList.Remove(keyToRemove);
-        
-        //Nach jeder Bewertung wird die Matchliste aktualisiert
-        _activeMatchesList = UpdateActiveMatches();
 
-        //Falls, nicht mehr genug Suggestions in der Liste sind -> neue erstellen.
-        if (_profileSuggestionList.Count < 5)
-            AddSuggestions();
+        try
+        {
+            //Erstelle neue MatchDto mit der Bewertung und Zeitpunkt
+            var dto = new RateDto
+            {
+                ContentReceiver = _profileId,
+                ContentCreator = creatorProfile.ProfileId,
+                ContentReceiverValue = value,
+                ContentReceiverRatingDate = DateTime.UtcNow,
+            };
+            _matchesDbs.SaveMatchInfo(dto);
+        
+            //Entferne Profil + HarvestUpload aus der Liste
+            var keyToRemove = _profileSuggestionList.Keys
+                .SingleOrDefault(p => p.ProfileId == creatorProfile.ProfileId);
+            if (keyToRemove != null)
+                _profileSuggestionList.Remove(keyToRemove);
+        
+            //Nach jeder Bewertung wird die Matchliste aktualisiert
+            _activeMatchesList = UpdateActiveMatches();
+
+            //Falls, nicht mehr genug Suggestions in der Liste sind -> neue erstellen.
+            if (_profileSuggestionList.Count < 5)
+                AddSuggestions();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+            $"Fehler beim Bewerten eines Users. ContentReceiver={_profileId}, " +
+            $"ContentCreator={creatorProfile.ProfileId}, " +
+            $"Value={value}",
+            ex
+            );
+        }
+        
     }
 
     public event Action<PublicProfileDto>? CreateMatch;

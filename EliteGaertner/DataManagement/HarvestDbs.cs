@@ -15,6 +15,7 @@ public class HarvestDbs : IHarvestDbs
         _dbContext = dbContext;
     }   
     
+    //TODO KOMMENTARE FEHLEN
     public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
     {
         //Falls die profileId <= 0 ist, return leere HarvestUploadDto Enumerable 
@@ -174,13 +175,21 @@ public class HarvestDbs : IHarvestDbs
             .Count(r => r.Uploadid == uploadId);
     }
     
-    //TODO Ich muss den Output randomisieren, sonst findet der irgendwann nicht mehr die richtigen Bilder
-    public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
+    public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(
+        int profileId, 
+        List<int> tagIds, 
+        HashSet<int> alreadyRatedProfiles, 
+        int preloadCount)
     {
         //Überprüfung ob ProfilId, TagIds vorhanden sind und PreloadCount > 0 ist
         //Falls nicht -> leere Liste zurückgeben
         if (profileId <= 0 || tagIds is null || tagIds.Count == 0 || preloadCount <= 0)
             return Enumerable.Empty<HarvestUploadDto>();
+        
+        
+        //Sicherheitscheck: falls keine alreadyRatedProfiles übergeben wurden
+        alreadyRatedProfiles ??= new HashSet<int>();
+
         
         //Hier bin ich in einen bekannten EF Core Query Translation Bug gelaufen.
         //Anscheinend mag er die Kombi aus GroupBy, Select(g => g.OrderByDescending(...).First()), Select(new Dto) nicht.
@@ -191,6 +200,8 @@ public class HarvestDbs : IHarvestDbs
             .AsNoTracking()
             //Filter alle HarvestUploads des Content Receivers heraus
             .Where(h => h.Profileid != profileId)
+            //Schließt alle Bilder aus von Profilen die bereits bewertet worden sind
+            .Where(h => !alreadyRatedProfiles.Contains(h.Profileid))
             //Überprüfe alle Tags des Harvest Uploads und prüfe, ob es mind ein Tag gibt, dass mit den Interessen
             //des Content Receivers übereinstimmen
             .Where(h => h.Tags.Any(t => tagIds.Contains(t.Tagid)))
@@ -214,6 +225,8 @@ public class HarvestDbs : IHarvestDbs
                     equals new { ProfileId = l.ProfileId, UploadDate = l.MaxUploadDate }
                 //Redundante Absicherung um eigene Uploads zu vermeiden
                 where h.Profileid != profileId
+                //Schließt alle Bilder aus von Profilen die bereits bewertet worden sind
+                where !alreadyRatedProfiles.Contains(h.Profileid)
                 //Überprüft nochmal ob der Tag im Upload vorhanden ist
                 where h.Tags.Any(t => tagIds.Contains(t.Tagid))
                 //Sortiert nach den aktuellsten Uploads

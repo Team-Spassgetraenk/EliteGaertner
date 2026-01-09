@@ -300,7 +300,8 @@ public class MatchManagerTests
         public HarvestDbsFake(IEnumerable<List<HarvestUploadDto>> sequence)
             => _queue = new Queue<List<HarvestUploadDto>>(sequence);
 
-        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
+        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds,
+            HashSet<int> alreadyRatedProfiles, int preloadCount)
             => _queue.Count > 0 ? _queue.Dequeue() : Enumerable.Empty<HarvestUploadDto>();
 
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)

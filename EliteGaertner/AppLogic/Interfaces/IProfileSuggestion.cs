@@ -10,7 +10,7 @@ public interface IProfileSuggestion
     //Anhand der enthaltenen Informationen können wir herausfinden welcher User für den Harvest-Upload
     //verantwortlich war. Für diesen User wird eine ProfileDTO erstellt. Die ProfileDto wird dann mit dem passenden 
     //Harvest-Upload in einer Dictionary abgelegt.
-    void CreateProfileSuggestions(int profileId, List<HarvestUploadDto> harvestSuggestions);
+    public void CreateProfileSuggestions(int profileId, List<HarvestUploadDto> harvestSuggestions);
     
     //Falls die User-Suggestions unter einem Schwellenwert fallen, dann
     //soll diese wieder aufgefüllt werden. Dabei lassen wir uns wieder eine Liste an Harvest-Suggestions
@@ -19,4 +19,7 @@ public interface IProfileSuggestion
     
     //Die Methode gibt eine Dictionary mit den passenden Usern und Harvestuploads zurück.
     public Dictionary<PublicProfileDto, HarvestUploadDto> GetProfileSuggestionList();
+
+    //TODO Kommentar fehlt
+    public void LoadAlreadyRatedProfiles(int profileId);
 }

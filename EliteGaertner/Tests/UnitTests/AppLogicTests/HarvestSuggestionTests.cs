@@ -25,7 +25,8 @@ public class HarvestSuggestionTests
         public HarvestDbsFake(IEnumerable<HarvestUploadDto> result)
             => _result = result;
 
-        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
+        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds,
+            HashSet<int> alreadyRatedProfiles, int preloadCount)
         {
             LastProfileId = profileId;
             LastTagIds = tagIds;

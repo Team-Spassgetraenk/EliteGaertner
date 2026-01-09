@@ -66,8 +66,8 @@ public class ProfileSuggestionTests
         public HarvestDbsFake(IEnumerable<HarvestUploadDto> uploads)
             => _uploads = uploads.ToList();
 
-        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(
-            int profileId, List<int> tagIds, int preloadCount)
+        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds,
+            HashSet<int> alreadyRatedProfiles, int preloadCount)
             => _uploads;
 
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)

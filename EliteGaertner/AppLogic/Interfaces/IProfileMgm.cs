@@ -11,17 +11,14 @@ public interface IProfileMgm
 
     public PrivateProfileDto GetPrivProfile(int profileId); //Für das eigene
 
-    public bool UpdateProfile(PrivateProfileDto profile);
+    public void UpdateProfile(PrivateProfileDto profile);
 
     public void UpdateCredentials(CredentialProfileDto credentials);
-
-    public bool UpdateContactVisibility(ContactVisibilityDto dto);
     
     public int RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials);
 
     public PrivateProfileDto LoginProfile(CredentialProfileDto credentials);
-
-    public List<PreferenceDto> GetPreference(int profileId);
+    
     
     public void SetPreference(List<PreferenceDto> preferences);
 }

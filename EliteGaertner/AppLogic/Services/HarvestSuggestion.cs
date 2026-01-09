@@ -3,7 +3,6 @@ using AppLogic.Interfaces;
 using DataManagement;
 using DataManagement.Interfaces;
 
-
 namespace AppLogic.Services;
 
 
@@ -13,12 +12,20 @@ public class HarvestSuggestion : IHarvestSuggestion
     private readonly List<HarvestUploadDto> _harvestSuggestionsList = new();
     private readonly IHarvestDbs _harvestRepo;
    
-    public HarvestSuggestion(IHarvestDbs harvestRepo, int profileId, List<int> tagIds, int preloadCount)
+    public HarvestSuggestion(IHarvestDbs harvestRepo, 
+        int profileId, 
+        List<int> tagIds, 
+        HashSet<int> alreadyRatedProfiles,
+        int preloadCount)
     {
         //Zuweisung der IHarvestDbs
         _harvestRepo = harvestRepo;
         //Übergabe der ProfileId und dem dazugehörigen Interessensprofil/TagIds an die Datenbank.
-        _harvestSuggestionsList.AddRange(_harvestRepo.GetHarvestUploadRepo(profileId, tagIds, preloadCount));
+        _harvestSuggestionsList.AddRange(_harvestRepo.GetHarvestUploadRepo(
+            profileId, 
+            tagIds, 
+            alreadyRatedProfiles, 
+            preloadCount));
     }
     
     public List<HarvestUploadDto> GetHarvestSuggestionList()

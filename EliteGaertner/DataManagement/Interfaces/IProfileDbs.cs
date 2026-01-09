@@ -3,6 +3,7 @@ using DataManagement.Entities;
 
 namespace DataManagement.Interfaces;
 
+//TODO KOMMENTARE FEHLT
 public interface IProfileDbs
 {
     //Die Methode speichert ein neues Profil bei der Registrierung ab.
@@ -14,7 +15,7 @@ public interface IProfileDbs
     
     public int SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials);
 
-    public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile);
+    public void EditProfile(PrivateProfileDto privateProfile);
 
     public void EditPassword(CredentialProfileDto credentials);
     
@@ -23,8 +24,6 @@ public interface IProfileDbs
     public PrivateProfileDto GetPrivateProfile(int profileId);
     
     public PublicProfileDto GetPublicProfile(int profileId);
-    
-    public bool UpdateContactVisibility(ContactVisibilityDto dto);
     
     public int? CheckPassword( string eMail, string passwordHash);
     

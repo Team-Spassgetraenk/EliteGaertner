@@ -25,7 +25,6 @@ public class ProfileDbs : IProfileDbs
             .SingleOrDefault(p => 
                 p.Email == normalizedEmail);
         
-        
         if (profile == null)
             return null;
 
@@ -48,15 +47,12 @@ public class ProfileDbs : IProfileDbs
             .AsNoTracking()
             .Any(p => p.Username == normalizedUsername);
     }
-
-    //TODO KOMMENTAR ÜBERARBEITEN
+    
     public int SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
     {
-        //Es ist nicht möglich, Stand jetzt, eine PrivateProfileDto/CredentialProfileDto
-        //zu übergeben die = null ist. Trotzdem defensive Programmierung.
+        //Überprüfungen
         if (privateProfile is null)
             throw new ArgumentNullException(nameof(privateProfile));
-
         if (credentials is null)
             throw new ArgumentNullException(nameof(credentials));
         
@@ -80,9 +76,7 @@ public class ProfileDbs : IProfileDbs
         var eMailExists = _dbContext.Profiles
             .AsNoTracking()
             .Any(p => p.Email == eMail);
-        //Falls UserName oder Passwort schon existiert -> leeres ProfileDto wird zurückgegeben
-        //Nicht in einem Statement zusammengelegt, um für die Zukunft festellen zu können
-        //welcher Wert bereits vorhanden ist
+        //Exceptions bei Duplikate
         if (userNameExists)
             throw new InvalidOperationException("Der Benutzername ist bereits vergeben.");
         if (eMailExists)
@@ -116,7 +110,7 @@ public class ProfileDbs : IProfileDbs
         return profileEntity.Profileid;
     }
 
-    public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
+    public void EditProfile(PrivateProfileDto privateProfile)
     {
         if (privateProfile == null || privateProfile.ProfileId <= 0)
             throw new ArgumentNullException(nameof(privateProfile), "Dto darf nicht null sein, oder ID negativ");
@@ -136,21 +130,14 @@ public class ProfileDbs : IProfileDbs
         profile.Sharemail = privateProfile.ShareMail;
         profile.Sharephonenumber = privateProfile.SharePhoneNumber;
     
-        // Email und PhoneNumber nur bei Nicht-Null überschreiben
+        //Email und PhoneNumber nur bei Nicht-Null überschreiben
         if (!string.IsNullOrWhiteSpace(privateProfile.EMail))
             profile.Email = privateProfile.EMail.Trim().ToLowerInvariant();
         if (!string.IsNullOrWhiteSpace(privateProfile.Phonenumber))
             profile.Phonenumber = privateProfile.Phonenumber?.Trim();
 
-        // Änderungen persistieren
-        var rowsAffected = _dbContext.SaveChanges();
-        if (rowsAffected > 0)
-        {
-            return GetPrivateProfile(privateProfile.ProfileId);
-        }
-    
-        // Fallback: Leeres DTO bei keinem Update
-        return new PrivateProfileDto();
+        //Änderungen persistieren
+        _dbContext.SaveChanges();
     }
     
     public Profile? GetProfile(int profileId)
@@ -219,31 +206,6 @@ public class ProfileDbs : IProfileDbs
         };
 
         return result;
-    }
-
-    public bool UpdateContactVisibility(ContactVisibilityDto dto)
-    {
-        if (dto == null || dto.profileId <= 0)
-            throw new ArgumentException("Ungültiges DTO.");
-        
-        var profile = _dbContext.Profiles
-            .SingleOrDefault(p => p.Profileid == dto.profileId);
-
-        if (profile == null)
-            throw new ArgumentException("Profil nicht gefunden.");
-
-        // Nur bei Nicht-Null überschreiben
-        if (!string.IsNullOrWhiteSpace(dto.EMail))
-            profile.Email = dto.EMail.Trim().ToLowerInvariant();
-
-        if (!string.IsNullOrWhiteSpace(dto.PhoneNumber))
-            profile.Phonenumber = dto.PhoneNumber.Trim();
-
-        profile.Sharemail = dto.ShareMail;
-        profile.Sharephonenumber = dto.SharePhoneNumber;
-
-        var rowsAffected = _dbContext.SaveChanges();
-        return rowsAffected > 0;
     }
     
     public IEnumerable<PreferenceDto> GetUserPreference(int profileId)

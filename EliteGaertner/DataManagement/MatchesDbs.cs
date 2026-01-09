@@ -64,12 +64,28 @@ public class MatchesDbs : IMatchesDbs
         return result;
     }
 
+    //TODO Maybe obsolet
     public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
     {
         return _dbContext.Ratings                    
             .Any(r =>                               
                 r.Contentreceiverid == profileIdReceiver &&
                 r.Contentcreatorid == profileIdCreator); 
+    }
+
+    public HashSet<int> GetAlreadyRatedProfileIds(int profileIdReceiver)
+    {
+        //Ungültige profileId -> leeres Ergebnis (keine Bewertungshistorie)
+        if (profileIdReceiver <= 0)
+            return new HashSet<int>();
+
+        //Alle Creator-ProfileIds, die der Receiver bereits bewertet hat (egal ob Like/Dislike)
+        return _dbContext.Ratings
+            .AsNoTracking()
+            .Where(r => r.Contentreceiverid == profileIdReceiver)
+            .Select(r => r.Contentcreatorid)
+            .Distinct()
+            .ToHashSet();
     }
     
     public void SaveMatchInfo(RateDto matchDto)
