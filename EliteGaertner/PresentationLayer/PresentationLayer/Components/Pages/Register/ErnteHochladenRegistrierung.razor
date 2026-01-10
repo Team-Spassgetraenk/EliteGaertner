@@ -1,0 +1,343 @@
+@page "/registrierung/erntehochladenregistrierung"
+
+@layout Layout.MainLayout
+@using AppLogic.Interfaces
+@using PresentationLayer.Shared
+@using PresentationLayer.State
+@using PresentationLayer.Services
+
+
+@inject IUploadService UploadService
+@inject IProfileMgm ProfileMgm
+@inject UserRegistrationState RegistrationState
+@inject IImageUploadService ImageUploadService
+@inject NavigationManager Nav
+@inject ILogger<ErnteHochladenRegistrierung> Logger
+
+
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<div class="register-page-container">
+    <div class="login-center">
+
+        <div class="register-card ernte-parameter-card">
+
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <h2 class="elitegaertner-title">EliteGärtner.</h2>
+            </div>
+
+            <h3 class="register-title">Deine Ernte veröffentlichen</h3>
+
+            <div class="form-layout">
+
+                @* --- LINKA SPALTE: Bild und Upload-Button (Vertikal zentriert zur rechten Spalte) --- *@
+                <div class="left-column">
+                    @* --- Flexibler Bild-Container (Passt sich der Bildgröße an) --- *@
+                    <div class="ernte-image-container">
+                        @if (string.IsNullOrEmpty(_hochgeladenesBild))
+                        {
+                        @* **Platzhalter-Bild** (Hier ein statisches Bild zur besseren Visualisierung) *@
+                        <img src="pictures/PlatzhalterBild.jpg" alt="Bild-Platzhalter" class="ernte-image placeholder-img" />
+                        <div class="placeholder-text-overlay">
+                            <span class="bi bi-camera" style="font-size: 3rem;"></span>
+                        </div>
+                        }
+                        else
+                        {
+                        @* Flexibles hochgeladenes Bild *@
+                        <img src="@_hochgeladenesBild" alt="Erntebild" class="ernte-image" />
+                        }
+                    </div>
+
+                    <InputFile id="file-upload" OnChange="HandleFileSelection" hidden />
+                    <label for="file-upload" class="app-button secondary-button upload-button">
+                        <span class="bi bi-upload"></span> Erntebild hochladen
+                    </label>
+
+                </div>
+
+                @* --- RECHTE SPALTE: Tags und Parameter --- *@
+                <div class="right-column">
+                    
+                    <h4 class="tag-headline">Gemüse</h4>
+                    <div class="tag-grid">
+                        @foreach (var tag in TagCatalog.Gemuese)
+                        {
+                            <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                                 @onclick="() => ToggleTag(tag.TagId)">
+                                <span>@tag.Icon</span> <span>@tag.Name</span>
+                            </div>
+                        }
+                    </div>
+
+                    <h4 class="tag-headline">Obst</h4>
+                    <div class="tag-grid">
+                        @foreach (var tag in TagCatalog.Obst)
+                        {
+                            <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                                 @onclick="() => ToggleTag(tag.TagId)">
+                                <span>@tag.Icon</span> <span>@tag.Name</span>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="parameter-row">
+                        @* Eingabefelder werden durch CSS-Regeln auf max-width begrenzt *@
+                        <div class="input-group">
+                            <label class="input-label">Gewicht (in g)</label>
+                            <input type="number" step="0.1" class="app-input" @bind="Gewicht" placeholder="z.B. 300"/>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Länge (in cm)</label>
+                            <input type="number" step="0.1" class="app-input" @bind="Laenge" placeholder="z.b. 67"/>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Breite (in cm)</label>
+                            <input type="number" step="0.1" class="app-input" @bind="Breite" placeholder="z.B. 25"/>
+                        </div>
+                    </div>
+
+                    <h4 class="tag-headline">Kommentar</h4>
+                    <div class="input-group">
+                        <textarea class="app-input" maxlength="150" @bind="Kommentar"
+                                  placeholder="Beschreibe kurz deine Ernte..."></textarea>
+                        <div class="char-counter">@Kommentar.Length / 150</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="app-button primary-button weiter-button"
+                    disabled="@(!IsFormValid)"
+                    @onclick="VeröffentlichenAsync">
+                Ernte veröffentlichen
+            </button>
+
+            @if (!IsFormValid)
+            {
+                <p class="disabled-hint">
+                    Bitte lade zuerst ein Bild hoch, wähle mindestens ein Tag aus, schreibe eine Beschreibung und fülle Gewicht, Länge und Breite aus.
+                </p>
+            }
+
+            @if (!string.IsNullOrEmpty(RegistrationError))
+            {
+                <div class="alert alert-danger mt-2">@RegistrationError</div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    
+    private string? _hochgeladenesBild = null;
+    private List<int> _selectedTagIds = new ();
+    private float? Gewicht { get; set; }
+    private float? Laenge { get; set; }
+    private float? Breite { get; set; }
+    private string Kommentar { get; set; } = "";
+    private string RegistrationError { get; set; } = "";
+
+    private bool IsFormValid =>
+        _selectedTagIds.Count > 0 &&
+        !string.IsNullOrWhiteSpace(_hochgeladenesBild) &&
+        !string.IsNullOrWhiteSpace(Kommentar) &&
+        Gewicht.HasValue && Gewicht.Value > 0 &&
+        Laenge.HasValue && Laenge.Value > 0 &&
+        Breite.HasValue && Breite.Value > 0;
+
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("Registration harvest step initialized. StepValid: ProfilData={ProfilDataValid}, ProfilPicture={ProfilPictureValid}, Preference={PreferenceValid}",
+            RegistrationState.IsStepProfilDataValid,
+            RegistrationState.IsStepProfilPictureValid,
+            RegistrationState.IsStepPreferenceValid);
+
+        if (!RegistrationState.IsStepProfilDataValid || !RegistrationState.IsStepProfilPictureValid || !RegistrationState.IsStepPreferenceValid)
+        {
+            Logger.LogWarning("Registration harvest step accessed without completing previous steps. Redirecting to /registrierung.");
+            Nav.NavigateTo("/registrierung");
+        }
+    }
+
+    private void ToggleTag(int tagId)
+    {
+        //Über UI soll nur ein Tag pro Upload erlaubt sein
+        //Für die Zukunft könnten wir aber umstellen, dass er mehrere Tags animmt
+        if (_selectedTagIds.Contains(tagId))
+        {
+            //Nochmal klicken -> abwählen
+            _selectedTagIds.Clear();
+            Logger.LogInformation("Harvest registration tag deselected. TagId={TagId}", tagId);
+            return;
+        }
+
+        // Neues Tag wählen -> alle anderen abwählen
+        _selectedTagIds.Clear();
+        _selectedTagIds.Add(tagId);
+        Logger.LogInformation("Harvest registration tag selected. TagId={TagId}", tagId);
+    }
+
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        
+        if (file is null)
+            return;
+
+        try
+        {
+            // Speichern passiert im Service (inkl. Ordner anlegen / Dateiname generieren etc.)
+            // Rückgabe ist ein relativer Pfad (z.B. "/tempUploads/<guid>.jpg"), den wir direkt rendern können.
+            _hochgeladenesBild = await ImageUploadService.SaveImageAsync(file);
+
+            Logger.LogInformation("Harvest registration image saved. RelativeUrl={RelativeUrl}", _hochgeladenesBild);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Harvest registration image upload failed.");
+            RegistrationError = "Fehler beim Hochladen des Bildes.";
+        }
+    }
+
+    private async Task VeröffentlichenAsync()
+    {
+        RegistrationError = "";
+        Logger.LogInformation("Harvest registration publish clicked. IsFormValid={IsFormValid}", IsFormValid);
+
+        // Defensive: falls Button trotzdem auslöst
+        if (!IsFormValid)
+        {
+            Logger.LogWarning("Harvest registration publish blocked due to invalid form. TagCount={TagCount}, HasImage={HasImage}, CommentLength={CommentLength}, Gewicht={Gewicht}, Laenge={Laenge}, Breite={Breite}",
+                _selectedTagIds.Count,
+                !string.IsNullOrWhiteSpace(_hochgeladenesBild),
+                Kommentar?.Length ?? 0,
+                Gewicht,
+                Laenge,
+                Breite);
+
+            RegistrationError = "Bitte lade ein Bild hoch, wähle ein Tag aus, schreibe einen Kommentar und fülle Gewicht, Länge und Breite aus.";
+            return;
+        }
+
+        //Werte in den RegistrationState übernehmen
+        RegistrationState.ImageUrl = _hochgeladenesBild!;
+        RegistrationState.Description = Kommentar.Trim();
+        RegistrationState.WeightGram = Gewicht;
+        RegistrationState.LengthCm = Laenge;
+        RegistrationState.WidthCm = Breite;
+
+        RegistrationState.SelectedTagIdsHarvestUpload.Clear();
+        foreach (var id in _selectedTagIds)
+        {
+            RegistrationState.SelectedTagIdsHarvestUpload.Add(id);
+        }
+
+        //Prüfen ob alle vorherigen Schritte erfüllt sind
+        if (!RegistrationState.IsReadyForRegistration)
+        {
+            Logger.LogWarning("Harvest registration publish blocked because RegistrationState is not ready. Redirecting to /registrierung.");
+            RegistrationError = "Registrierung ist unvollständig. Bitte gehe die vorherigen Schritte erneut durch.";
+            Nav.NavigateTo("/registrierung");
+            return;
+        }
+
+        int profileId;
+
+        //Profil registrieren
+        var newProfileDto = new PrivateProfileDto
+        {
+            ProfilepictureUrl = RegistrationState.ProfilePictureUrl,
+            UserName = RegistrationState.UserName,
+            FirstName = RegistrationState.FirstName,
+            LastName = RegistrationState.LastName,
+            EMail = RegistrationState.Email,
+            Phonenumber = RegistrationState.PhoneNumber,
+            Profiletext = RegistrationState.ProfileText,
+            ShareMail = RegistrationState.ShareEmail,
+            SharePhoneNumber = RegistrationState.SharePhoneNumber,
+        };
+
+        //Credentials setzen
+        var newCredentialDto = new CredentialProfileDto
+        {
+            EMail = RegistrationState.Email,
+            PasswordHash = RegistrationState.PlainPassword
+        };
+
+        try
+        {
+            profileId = ProfileMgm.RegisterProfile(newProfileDto, newCredentialDto);
+            Logger.LogInformation("RegisterProfile succeeded. ProfileId={ProfileId}", profileId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "RegisterProfile failed during harvest registration.");
+            RegistrationError = ex.Message;
+            return;
+        }
+
+        //Preferences setzen
+        var preferences = RegistrationState.SelectedTagIdsPreferences
+            .Select(tagId => new PreferenceDto
+            {
+                TagId = tagId,
+                Profileid = profileId,
+                DateUpdated = default
+            })
+            .ToList();
+
+        Logger.LogInformation("Setting preferences during harvest registration. ProfileId={ProfileId}, PreferenceCount={PreferenceCount}", profileId, preferences.Count);
+        try
+        {
+            ProfileMgm.SetPreference(preferences);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "SetPreference failed during harvest registration. ProfileId={ProfileId}", profileId);
+            RegistrationError = ex.Message;
+            return;
+        }
+
+        //HarvestUpload erstellen
+        var newHarvestUploadDto = new HarvestUploadDto
+        {
+            ProfileId = profileId,
+            ImageUrl = RegistrationState.ImageUrl,
+            Description = RegistrationState.Description,
+            WeightGram = RegistrationState.WeightGram!.Value,
+            WidthCm = RegistrationState.WidthCm!.Value,
+            LengthCm = RegistrationState.LengthCm!.Value,
+            TagIds = RegistrationState.SelectedTagIdsHarvestUpload.ToList(),
+        };
+
+        Logger.LogInformation("Creating harvest upload during registration. ProfileId={ProfileId}, TagCount={TagCount}, Gewicht={Gewicht}, Laenge={Laenge}, Breite={Breite}",
+            profileId,
+            newHarvestUploadDto.TagIds?.Count ?? 0,
+            newHarvestUploadDto.WeightGram,
+            newHarvestUploadDto.LengthCm,
+            newHarvestUploadDto.WidthCm);
+        try
+        {
+            UploadService.CreateHarvestUpload(newHarvestUploadDto);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "CreateHarvestUpload failed during harvest registration. ProfileId={ProfileId}, ImageUrl={ImageUrl}", profileId, newHarvestUploadDto.ImageUrl);
+            RegistrationError = ex.Message;
+            return;
+        }
+
+        //RegistrationState zurücksetzen
+        RegistrationState.Reset();
+        Logger.LogInformation("RegistrationState reset after successful harvest registration. Redirecting to welcome page.");
+        
+        Logger.LogInformation("Navigating to /registrierung/willkommenregistrierung.");
+        Nav.NavigateTo("/registrierung/willkommenregistrierung");
+
+        await Task.CompletedTask;
+    }
+}

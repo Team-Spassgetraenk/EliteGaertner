@@ -1,0 +1,146 @@
+2026-01-09 20:18:41.886 +01:00 [INF] === EliteGärtner STARTED ===
+2026-01-09 20:18:42.479 +01:00 [ERR] Failed executing DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-01-09 20:18:42.777 +01:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert
+2026-01-09 20:18:43.428 +01:00 [INF] HTTP GET / responded 200 in 164.2696 ms
+2026-01-09 20:18:43.457 +01:00 [INF] HTTP GET /app.css responded 200 in 6.0204 ms
+2026-01-09 20:18:43.459 +01:00 [INF] HTTP GET /_framework/blazor.server.js responded 200 in 8.2065 ms
+2026-01-09 20:18:43.460 +01:00 [INF] HTTP GET /PresentationLayer.styles.css responded 200 in 9.1543 ms
+2026-01-09 20:18:43.461 +01:00 [INF] HTTP GET /lib/bootstrap/dist/css/bootstrap.min.css responded 200 in 10.0177 ms
+2026-01-09 20:18:43.461 +01:00 [INF] HTTP GET /pictures/EliteGärtner_logo.png responded 200 in 10.5249 ms
+2026-01-09 20:18:43.483 +01:00 [INF] HTTP GET /_blazor/initializers responded 200 in 2.8078 ms
+2026-01-09 20:18:43.499 +01:00 [INF] HTTP GET /pictures/LightIconBackground.jpeg responded 200 in 19.1714 ms
+2026-01-09 20:18:43.504 +01:00 [INF] HTTP POST /_blazor/negotiate responded 200 in 6.0303 ms
+2026-01-09 20:18:43.558 +01:00 [INF] HTTP GET /pictures/EliteGärtner_logo.png responded 200 in 6.5560 ms
+2026-01-09 20:18:43.738 +01:00 [INF] HTTP GET /pictures/EliteGärtner_logo.png responded 200 in 31.7510 ms
+2026-01-09 20:18:43.875 +01:00 [INF] HTTP GET /pictures/EliteGärtner_logo.png responded 200 in 1.5390 ms
+2026-01-09 21:00:46.349 +01:00 [INF] HTTP CONNECT /_blazor responded 200 in 2522791.0073 ms
+2026-01-09 21:00:48.968 +01:00 [INF] HTTP POST /_blazor/negotiate responded 200 in 0.1204 ms
+2026-01-09 21:12:01.054 +01:00 [INF] HTTP CONNECT /_blazor responded 200 in 672098.7176 ms
+2026-01-09 21:12:01.064 +01:00 [INF] HTTP POST /_blazor/disconnect responded 200 in 7.0479 ms
+2026-01-09 21:50:18.395 +01:00 [ERR] Failed executing DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-01-09 21:50:18.717 +01:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert
+2026-01-09 21:50:21.755 +01:00 [INF] HTTP GET / responded 200 in 166.8499 ms
+2026-01-09 21:50:21.805 +01:00 [INF] HTTP GET /app.css responded 200 in 20.2630 ms
+2026-01-09 21:50:21.807 +01:00 [INF] HTTP GET /_framework/blazor.server.js responded 200 in 22.8900 ms
+2026-01-09 21:50:21.810 +01:00 [INF] HTTP GET /PresentationLayer.styles.css responded 200 in 25.6868 ms
+2026-01-09 21:50:21.815 +01:00 [INF] HTTP GET /lib/bootstrap/dist/css/bootstrap.min.css responded 200 in 30.5878 ms
+2026-01-09 21:50:21.818 +01:00 [INF] HTTP GET /pictures/EliteGärtner_logo.png responded 200 in 33.7848 ms
+2026-01-09 21:50:21.870 +01:00 [INF] HTTP GET /_blazor/initializers responded 200 in 7.5365 ms
+2026-01-09 21:50:21.878 +01:00 [INF] HTTP GET /pictures/LightIconBackground.jpeg responded 200 in 34.4602 ms
+2026-01-09 21:50:21.917 +01:00 [INF] HTTP POST /_blazor/negotiate responded 200 in 5.3762 ms
+2026-01-09 21:50:26.279 +01:00 [INF] HTTP GET / responded 200 in 5.7265 ms
+2026-01-09 21:50:26.359 +01:00 [INF] HTTP GET /app.css responded 200 in 0.6189 ms
+2026-01-09 21:50:26.360 +01:00 [INF] HTTP GET /_framework/blazor.server.js responded 200 in 0.7720 ms
+2026-01-09 21:50:26.360 +01:00 [INF] HTTP GET /PresentationLayer.styles.css responded 200 in 2.0343 ms
+2026-01-09 21:50:26.361 +01:00 [INF] HTTP GET /lib/bootstrap/dist/css/bootstrap.min.css responded 200 in 2.8986 ms
+2026-01-09 21:50:26.362 +01:00 [INF] HTTP GET /pictures/EliteGärtner_logo.png responded 200 in 3.6364 ms
+2026-01-09 21:50:26.368 +01:00 [INF] HTTP GET /_blazor/initializers responded 200 in 0.1591 ms
+2026-01-09 21:50:26.383 +01:00 [INF] HTTP POST /_blazor/negotiate responded 200 in 0.2248 ms
+2026-01-09 21:50:26.385 +01:00 [INF] HTTP GET /pictures/LightIconBackground.jpeg responded 200 in 16.6931 ms
+2026-01-09 21:50:58.365 +01:00 [INF] HTTP GET /pictures/Rangliste.png responded 200 in 2.9611 ms
+2026-01-09 21:50:58.365 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_08.png responded 200 in 2.8450 ms
+2026-01-09 21:50:58.366 +01:00 [INF] HTTP GET /pictures/Profil_04.png responded 200 in 3.3735 ms
+2026-01-09 21:50:58.367 +01:00 [INF] HTTP GET /pictures/EinstellungenIcon.png responded 200 in 5.1375 ms
+2026-01-09 21:50:58.369 +01:00 [INF] HTTP GET /pictures/ads/pimpyourblechad02.jpg responded 200 in 7.6128 ms
+2026-01-09 21:50:58.371 +01:00 [INF] HTTP GET /pictures/MatchesIcon.png responded 200 in 8.1805 ms
+2026-01-09 21:50:58.371 +01:00 [INF] HTTP GET /pictures/uploads/uploadid14_profileid06.png responded 200 in 9.0981 ms
+2026-01-09 21:51:07.602 +01:00 [INF] HTTP GET /pictures/Rangliste.png responded 200 in 2.9130 ms
+2026-01-09 21:51:07.603 +01:00 [INF] HTTP GET /pictures/Profil_04.png responded 200 in 3.5732 ms
+2026-01-09 21:51:07.606 +01:00 [INF] HTTP GET /pictures/ads/pimpyourblechad02.jpg responded 200 in 6.7311 ms
+2026-01-09 21:51:07.606 +01:00 [INF] HTTP GET /pictures/EinstellungenIcon.png responded 200 in 6.8730 ms
+2026-01-09 21:51:07.609 +01:00 [INF] HTTP GET /pictures/MatchesIcon.png responded 200 in 9.6005 ms
+2026-01-09 21:51:07.611 +01:00 [INF] HTTP GET /pictures/uploads/uploadid43_profileid20.png responded 200 in 11.5672 ms
+2026-01-09 21:51:07.611 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_28.png responded 200 in 11.8191 ms
+2026-01-09 21:51:09.192 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_14.png responded 200 in 4.2198 ms
+2026-01-09 21:51:09.194 +01:00 [INF] HTTP GET /pictures/uploads/uploadid17_profileid07.png responded 200 in 6.1992 ms
+2026-01-09 21:51:10.379 +01:00 [INF] HTTP GET /sounds/itsamatch.mp3 responded 206 in 2.0081 ms
+2026-01-09 21:51:10.382 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_27.png responded 200 in 1.1182 ms
+2026-01-09 21:51:10.383 +01:00 [INF] HTTP GET /pictures/uploads/Gurken_04.jpg responded 200 in 1.7717 ms
+2026-01-09 21:51:10.385 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_12.png responded 200 in 2.4158 ms
+2026-01-09 21:51:12.308 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_11.png responded 200 in 4.6633 ms
+2026-01-09 21:51:12.311 +01:00 [INF] HTTP GET /pictures/uploads/uploadid34_profileid16.png responded 200 in 7.5317 ms
+2026-01-09 21:51:15.551 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_17.png responded 200 in 4.1307 ms
+2026-01-09 21:51:15.552 +01:00 [INF] HTTP GET /pictures/uploads/uploadid40_profileid19.png responded 200 in 5.2915 ms
+2026-01-09 21:51:17.083 +01:00 [INF] HTTP GET /pictures/uploads/Radieschen_03.jpg responded 200 in 2.7814 ms
+2026-01-09 21:51:17.084 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_16.png responded 200 in 3.4761 ms
+2026-01-09 21:51:18.435 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_06.png responded 200 in 1.9724 ms
+2026-01-09 21:51:18.438 +01:00 [INF] HTTP GET /pictures/uploads/uploadid26_profileid12.png responded 200 in 5.0466 ms
+2026-01-09 21:51:19.501 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_23.png responded 200 in 4.0087 ms
+2026-01-09 21:51:19.504 +01:00 [INF] HTTP GET /pictures/uploads/uploadid36_profileid17.png responded 200 in 6.4124 ms
+2026-01-09 21:51:20.447 +01:00 [INF] HTTP GET /pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg responded 200 in 0.6189 ms
+2026-01-09 21:51:20.810 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_25.png responded 200 in 4.5132 ms
+2026-01-09 21:51:20.811 +01:00 [INF] HTTP GET /pictures/uploads/uploadid28_profileid13.png responded 200 in 6.3151 ms
+2026-01-09 21:51:22.156 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_27.png responded 200 in 0.6248 ms
+2026-01-09 21:51:26.411 +01:00 [INF] HTTP GET /pictures/ads/GurkenStandAd.jpg responded 200 in 3.0188 ms
+2026-01-09 22:11:52.085 +01:00 [INF] HTTP CONNECT /_blazor responded 200 in 1285699.1828 ms
+2026-01-09 22:11:52.085 +01:00 [INF] HTTP CONNECT /_blazor responded 200 in 1290158.4738 ms
+2026-01-09 22:11:54.650 +01:00 [INF] HTTP POST /_blazor/negotiate responded 200 in 0.0952 ms
+2026-01-09 22:11:54.650 +01:00 [INF] HTTP POST /_blazor/negotiate responded 200 in 0.0963 ms
+2026-01-09 22:29:41.517 +01:00 [INF] HTTP CONNECT /_blazor responded 200 in 1066919.3424 ms
+2026-01-09 22:29:41.517 +01:00 [INF] HTTP CONNECT /_blazor responded 200 in 1066919.3422 ms
+2026-01-09 22:44:18.862 +01:00 [ERR] Failed executing DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-01-09 22:44:19.203 +01:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert
+2026-01-09 22:44:19.635 +01:00 [INF] HTTP GET / responded 200 in 162.3188 ms
+2026-01-09 22:44:19.654 +01:00 [INF] HTTP GET /_framework/blazor.server.js responded 200 in 6.0865 ms
+2026-01-09 22:44:19.654 +01:00 [INF] HTTP GET /lib/bootstrap/dist/css/bootstrap.min.css responded 200 in 6.1737 ms
+2026-01-09 22:44:19.654 +01:00 [INF] HTTP GET /PresentationLayer.styles.css responded 200 in 6.1608 ms
+2026-01-09 22:44:19.655 +01:00 [INF] HTTP GET /pictures/EliteGärtner_logo.png responded 200 in 6.4766 ms
+2026-01-09 22:44:19.654 +01:00 [INF] HTTP GET /app.css responded 200 in 6.1343 ms
+2026-01-09 22:44:19.669 +01:00 [INF] HTTP GET /_blazor/initializers responded 200 in 4.3017 ms
+2026-01-09 22:44:19.677 +01:00 [INF] HTTP GET /pictures/LightIconBackground.jpeg responded 200 in 12.1245 ms
+2026-01-09 22:44:19.693 +01:00 [INF] HTTP POST /_blazor/negotiate responded 200 in 3.6887 ms
+2026-01-09 22:44:30.621 +01:00 [INF] HTTP GET /pictures/Rangliste.png responded 200 in 5.3149 ms
+2026-01-09 22:44:30.621 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_08.png responded 200 in 5.4275 ms
+2026-01-09 22:44:30.622 +01:00 [INF] HTTP GET /pictures/Profil_04.png responded 200 in 6.2591 ms
+2026-01-09 22:44:30.624 +01:00 [INF] HTTP GET /pictures/EinstellungenIcon.png responded 200 in 7.9775 ms
+2026-01-09 22:44:30.624 +01:00 [INF] HTTP GET /pictures/ads/pimpyourblechad02.jpg responded 200 in 8.8998 ms
+2026-01-09 22:44:30.627 +01:00 [INF] HTTP GET /pictures/MatchesIcon.png responded 200 in 11.7141 ms
+2026-01-09 22:44:30.628 +01:00 [INF] HTTP GET /pictures/uploads/uploadid14_profileid06.png responded 200 in 12.6906 ms
+2026-01-09 22:44:32.492 +01:00 [INF] HTTP GET /sounds/itsamatch.mp3 responded 206 in 1.8901 ms
+2026-01-09 22:44:32.499 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_27.png responded 200 in 1.7430 ms
+2026-01-09 22:44:32.504 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_12.png responded 200 in 4.8872 ms
+2026-01-09 22:44:32.504 +01:00 [INF] HTTP GET /pictures/uploads/uploadid05_profileid02.png responded 200 in 7.1962 ms
+2026-01-09 22:44:41.187 +01:00 [INF] HTTP GET /pictures/uploads/uploadid43_profileid20.png responded 200 in 5.4342 ms
+2026-01-09 22:44:41.187 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_28.png responded 200 in 5.5200 ms
+2026-01-09 22:44:42.684 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_14.png responded 200 in 3.8409 ms
+2026-01-09 22:44:42.685 +01:00 [INF] HTTP GET /pictures/uploads/uploadid17_profileid07.png responded 200 in 5.4245 ms
+2026-01-09 22:44:44.217 +01:00 [INF] HTTP GET /pictures/uploads/Gurken_04.jpg responded 200 in 2.5289 ms
+2026-01-09 22:44:46.105 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_11.png responded 200 in 5.6936 ms
+2026-01-09 22:44:46.108 +01:00 [INF] HTTP GET /pictures/uploads/uploadid34_profileid16.png responded 200 in 8.9344 ms
+2026-01-09 22:44:47.183 +01:00 [INF] HTTP GET /pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg responded 200 in 0.8213 ms
+2026-01-09 22:44:48.035 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_17.png responded 200 in 3.4772 ms
+2026-01-09 22:44:48.036 +01:00 [INF] HTTP GET /pictures/uploads/uploadid40_profileid19.png responded 200 in 5.3174 ms
+2026-01-09 22:44:49.265 +01:00 [INF] HTTP GET /pictures/uploads/Radieschen_03.jpg responded 200 in 2.5466 ms
+2026-01-09 22:44:49.265 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_16.png responded 200 in 2.9781 ms
+2026-01-09 22:44:50.468 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_04.png responded 200 in 1.2079 ms
+2026-01-09 22:44:50.473 +01:00 [INF] HTTP GET /pictures/uploads/uploadid29_profileid14.png responded 200 in 6.3489 ms
+2026-01-09 22:44:51.594 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_22.png responded 200 in 2.9380 ms
+2026-01-09 22:44:51.599 +01:00 [INF] HTTP GET /pictures/uploads/uploadid21_profileid09.png responded 200 in 7.7560 ms
+2026-01-09 22:44:52.634 +01:00 [INF] HTTP GET /pictures/uploads/uploadid12_profileid05.png responded 200 in 4.0377 ms
+2026-01-09 22:44:53.184 +01:00 [INF] HTTP GET /pictures/ads/GurkenStandAd.jpg responded 200 in 3.0878 ms
+2026-01-09 22:44:53.684 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_02.png responded 200 in 1.4026 ms
+2026-01-09 22:44:53.686 +01:00 [INF] HTTP GET /pictures/uploads/uploadid38_profileid18.png responded 200 in 3.4964 ms
+2026-01-09 22:44:54.702 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_18.png responded 200 in 3.3073 ms
+2026-01-09 22:44:54.704 +01:00 [INF] HTTP GET /pictures/uploads/uploadid31_profileid15.png responded 200 in 4.8751 ms
+2026-01-09 22:44:55.729 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_01.png responded 200 in 1.3360 ms
+2026-01-09 22:44:55.732 +01:00 [INF] HTTP GET /pictures/uploads/Mais_03.png responded 200 in 3.9664 ms
+2026-01-09 22:44:56.775 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_06.png responded 200 in 1.4795 ms
+2026-01-09 22:44:56.777 +01:00 [INF] HTTP GET /pictures/uploads/uploadid26_profileid12.png responded 200 in 4.0018 ms
+2026-01-09 22:44:58.636 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_23.png responded 200 in 3.5383 ms
+2026-01-09 22:44:58.641 +01:00 [INF] HTTP GET /pictures/uploads/uploadid36_profileid17.png responded 200 in 7.6642 ms
+2026-01-09 22:44:59.184 +01:00 [INF] HTTP GET /pictures/ads/OBI_werbung.jpg responded 200 in 4.7566 ms
+2026-01-09 22:44:59.706 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_25.png responded 200 in 3.1180 ms
+2026-01-09 22:44:59.708 +01:00 [INF] HTTP GET /pictures/uploads/uploadid28_profileid13.png responded 200 in 4.9340 ms
+2026-01-09 22:45:00.794 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_27.png responded 200 in 1.5988 ms
+2026-01-09 22:45:00.796 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_10.png responded 200 in 3.1893 ms
+2026-01-09 22:45:00.796 +01:00 [INF] HTTP GET /pictures/uploads/Gurken_02.jpg responded 200 in 3.2990 ms
+2026-01-09 22:59:01.994 +01:00 [INF] HTTP CONNECT /_blazor responded 200 in 882180.8616 ms

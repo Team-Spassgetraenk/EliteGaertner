@@ -1,14 +1,25 @@
 using PresentationLayer.Components;
 using DataManagement;
+using Serilog;
 using Microsoft.EntityFrameworkCore;
 using AppLogic.Interfaces;
 using AppLogic.Services;
 using DataManagement.Interfaces;
-using PresentationLayer.Components.Pages.Register;
 using PresentationLayer.Services;
 using PresentationLayer.State;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Serilog wird initialisiert
+builder.Host.UseSerilog((context, services, loggerConfig) =>
+{
+    //Liest die Config aus 
+    loggerConfig
+        //Appsettings.json    
+        .ReadFrom.Configuration(context.Configuration)
+        //Damit weiß er welche Injections in der Program.cs durchgeführt werden
+        .ReadFrom.Services(services);
+});
 
 //ConnectionString für EliteGaertnerDbContext
 var connectionString = builder.Configuration.GetConnectionString("Default")
@@ -42,6 +53,9 @@ builder.Services.AddScoped<IImageUploadService, ImageUploadService>();
 
 var app = builder.Build();
 
+//HTTP Requests loggen (Statuscode, Dauer, etc.)
+app.UseSerilogRequestLogging();
+
 //Überprüft, ob Datenbankschema vorhanden ist
 //Falls nicht -> Datenbankschema wird implementiert
 using (var scope = app.Services.CreateScope())
@@ -50,7 +64,8 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-// Configure the HTTP request pipeline.
+//Prüft, ob sich der Code im Development Modus befindet
+//Falls nicht -> Logs werden nicht ausgegeben 
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);

@@ -1,188 +1,190 @@
+using System;
+using Contracts.Data_Transfer_Objects;
+using DataManagement.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 using AppLogic.Services;
-using DataManagement.Interfaces;
-using Contracts.Data_Transfer_Objects;
-using System;
 
-namespace Tests.UnitTests.AppLogicTests
+namespace Tests.UnitTests.AppLogicTests;
+
+[TestClass]
+[TestCategory("Unit")]
+public class UploadServiceImplTests
 {
-    [TestClass]
-    public class UploadServiceImplTests
+    private Mock<IHarvestDbs> _mockHarvestDbs = null!;
+    private UploadServiceImpl _uploadService = null!;
+
+    [TestInitialize]
+    public void TestInitialize()
     {
-        private Mock<IHarvestDbs> _mockHarvestDbs;
-        private UploadServiceImpl _uploadService;
+        _mockHarvestDbs = new Mock<IHarvestDbs>(MockBehavior.Strict);
+        _uploadService = new UploadServiceImpl(_mockHarvestDbs.Object, NullLogger<UploadServiceImpl>.Instance);
+    }
 
-        [TestInitialize]
-        public void TestInitialize()
+    [TestMethod]
+    public void CreateHarvestUpload_ValidDto_CallsDbsOnce()
+    {
+        // Arrange
+        var uploadDto = new HarvestUploadDto
         {
-            _mockHarvestDbs = new Mock<IHarvestDbs>();
-            _uploadService = new UploadServiceImpl(_mockHarvestDbs.Object);
-        }
+            ProfileId = 1,
+            ImageUrl = "test.jpg",
+            Description = "Test upload",
+            WeightGram = 500,
+            WidthCm = 10,
+            LengthCm = 20
+        };
 
-        [TestMethod]
-        public void CreateHarvestUpload_aus_Dto_Wahr()
-        {
-            // Arrange Testdaten erstellen
-            var uploadDto = new HarvestUploadDto
-            {
-                ProfileId = 1,
-                ImageUrl = "test.jpg",
-                Description = "Test upload",
-                WeightGram = 500,
-                WidthCm = 10,
-                LengthCm = 20
-            };
-            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(uploadDto)).Returns(true);
+        _mockHarvestDbs
+            .Setup(x => x.CreateUploadDbs(uploadDto));
 
-            // Act = Aufruf
-           _uploadService.CreateHarvestUpload(uploadDto);
+        // Act
+        _uploadService.CreateHarvestUpload(uploadDto);
 
-            // Assert
-            Assert.IsTrue(result);
-            _mockHarvestDbs.Verify(x => x.CreateUploadDbs(uploadDto), Times.Once);
-        }
+        // Assert
+        _mockHarvestDbs.Verify(x => x.CreateUploadDbs(uploadDto), Times.Once);
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
 
-        [TestMethod]
-        public void CreateHarvestUpload_aus_Dto_ReturnsFalse()
-        {
-            // Arrange
-            var uploadDto = new HarvestUploadDto();
-            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(uploadDto)).Returns(false);
+    [TestMethod]
+    public void CreateHarvestUpload_WhenDbsThrows_WrapsInInvalidOperationException()
+    {
+        // Arrange
+        var uploadDto = new HarvestUploadDto { ProfileId = 1, ImageUrl = "x.jpg" };
+        var inner = new Exception("db failed");
 
-            // Act
-            _uploadService.CreateHarvestUpload(uploadDto);
+        _mockHarvestDbs
+            .Setup(x => x.CreateUploadDbs(uploadDto))
+            .Throws(inner);
 
-            // Assert
-            Assert.IsFalse(result);
-            _mockHarvestDbs.Verify(x => x.CreateUploadDbs(uploadDto), Times.Once);
-        }
+        // Act
+        var ex = Assert.ThrowsException<InvalidOperationException>(() =>
+            _uploadService.CreateHarvestUpload(uploadDto));
 
-        [TestMethod]
-        public void CreateHarvestUpload_aus_Paramatern_Wahr()
-        {
-            // Arrange
-            int profileId = 1;
-            string imageUrl = "test.jpg";
-            string description = "Test upload";
-            float weight = 500.5f;
-            int width = 10;
-            int length = 20;
+        // Assert
+        Assert.AreEqual("Upload fehlgeschlagen", ex.Message);
+        Assert.AreSame(inner, ex.InnerException);
 
-            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(It.Is<HarvestUploadDto>(dto =>
-                dto.ProfileId == profileId &&
-                dto.ImageUrl == imageUrl &&
-                dto.Description == description &&
-                dto.WeightGram == weight &&
-                dto.WidthCm == width &&
-                dto.LengthCm == length))).Returns(true);
+        _mockHarvestDbs.Verify(x => x.CreateUploadDbs(uploadDto), Times.Once);
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
 
-            // Act
-            _uploadService.CreateHarvestUpload(profileId, imageUrl, description, weight, width, length);
+    [TestMethod]
+    public void DeleteHarvestUpload_ValidUploadWithImageUrl_ReturnsImageUrl_AndDeletesInDb()
+    {
+        // Arrange
+        int uploadId = 1;
+        var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "test.jpg" };
 
-            // Assert
-            Assert.IsTrue(result);
-            _mockHarvestDbs.Verify(x => x.CreateUploadDbs(It.IsAny<HarvestUploadDto>()), Times.Once);
-        }
+        _mockHarvestDbs
+            .Setup(x => x.GetHarvestUploadDto(uploadId))
+            .Returns(uploadDto);
 
-        [TestMethod]
-        public void CreateHarvestUpload_WithParameters_Failure_ReturnsFalse()
-        {
-            // Arrange
-            _mockHarvestDbs.Setup(x => x.CreateUploadDbs(It.IsAny<HarvestUploadDto>())).Returns(false);
+        _mockHarvestDbs
+            .Setup(x => x.DeleteHarvestUpload(uploadId));
 
-            // Act
-            _uploadService.CreateHarvestUpload(new HarvestUploadDto());
+        // Act
+        var result = _uploadService.DeleteHarvestUpload(uploadId);
 
-            // Assert
-            Assert.IsFalse(result);
-            _mockHarvestDbs.Verify(x => x.CreateUploadDbs(It.IsAny<HarvestUploadDto>()), Times.Once);
-        }
+        // Assert
+        Assert.AreEqual("test.jpg", result);
+        _mockHarvestDbs.Verify(x => x.GetHarvestUploadDto(uploadId), Times.Once);
+        _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(uploadId), Times.Once);
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
 
-        // NEU: GetUploadDto – gültige Id liefert DTO
-        [TestMethod]
-        public void GetUploadDto_GueltigeId_GibtDtoZurueck()
-        {
-            // Arrange
-            int uploadId = 1;
-            var expectedDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "test.jpg" };
-            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns(expectedDto);
+    [TestMethod]
+    public void DeleteHarvestUpload_UploadDoesNotExist_ReturnsNull_AndDoesNotDelete()
+    {
+        // Arrange
+        int uploadId = 999;
 
-            // Act
-            var result = _uploadService.GetUploadDto(uploadId);
+        _mockHarvestDbs
+            .Setup(x => x.GetHarvestUploadDto(uploadId))
+            .Returns((HarvestUploadDto?)null);
 
-            // Assert
-            Assert.AreEqual(expectedDto, result);
-            _mockHarvestDbs.Verify(x => x.GetUploadDb(uploadId), Times.Once);
-        }
+        // Act
+        var result = _uploadService.DeleteHarvestUpload(uploadId);
 
-        // NEU: GetUploadDto – ungueltige Id liefert null
-        [TestMethod]
-        public void GetUploadDto_UngueltigeId_GibtNullZurueck()
-        {
-            // Arrange
-            int uploadId = 999;
-            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns((HarvestUploadDto)null);
+        // Assert
+        Assert.IsNull(result);
+        _mockHarvestDbs.Verify(x => x.GetHarvestUploadDto(uploadId), Times.Once);
+        _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(It.IsAny<int>()), Times.Never);
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
 
-            // Act
-            var result = _uploadService.GetUploadDto(uploadId);
+    [TestMethod]
+    public void DeleteHarvestUpload_EmptyImageUrl_ReturnsNull_AndDoesNotDelete()
+    {
+        // Arrange
+        int uploadId = 1;
+        var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "  " };
 
-            // Assert
-            Assert.IsNull(result);
-            _mockHarvestDbs.Verify(x => x.GetUploadDb(uploadId), Times.Once);
-        }
+        _mockHarvestDbs
+            .Setup(x => x.GetHarvestUploadDto(uploadId))
+            .Returns(uploadDto);
 
-        // NEU: DeleteUpload – gültiger Upload mit ImageUrl
-        [TestMethod]
-        public void DeleteUpload_GueltigerUploadMitImageUrl_GibtDateinameZurueck()
-        {
-            // Arrange
-            int uploadId = 1;
-            int profileId = 1;
-            var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "test.jpg" };
-            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns(uploadDto);
+        // Act
+        var result = _uploadService.DeleteHarvestUpload(uploadId);
 
-            // Act
-            var result = _uploadService.DeleteUpload(uploadId);
+        // Assert
+        Assert.IsNull(result);
+        _mockHarvestDbs.Verify(x => x.GetHarvestUploadDto(uploadId), Times.Once);
+        _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(It.IsAny<int>()), Times.Never);
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
 
-            // Assert
-            Assert.AreEqual("test.jpg", result);
-            _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(uploadId), Times.Once);
-        }
+    [TestMethod]
+    public void DeleteHarvestUpload_WhenGetUploadThrows_WrapsInInvalidOperationException()
+    {
+        // Arrange
+        int uploadId = 1;
+        var inner = new Exception("read failed");
 
-        // NEU: DeleteUpload – DTO null
-        [TestMethod]
-        public void DeleteUpload_UploadExistiertNicht_GibtNullZurueck()
-        {
-            // Arrange
-            int uploadId = 999;
-            int profileId = 1;
-            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns((HarvestUploadDto)null);
+        _mockHarvestDbs
+            .Setup(x => x.GetHarvestUploadDto(uploadId))
+            .Throws(inner);
 
-            // Act
-            var result = _uploadService.DeleteUpload(uploadId);
+        // Act
+        var ex = Assert.ThrowsException<InvalidOperationException>(() =>
+            _uploadService.DeleteHarvestUpload(uploadId));
 
-            // Assert
-            Assert.IsNull(result);
-            _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(It.IsAny<int>()), Times.Never);
-        }
+        // Assert
+        Assert.AreEqual("Upload konnte nicht geladen werden.", ex.Message);
+        Assert.AreSame(inner, ex.InnerException);
 
-        // NEU: DeleteUpload – leere ImageUrl
-        [TestMethod]
-        public void DeleteUpload_LeereImageUrl_GibtNullZurueck()
-        {
-            // Arrange
-            int uploadId = 1;
-            int profileId = 1;
-            var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "" };
-            _mockHarvestDbs.Setup(x => x.GetUploadDb(uploadId)).Returns(uploadDto);
+        _mockHarvestDbs.Verify(x => x.GetHarvestUploadDto(uploadId), Times.Once);
+        _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(It.IsAny<int>()), Times.Never);
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
 
-            // Act
-            var result = _uploadService.DeleteUpload(uploadId);
+    [TestMethod]
+    public void DeleteHarvestUpload_WhenDeleteThrows_WrapsInInvalidOperationException()
+    {
+        // Arrange
+        int uploadId = 1;
+        var uploadDto = new HarvestUploadDto { UploadId = uploadId, ImageUrl = "test.jpg" };
+        var inner = new Exception("delete failed");
 
-            // Assert
-            Assert.IsNull(result);
-            _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(It.IsAny<int>()), Times.Never);
-        }
+        _mockHarvestDbs
+            .Setup(x => x.GetHarvestUploadDto(uploadId))
+            .Returns(uploadDto);
+
+        _mockHarvestDbs
+            .Setup(x => x.DeleteHarvestUpload(uploadId))
+            .Throws(inner);
+
+        // Act
+        var ex = Assert.ThrowsException<InvalidOperationException>(() =>
+            _uploadService.DeleteHarvestUpload(uploadId));
+
+        // Assert
+        Assert.AreEqual("Upload konnte nicht gelöscht werden.", ex.Message);
+        Assert.AreSame(inner, ex.InnerException);
+
+        _mockHarvestDbs.Verify(x => x.GetHarvestUploadDto(uploadId), Times.Once);
+        _mockHarvestDbs.Verify(x => x.DeleteHarvestUpload(uploadId), Times.Once);
+        _mockHarvestDbs.VerifyNoOtherCalls();
     }
 }

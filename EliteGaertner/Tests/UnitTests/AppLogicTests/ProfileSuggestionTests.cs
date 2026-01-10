@@ -6,6 +6,8 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 using Contracts.Enumeration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.UnitTests.AppLogicTests;
 
@@ -41,7 +43,9 @@ public class ProfileSuggestionTests
             harvestDbs,
             receiverId,
             tagIds: new List<int> { 1, 2 },
-            preloadCount: 10
+            preloadCount: 10,
+            logger: NullLogger<ProfileSuggestion>.Instance,
+            harvestLogger: NullLogger<HarvestSuggestion>.Instance
         );
 
         // Act
@@ -66,8 +70,8 @@ public class ProfileSuggestionTests
         public HarvestDbsFake(IEnumerable<HarvestUploadDto> uploads)
             => _uploads = uploads.ToList();
 
-        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(
-            int profileId, List<int> tagIds, int preloadCount)
+        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds,
+            HashSet<int> alreadyRatedProfiles, int preloadCount)
             => _uploads;
 
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
@@ -76,7 +80,7 @@ public class ProfileSuggestionTests
         public void CreateUploadDbs(HarvestUploadDto uploadDto)
             => throw new NotImplementedException();
 
-        public HarvestUploadDto GetUploadDb(int uploadId)
+        public HarvestUploadDto GetHarvestUploadDto(int uploadId)
             => throw new NotImplementedException();
 
         public void DeleteHarvestUpload(int uploadId)
@@ -95,33 +99,31 @@ public class ProfileSuggestionTests
         public MatchesDbsFake(IEnumerable<(int receiver, int creator)> ratedPairs)
             => _ratedPairs = ratedPairs.ToHashSet();
 
-        public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
-            => _ratedPairs.Contains((profileIdReceiver, profileIdCreator));
+        public HashSet<int> GetAlreadyRatedProfileIds(int profileIdReceiver)
+            => _ratedPairs
+                .Where(p => p.receiver == profileIdReceiver)
+                .Select(p => p.creator)
+                .ToHashSet();
 
-        public IEnumerable<PublicProfileDto> GetActiveMatches(int profileId)
+        public IEnumerable<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
             => Enumerable.Empty<PublicProfileDto>();
 
-        public void SaveMatchInfo(RateDto matchDto) { }
+        public void SaveRateInfo(RateDto matchDto) { }
     }
 
     private sealed class ProfileDbsFake : IProfileDbs
     {
-        public bool CheckUsernameExists(string username)
+        public bool CheckProfileNameExists(string profileName)
+            => false;
+
+        public int SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
             => throw new NotImplementedException();
 
-        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
-            => throw new NotImplementedException();
-
-        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
-            => throw new NotImplementedException();
-
-        public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
+        public void EditProfile(PrivateProfileDto privateProfile)
             => throw new NotImplementedException();
 
         public void EditPassword(CredentialProfileDto credentials)
-        {
-            throw new NotImplementedException();
-        }
+            => throw new NotImplementedException();
 
         public DataManagement.Entities.Profile? GetProfile(int profileId)
             => null; // im ProfileSuggestion-Test nicht benötigt
@@ -138,16 +140,13 @@ public class ProfileSuggestionTests
                 Phonenumber = null
             };
 
-        public bool UpdateContactVisibility(ContactVisibilityDto dto)
-            => throw new NotImplementedException();
-
-        public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
-            => throw new NotImplementedException();
-
-        public bool SetUserPreference(List<PreferenceDto> preferences)
-            => throw new NotImplementedException();
-
         public int? CheckPassword(string eMail, string passwordHash)
+            => throw new NotImplementedException();
+
+        public IEnumerable<PreferenceDto> GetProfilePreference(int profileId)
+            => throw new NotImplementedException();
+
+        public void SetProfilePreference(List<PreferenceDto> preferences)
             => throw new NotImplementedException();
     }
 }

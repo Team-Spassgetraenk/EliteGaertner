@@ -3,7 +3,6 @@ using Contracts.Enumeration;
 
 namespace AppLogic.Interfaces;
 
-
 //Dieses Interface stellt alle Methoden zur Verfügung, die für die Erstellung und Verwaltung der Profil-
 //und HarvestUpload Vorschläge benötigt werden. Zusätzlich sind hier die Methoden, die die Matchlogik behandeln.
 public interface IMatchManager
@@ -12,32 +11,28 @@ public interface IMatchManager
     public Dictionary<PublicProfileDto, HarvestUploadDto> CreateProfileSuggestionList(int profileId, List<int> tagIds,
         int preloadCount);
     
-    //TODO kommentar fehlt
+    //Sobald in der User Suggestion List nicht mehr genug Vorschläge vorhanden sind, werden diese über die Methode nachgeladen
     public void AddSuggestions();
     
     //Gibt eine Liste an User+HarvestUpload Suggestions zurück
     public Dictionary<PublicProfileDto, HarvestUploadDto> GetProfileSuggestionList();
     
     //Diese Methode implementiert das Bewerten der Profile/Bilder.
-    //Der Content Receiver kann den User positiv oder negativ bewerten.
-    //Nach der Bewertung wird die jeweilige ProfileDTO mit ihrer HarvestDTO aus der Liste entfernt.
-    //Dabei wird auch überprüft, ob es zu einem Match kommt. Falls ja -> CreateMatch Methode.
-    //Es wird dabei immer überprüft, ob noch genug Vorschläge in der Liste vorhanden sind.
-    //Falls nicht, werden wieder neue Vorschläge generiert.
     public void RateUser(PublicProfileDto targetProfile, bool value);
     
-    //TODO Kommentar fehlt
+    //Diese Methode ist ein Event, die getriggert wird, sobald ein neues Match entsteht
     public event Action<PublicProfileDto>? CreateMatch;
 
-    //TODO Kommentar fehlt
+    //Diese Methode übergibt dem PräsentationsLayer den nächsten Vorschlag aus der SuggestionList
     public (PublicProfileDto creator, HarvestUploadDto harvest)? GetNextSuggestion();
     
-    //TODO Kommentar fehlt
+    //Nach jedem "RateUser" wird diese Methode aufgerufen, die die MatchListe aktualisiert und feststellt, ob neue
+    //dazugekommen sind
     public List<PublicProfileDto> UpdateActiveMatches();
 
-    //TODO KOMMENTAR FEHLT
+    //Übergibt die Liste an ActiveMatches an den Präsentations Layer
     public List<PublicProfileDto> GetActiveMatches();
     
-    //TODO KOMMENTAR FEHLT
+    //Führt das ReportHandling für einen Vorschlag durch
     public void ReportHarvestUpload(int uploadId, ReportReasons reason);
 }

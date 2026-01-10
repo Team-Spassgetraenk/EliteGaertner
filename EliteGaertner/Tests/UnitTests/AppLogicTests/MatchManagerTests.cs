@@ -6,6 +6,7 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 using Contracts.Enumeration;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.UnitTests.AppLogicTests;
 
@@ -44,7 +45,7 @@ public class MatchManagerTests
             new List<HarvestUploadDto>() // AddSuggestions()
         });
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, NullLoggerFactory.Instance);
 
         var creator = profileDbs.GetPublicProfile(2);
 
@@ -100,7 +101,7 @@ public class MatchManagerTests
             }
         });
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, NullLoggerFactory.Instance);
 
         var creator2 = profileDbs.GetPublicProfile(2);
 
@@ -150,7 +151,7 @@ public class MatchManagerTests
             ReportCountToReturn = 5
         };
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, NullLoggerFactory.Instance);
 
         // Act
         sut.ReportHarvestUpload(uploadId: 123, reason: ReportReasons.Spam);
@@ -188,7 +189,7 @@ public class MatchManagerTests
             ReportCountToReturn = 4
         };
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, NullLoggerFactory.Instance);
 
         // Act
         sut.ReportHarvestUpload(uploadId: 456, reason: ReportReasons.CatFishing);
@@ -231,7 +232,7 @@ public class MatchManagerTests
         public IEnumerable<PublicProfileDto> GetActiveMatches(int profileIdReceiver)
             => _queue.Count > 0 ? _queue.Dequeue() : Enumerable.Empty<PublicProfileDto>();
 
-        public void SaveMatchInfo(RateDto matchDto)
+        public void SaveRateInfo(RateDto matchDto)
         {
             SaveCalls.Add(matchDto);
 
@@ -241,26 +242,30 @@ public class MatchManagerTests
 
         public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
             => _ratedPairs.Contains((profileIdReceiver, profileIdCreator));
+
+        public HashSet<int> GetAlreadyRatedProfileIds(int profileIdReceiver)
+        {
+            // Alle CreatorIds, die dieser Receiver bereits bewertet hat
+            return _ratedPairs
+                .Where(p => p.receiverId == profileIdReceiver)
+                .Select(p => p.creatorId)
+                .ToHashSet();
+        }
     }
 
     private sealed class ProfileDbsFake : IProfileDbs
     {
-        public bool CheckUsernameExists(string username)
+        public bool CheckProfileNameExists(string profileName)
+            => false;
+
+        public int SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
             => throw new NotImplementedException();
 
-        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
-            => throw new NotImplementedException();
-
-        public PrivateProfileDto SetNewProfile(PrivateProfileDto privateProfile)
-            => throw new NotImplementedException();
-
-        public PrivateProfileDto EditProfile(PrivateProfileDto privateProfile)
+        public void EditProfile(PrivateProfileDto privateProfile)
             => throw new NotImplementedException();
 
         public void EditPassword(CredentialProfileDto credentials)
-        {
-            throw new NotImplementedException();
-        }
+            => throw new NotImplementedException();
 
         public DataManagement.Entities.Profile? GetProfile(int profileId)
             => null;
@@ -275,16 +280,13 @@ public class MatchManagerTests
                 UserName = $"User{profileId}"
             };
 
-        public bool UpdateContactVisibility(ContactVisibilityDto dto)
-            => throw new NotImplementedException();
-
         public int? CheckPassword(string eMail, string passwordHash)
             => throw new NotImplementedException();
 
-        public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
+        public IEnumerable<PreferenceDto> GetProfilePreference(int profileId)
             => throw new NotImplementedException();
 
-        public bool SetUserPreference(List<PreferenceDto> preferences)
+        public void SetProfilePreference(List<PreferenceDto> preferences)
             => throw new NotImplementedException();
     }
 
@@ -300,7 +302,8 @@ public class MatchManagerTests
         public HarvestDbsFake(IEnumerable<List<HarvestUploadDto>> sequence)
             => _queue = new Queue<List<HarvestUploadDto>>(sequence);
 
-        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
+        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds,
+            HashSet<int> alreadyRatedProfiles, int preloadCount)
             => _queue.Count > 0 ? _queue.Dequeue() : Enumerable.Empty<HarvestUploadDto>();
 
         public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
@@ -309,7 +312,6 @@ public class MatchManagerTests
         public void DeleteHarvestUpload(int uploadId)
         {
             DeleteCalls.Add(uploadId);
-            return;
         }
 
         public void SetReportHarvestUpload(int uploadId, ReportReasons reason)
@@ -320,7 +322,7 @@ public class MatchManagerTests
         public void CreateUploadDbs(HarvestUploadDto uploadDto)
             => throw new NotImplementedException();
 
-        public HarvestUploadDto GetUploadDb(int uploadId)
+        public HarvestUploadDto GetHarvestUploadDto(int uploadId)
             => throw new NotImplementedException();
     }
 }

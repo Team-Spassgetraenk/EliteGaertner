@@ -1,5 +1,6 @@
 @page "/ueber-uns"
 @inject NavigationManager Nav
+@inject Microsoft.Extensions.Logging.ILogger<ÜberUns> Logger
 
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -8,7 +9,7 @@
 <div class="about-page-container">
     @* --- TOP BAR --- *@
     <header class="comic-top-bar">
-        <div class="back-button" @onclick='() => Nav.NavigateTo("/startseite")'>
+        <div class="back-button" @onclick="BackToStartseite">
             <i class="bi bi-chevron-left"></i>
             <span>Zurück</span>
         </div>
@@ -138,3 +139,16 @@
         </div>
     </main>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("Über-uns page opened.");
+    }
+
+    private void BackToStartseite()
+    {
+        Logger.LogInformation("User clicked 'Zurück' on Über-uns page. Navigating to /startseite.");
+        Nav.NavigateTo("/startseite");
+    }
+}

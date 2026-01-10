@@ -2,7 +2,7 @@ using Contracts.Enumeration;
 
 namespace Contracts.Data_Transfer_Objects;
 
-//TODO
+//Stellt alle benötigten Informationen fürs Rendering der Ranglisten bereit
 public record LeaderboardDto
 {
     public string LeaderboardTitle { get; init; }

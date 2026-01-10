@@ -1,5 +1,6 @@
 namespace Contracts.Data_Transfer_Objects;
 
+//Beinhaltet alle benötigten Infos fürs Rendering eines öffentlichen Profils
 public record PublicProfileDto
 {
     public int ProfileId { get; init; }

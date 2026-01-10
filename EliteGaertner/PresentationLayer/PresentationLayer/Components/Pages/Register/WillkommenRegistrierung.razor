@@ -1,11 +1,13 @@
-@page "/welcome"
+@page "/registrierung/willkommenregistrierung"
 
 @layout Layout.MainLayout
 
-@inject NavigationManager Nav
+
 @using AppLogic.Interfaces
 @using PresentationLayer.State
 @inject UserRegistrationState RegistrationState
+@inject NavigationManager Nav
+@inject Microsoft.Extensions.Logging.ILogger<WillkommenRegistrierung> Logger
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -36,8 +38,14 @@
 </div>
 
 @code {
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("WillkommenRegistrierung initialized.");
+    }
+
     private void GoToStartseite()
     {
-        Nav.NavigateTo("/");
+        Logger.LogInformation("Navigating from WillkommenRegistrierung to Login (/).");
+        Nav.NavigateTo("/", forceLoad: true);
     }
 }

@@ -1,12 +1,16 @@
+using System;
+using System.Collections.Generic;
 using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using Contracts.Enumeration;
 using DataManagement.Interfaces;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.UnitTests.AppLogicTests;
 
 //Komplett von ChatGPT erstellt!!
 [TestClass]
+[TestCategory("Unit")]
 public class LeaderboardServiceTests
 {
     private sealed class FakeLeaderBoardDbs : ILeaderBoardDbs
@@ -68,6 +72,7 @@ public class LeaderboardServiceTests
     {
         // Arrange
         var title = "Top 10 Likes";
+        var leaderboardId = 1;
         var profileId = 42;
         int? tagId = null;
         var goal = LeaderboardSearchGoal.MostLikes;
@@ -83,7 +88,7 @@ public class LeaderboardServiceTests
 
         var fakeDbs = new FakeLeaderBoardDbs(providedEnumerable, personal);
 
-        var sut = new LeaderboardService(title, profileId, tagId, goal, fakeDbs);
+        var sut = new LeaderboardService(title, leaderboardId, profileId, tagId, goal, fakeDbs);
 
         // Act
         var dto = sut.GetLeaderBoardDto();
@@ -99,6 +104,7 @@ public class LeaderboardServiceTests
 
         // Assert: Felder korrekt gemappt
         Assert.AreEqual(title, dto.LeaderboardTitle);
+        Assert.AreEqual(leaderboardId, dto.LeaderboardId);
         Assert.AreEqual(tagId, dto.TagId);
         Assert.AreEqual(goal, dto.Goal);
 

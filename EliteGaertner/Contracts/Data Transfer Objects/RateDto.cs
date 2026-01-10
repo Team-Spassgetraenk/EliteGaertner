@@ -1,8 +1,7 @@
-using System.Runtime.InteropServices.JavaScript;
 
 namespace Contracts.Data_Transfer_Objects;
 
-//Manche Properties hier sind nullable, da auch keine Ratings vorhanden sein können 
+//Beinhaltet alle Informationen einer Profilbewertung
 public record RateDto
 {
     //Wie hat der Receiver den Creator bewertet?

@@ -5,6 +5,8 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using Contracts.Enumeration;
 using DataManagement.Interfaces;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.VisualStudio.TestPlatform.Common.ExtensionFramework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.UnitTests.AppLogicTests;
@@ -20,15 +22,18 @@ public class HarvestSuggestionTests
 
         public int? LastProfileId { get; private set; }
         public List<int>? LastTagIds { get; private set; }
+        public HashSet<int>? LastAlreadyRatedProfiles { get; private set; }
         public int? LastPreloadCount { get; private set; }
 
         public HarvestDbsFake(IEnumerable<HarvestUploadDto> result)
             => _result = result;
 
-        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount)
+        public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds,
+            HashSet<int> alreadyRatedProfiles, int preloadCount)
         {
             LastProfileId = profileId;
             LastTagIds = tagIds;
+            LastAlreadyRatedProfiles = alreadyRatedProfiles;
             LastPreloadCount = preloadCount;
             return _result;
         }
@@ -40,7 +45,7 @@ public class HarvestSuggestionTests
         public void CreateUploadDbs(HarvestUploadDto uploadDto)
             => throw new NotImplementedException();
 
-        public HarvestUploadDto GetUploadDb(int uploadId)
+        public HarvestUploadDto GetHarvestUploadDto(int uploadId)
             => throw new NotImplementedException();
 
         public void DeleteHarvestUpload(int uploadId)
@@ -66,10 +71,18 @@ public class HarvestSuggestionTests
         var fakeRepo = new HarvestDbsFake(expected);
         var profileId = 10;
         var tagIds = new List<int> { 3, 6, 9 };
+        var alreadyRatedProfiles = new HashSet<int> { 111, 222 };
         var preloadCount = 10;
-
+        
         // Act
-        var sut = new HarvestSuggestion(fakeRepo, profileId, tagIds, preloadCount);
+        var sut = new HarvestSuggestion(
+            NullLogger<HarvestSuggestion>.Instance,
+            fakeRepo,
+            profileId,
+            tagIds,
+            alreadyRatedProfiles,
+            preloadCount
+        );
         var result = sut.GetHarvestSuggestionList();
 
         // Assert
@@ -79,6 +92,7 @@ public class HarvestSuggestionTests
 
         Assert.AreEqual(profileId, fakeRepo.LastProfileId);
         CollectionAssert.AreEqual(tagIds, fakeRepo.LastTagIds);
+        CollectionAssert.AreEquivalent(alreadyRatedProfiles.ToList(), fakeRepo.LastAlreadyRatedProfiles!.ToList());
         Assert.AreEqual(preloadCount, fakeRepo.LastPreloadCount);
     }
 
@@ -89,7 +103,14 @@ public class HarvestSuggestionTests
         var fakeRepo = new HarvestDbsFake(Array.Empty<HarvestUploadDto>());
 
         // Act
-        var sut = new HarvestSuggestion(fakeRepo, 1, new List<int> { 3 }, 10);
+        var sut = new HarvestSuggestion(
+            NullLogger<HarvestSuggestion>.Instance,
+            fakeRepo,
+            1,
+            new List<int> { 3 },
+            new HashSet<int>(),
+            10
+        );
         var result = sut.GetHarvestSuggestionList();
 
         // Assert

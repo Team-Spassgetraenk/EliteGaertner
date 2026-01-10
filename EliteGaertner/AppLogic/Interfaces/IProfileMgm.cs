@@ -2,26 +2,30 @@
 
 namespace AppLogic.Interfaces;
 
-//TODO Kommentare fehlen
+//Dieses Interface ist für alle Methoden zuständig, die sich um das Profilmanagement kümmern
 public interface IProfileMgm
 {
-    public bool CheckUsernameExists (string username);
+    //Überprüft, ob der Profilname existiert
+    public bool CheckProfileNameExists (string profileName);
     
+    //Gibt ein PublicProfileDto anhand der aufgerufenen ProfileId zurück
     public PublicProfileDto VisitPublicProfile(int profileId); //Für Besucher
 
-    public PrivateProfileDto GetPrivProfile(int profileId); //Für das eigene
+    //Gibt ein PrivatesProfileDto anhand der aufgerufenen ProfileId zurück
+    public PrivateProfileDto GetPrivProfile(int profileId); 
 
-    public bool UpdateProfile(PrivateProfileDto profile);
+    //Änderungen am eigenen Profil werden hier verarbeitet 
+    public void UpdateProfile(PrivateProfileDto profile);
 
+    //Implementiert die Passwortänderung
     public void UpdateCredentials(CredentialProfileDto credentials);
-
-    public bool UpdateContactVisibility(ContactVisibilityDto dto);
     
-    public PrivateProfileDto RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials);
+    //Implementiert die Profilregistrierung
+    public int RegisterProfile(PrivateProfileDto newProfile, CredentialProfileDto credentials);
 
+    //Implementiert das Login
     public PrivateProfileDto LoginProfile(CredentialProfileDto credentials);
-
-    public List<PreferenceDto> GetPreference(int profileId);
     
-    public bool SetPreference(List<PreferenceDto> preferences);
+    //Die Präferenzen des Users werden hier abgearbeitet 
+    public void SetPreference(List<PreferenceDto> preferences);
 }

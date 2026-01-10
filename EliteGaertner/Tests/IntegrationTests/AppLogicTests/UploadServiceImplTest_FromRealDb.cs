@@ -5,6 +5,8 @@ using Contracts.Data_Transfer_Objects;
 using DataManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.IntegrationTests.AppLogicTests;
 
@@ -35,8 +37,13 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
         using var db = CreateDb();
         using var tx = db.Database.BeginTransaction(); // rollback am Ende
 
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new UploadServiceImpl(harvestDbs);
+        ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
+
+        var harvestDbs = new HarvestDbs(db, loggerFactory.CreateLogger<HarvestDbs>());
+        var sut = new UploadServiceImpl(harvestDbs, loggerFactory.CreateLogger<UploadServiceImpl>());
+
+        // Für CreateUploadDbs muss mindestens ein gültiger Tag angegeben werden
+        var existingTagId = db.Tags.AsNoTracking().Select(t => t.Tagid).First();
 
         // Arrange
         const int profileId = 1; // Seed: tomatentiger hat i.d.R. ProfileId=1
@@ -47,8 +54,19 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
         const int length = 5;
 
         // Act 1: Create
-        var created = sut.CreateHarvestUpload(profileId, uniqueUrl, description, weight, width, length);
-        Assert.IsTrue(created, "CreateHarvestUpload sollte true liefern.");
+        var uploadDto = new HarvestUploadDto
+        {
+            ProfileId = profileId,
+            ImageUrl = uniqueUrl,
+            Description = description,
+            WeightGram = weight,
+            WidthCm = width,
+            LengthCm = length,
+            UploadDate = DateTime.UtcNow,
+            TagIds = new System.Collections.Generic.List<int> { existingTagId }
+        };
+
+        sut.CreateHarvestUpload(uploadDto);
 
         // UploadId aus DB holen (über unique URL)
         var createdEntity = db.Harvestuploads
@@ -60,11 +78,10 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
 
         TestContext.WriteLine($"Created UploadId={uploadId}, ProfileId={profileId}, Url={uniqueUrl}");
 
-        // Act 2: Get
-        var dto = sut.GetUploadDto(uploadId);
+        // Assert 2: Created upload should be retrievable via DataManagement
+        var dto = harvestDbs.GetHarvestUploadDto(uploadId);
 
-        // Assert Get
-        Assert.IsNotNull(dto);
+        Assert.IsNotNull(dto, "Nach Create muss der Upload über HarvestDbs wieder geladen werden können.");
         Assert.AreEqual(uploadId, dto.UploadId);
         Assert.AreEqual(profileId, dto.ProfileId);
         Assert.AreEqual(uniqueUrl, dto.ImageUrl);
@@ -72,15 +89,17 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
         Assert.AreEqual(weight, dto.WeightGram);
         Assert.AreEqual(width, dto.WidthCm);
         Assert.AreEqual(length, dto.LengthCm);
+        Assert.IsNotNull(dto.TagIds);
+        Assert.IsTrue(dto.TagIds.Contains(existingTagId), "Der Upload muss den gesetzten Tag enthalten.");
 
-        // Act 3: Delete (liefert filename/url zurück)
-        var returnedFileName = sut.DeleteUpload(uploadId, profileId);
+        // Act 3: Delete (liefert ImageUrl zurück)
+        var returnedFileName = sut.DeleteHarvestUpload(uploadId);
 
         // Assert Delete
-        Assert.AreEqual(uniqueUrl, returnedFileName, "DeleteUpload soll die ImageUrl zurückgeben.");
+        Assert.AreEqual(uniqueUrl, returnedFileName, "DeleteHarvestUpload soll die ImageUrl zurückgeben.");
 
         var stillExists = db.Harvestuploads.AsNoTracking().Any(h => h.Uploadid == uploadId);
-        Assert.IsFalse(stillExists, "Upload muss nach DeleteUpload aus der DB entfernt sein.");
+        Assert.IsFalse(stillExists, "Upload muss nach DeleteHarvestUpload aus der DB entfernt sein.");
 
         tx.Rollback(); // Datenbank bleibt wie Seed
     }
@@ -89,14 +108,17 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
     public void DeleteUpload_ShouldReturnNull_WhenUploadDoesNotExist()
     {
         using var db = CreateDb();
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new UploadServiceImpl(harvestDbs);
+
+        ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
+
+        var harvestDbs = new HarvestDbs(db, loggerFactory.CreateLogger<HarvestDbs>());
+        var sut = new UploadServiceImpl(harvestDbs, loggerFactory.CreateLogger<UploadServiceImpl>());
 
         // Arrange
-        const int nonExistingUploadId = -999; // führt in HarvestDbs.GetUploadDb zu "new HarvestUploadDto()"
+        const int nonExistingUploadId = 9_999_999; // positive ID, die in der Seed-DB nicht existiert
 
         // Act
-        var result = sut.DeleteUpload(nonExistingUploadId, profileId: 1);
+        var result = sut.DeleteHarvestUpload(nonExistingUploadId);
 
         // Assert
         Assert.IsNull(result, "Wenn Upload nicht existiert, soll DeleteUpload null zurückgeben.");

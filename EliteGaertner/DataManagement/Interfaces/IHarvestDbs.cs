@@ -3,22 +3,23 @@ using Contracts.Enumeration;
 
 namespace DataManagement.Interfaces;
 
-
-//TODO Kommentare fehlen
+//Diese Interface stellt alle Datenbankzugriffe für die HarvestUploads bereit
 public interface IHarvestDbs
 {
 
-    //Gib mir die Harvestuploads des Users zurück.
+    //Gib mir die Harvestuploads des Profils zurück
     public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId);
     
     //Erstell mir eine Repository an HarvestUploadDtos die zum dem Interessensprofil
     //des Users passen. Die Menge der DTOs wird vom preloadCount bestimmt.
-    public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds, int preloadCount);
+    public IEnumerable<HarvestUploadDto> GetHarvestUploadRepo(int profileId, List<int> tagIds,
+        HashSet<int> alreadyRatedProfiles, int preloadCount);
     
+    //Erstellt ein HarvestUpload
     public void CreateUploadDbs(HarvestUploadDto uploadDto);
     
-    //TODO KOMMENTAR FEHLT
-    public HarvestUploadDto GetUploadDb(int uploadId);
+    //Gibt HarvestUploadDto zurück
+    public HarvestUploadDto GetHarvestUploadDto(int uploadId);
     
     //Löscht einen HarvestUpload
     public void DeleteHarvestUpload(int uploadId);

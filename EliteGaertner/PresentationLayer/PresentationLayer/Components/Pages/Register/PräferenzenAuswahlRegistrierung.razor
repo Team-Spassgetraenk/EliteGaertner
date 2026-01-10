@@ -1,0 +1,139 @@
+@page "/registrierung/praeferenzendatenregistrierung"
+
+@layout Layout.MainLayout
+
+@using PresentationLayer.State
+@using PresentationLayer.Shared
+@using AppLogic.Interfaces
+
+@inject UserRegistrationState RegistrationState
+@inject NavigationManager Nav
+@inject Microsoft.Extensions.Logging.ILogger<PräferenzenAuswahlRegistrierung> Logger
+
+
+@* WICHTIG: Beide Schriftarten laden, da Patrick Hand für den allgemeinen Text und Playfair Display für den EliteGärtner-Titel verwendet wird *@
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<div class="register-page-container">
+    <div class="login-center">
+
+        <div class="register-card">
+
+            <div class="logo-container">
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                @* Style entfernt und über die CSS-Klasse elitegaertner-title definiert *@
+                <h2 class="elitegaertner-title mt-2">EliteGärtner.</h2>
+            </div>
+            
+            <h3 class="register-title">Wähle dein Interessensprofil</h3>
+            
+            <h4 class="tag-headline">Gemüse</h4>
+            <div class="tag-grid">
+                @foreach (var tag in TagCatalog.Gemuese)
+                {
+                    <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                         @onclick="() => ToggleTag(tag.TagId)">
+                        <span>@tag.Icon</span>
+                        <span>@tag.Name</span>
+                    </div>
+                }
+            </div>
+
+            <h4 class="tag-headline">Obst</h4>
+            <div class="tag-grid">
+                @foreach (var tag in TagCatalog.Obst)
+                {
+                    <div class="tag app-tag @(_selectedTagIds.Contains(tag.TagId) ? "selected" : "")"
+                         @onclick="() => ToggleTag(tag.TagId)">
+                        <span>@tag.Icon</span>
+                        <span>@tag.Name</span>
+                    </div>
+                }
+            </div>
+
+            <button class="app-button primary-button weiter-button"
+                    disabled="@( !_selectedTagIds.Any() )"
+                    @onclick="NextRegistrationStep">
+                Speichern
+            </button>
+            
+            @if ( !_selectedTagIds.Any() )
+            {
+                <p class="disabled-hint">Bitte mindestens ein Tag auswählen.</p>
+            }
+
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+    private HashSet<int> _selectedTagIds = new();
+
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("Preferences registration page initialized. ProfilDataValid={ProfilDataValid}, ProfilPictureValid={ProfilPictureValid}",
+            RegistrationState.IsStepProfilDataValid,
+            RegistrationState.IsStepProfilPictureValid);
+
+        //Überprüfung, ob alle nötigen Registrierungsseiten durchlaufen worden sind
+        if (!RegistrationState.IsStepProfilDataValid || !RegistrationState.IsStepProfilPictureValid)
+        {
+            Logger.LogWarning("Redirecting to /registrierung because prerequisites are not met. ProfilDataValid={ProfilDataValid}, ProfilPictureValid={ProfilPictureValid}",
+                RegistrationState.IsStepProfilDataValid,
+                RegistrationState.IsStepProfilPictureValid);
+
+            Nav.NavigateTo("/registrierung");
+        }
+    }
+
+
+    void ToggleTag(int tagId)
+    {
+        var wasSelected = _selectedTagIds.Contains(tagId);
+
+        if (wasSelected)
+        {
+            _selectedTagIds.Remove(tagId);
+        }
+        else
+        {
+            _selectedTagIds.Add(tagId);
+        }
+
+        Logger.LogInformation("Preference tag toggled. TagId={TagId}, Action={Action}, SelectedCount={SelectedCount}",
+            tagId,
+            wasSelected ? "Removed" : "Added",
+            _selectedTagIds.Count);
+
+        StateHasChanged();
+    }
+
+    void NextRegistrationStep()
+    {
+        Logger.LogInformation("NextRegistrationStep clicked. SelectedCount={SelectedCount}", _selectedTagIds.Count);
+
+        //Überprüfung
+        if (!_selectedTagIds.Any())
+        {
+            Logger.LogWarning("NextRegistrationStep aborted because no tags are selected.");
+            return;
+        }
+
+        //Den State vorsichtshalber zurücksetzen
+        RegistrationState.SelectedTagIdsPreferences.Clear();
+
+        //TagIds hinzufügen zu RegistrationState
+        foreach (var id in _selectedTagIds)
+        {
+            RegistrationState.SelectedTagIdsPreferences.Add(id);
+        }
+
+        Logger.LogInformation("Preferences saved to RegistrationState. Count={Count}. Navigating to /registrierung/erntehochladenregistrierung",
+            RegistrationState.SelectedTagIdsPreferences.Count);
+
+        Nav.NavigateTo("/registrierung/erntehochladenregistrierung");
+    }
+}

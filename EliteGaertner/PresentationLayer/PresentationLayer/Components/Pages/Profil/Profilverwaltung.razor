@@ -11,6 +11,7 @@
 @inject CurrentProfileState CurrentProfile
 @inject SessionService Session
 @inject NavigationManager Nav
+@inject Microsoft.Extensions.Logging.ILogger<Profilverwaltung> Logger
 
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -52,13 +53,13 @@
 
                 @* Pfeil Links *@
                 <button class="arrow-nav-button secondary-button"
-                        @onclick="SelectPreviousProfile">
+                        @onclick="SelectPreviousProfilePicture">
                     <i class="bi bi-caret-left-fill"></i>
                 </button>
 
                 @* Vorschau Links (Vorgänger-Bild)*@
                 <div class="profile-preview-container-hybrid">
-                    <img src="@($"pictures/Profilbilder/{GetProfileName(_currentIndex - 1)}")"
+                    <img src="@($"pictures/Profilbilder/{GetProfilePictureName(_currentIndex - 1)}")"
                          alt="Vorschau"
                          class="profile-image-preview" />
                 </div>
@@ -72,14 +73,14 @@
 
                 @* Vorschau Rechts (Nachfolger-Bild)*@
                 <div class="profile-preview-container-hybrid">
-                    <img src="@($"pictures/Profilbilder/{GetProfileName(_currentIndex + 1)}")"
+                    <img src="@($"pictures/Profilbilder/{GetProfilePictureName(_currentIndex + 1)}")"
                          alt="Vorschau"
                          class="profile-image-preview" />
                 </div>
 
                 @* Pfeil Rechts *@
                 <button class="arrow-nav-button secondary-button"
-                        @onclick="SelectNextProfile">
+                        @onclick="SelectNextProfilePicture">
                     <i class="bi bi-caret-right-fill"></i>
                 </button>
 
@@ -289,16 +290,25 @@
         //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
         if (CurrentProfile.LoggedInProfile is null)
         {
+            Logger.LogWarning("Profilverwaltung OnInitialized: Kein eingeloggtes Profil -> redirect '/' .");
             Nav.NavigateTo("/");
             return;
         }
-    
+
         if (CurrentProfile.ShareMail is null || CurrentProfile.Phonenumber is null)
         {
+            Logger.LogWarning(
+                "Profilverwaltung OnInitialized: ShareMail oder Phonenumber ist null (ProfileId={ProfileId}) -> redirect '/' .",
+                CurrentProfile.ProfileId);
             Nav.NavigateTo("/");
             return;
         }
-    
+
+        Logger.LogInformation(
+            "Profilverwaltung OnInitialized: Start (ProfileId={ProfileId}, UserName={UserName}).",
+            CurrentProfile.ProfileId,
+            CurrentProfile.UserName);
+
         //Initialisierung der Profildaten
         _profilePicture = CurrentProfile.ProfilepictureUrl ?? "";
         _lastName = CurrentProfile.LastName ?? "";
@@ -309,17 +319,23 @@
         _phoneNumber = CurrentProfile.Phonenumber ?? "";
         _shareEmail = CurrentProfile.ShareMail.Value;
         _sharePhoneNumber = CurrentProfile.SharePhoneNumber.Value;
-    
-        //ProfilBild-"Karusell" vorbereitenPasswort1!
+
+        Logger.LogDebug(
+            "Profilverwaltung OnInitialized: State geladen (SelectedPictureUrl={ProfilePictureUrl}, ShareEmail={ShareEmail}, SharePhone={SharePhone}).",
+            _profilePicture,
+            _shareEmail,
+            _sharePhoneNumber);
+
+        //ProfilBild-"Karusell" 
         var currentFileName = Path.GetFileName(_profilePicture);
-    
+
         var idx = ProfilePictureCatalog.profilePictures
             .Select((name, index) => new { name, index })
             .Where(x => x.name == currentFileName)
             .Select(x => x.index)
             .DefaultIfEmpty(-1)
             .First();
-    
+
         if (idx >= 0)
         {
             _currentIndex = idx;
@@ -333,36 +349,37 @@
                 ? ProfilePictureCatalog.profilePictures[0]
                 : "";
         }
+
+        Logger.LogInformation(
+            "Profilverwaltung OnInitialized: Carousel init (Index={Index}, SelectedProfilePicture={SelectedProfilePicture}).",
+            _currentIndex,
+            _selectedProfilePicture);
     }
     
-    // ====================================== 
-    // PROFILEPICTURE-HANDLING            
-    // ====================================== 
-    
-    private string GetProfileName(int index)
+    //ProfilePicture Handling
+    private string GetProfilePictureName(int index)
     {
         int count = ProfilePictureCatalog.profilePictures.Count;
         int effectiveIndex = (index % count + count) % count;
         return ProfilePictureCatalog.profilePictures[effectiveIndex];
     }
     
-    private void SelectNextProfile()
+    private void SelectNextProfilePicture()
     {
         _currentIndex = (_currentIndex + 1) % ProfilePictureCatalog.profilePictures.Count;
         _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+        Logger.LogDebug("Profilverwaltung: Next picture selected (Index={Index}, Selected={Selected}).", _currentIndex, _selectedProfilePicture);
     }
-    //
-    private void SelectPreviousProfile()
+    
+    private void SelectPreviousProfilePicture()
     {
         _currentIndex = (_currentIndex - 1 + ProfilePictureCatalog.profilePictures.Count) 
                        % ProfilePictureCatalog.profilePictures.Count;
         _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+        Logger.LogDebug("Profilverwaltung: Previous picture selected (Index={Index}, Selected={Selected}).", _currentIndex, _selectedProfilePicture);
     }
     
-    // ======================================
-    // VALIDIERUNG & LOGIK (C#)
-    // ======================================
-
+    //Validierung und Logik
     //Email Validierung
     public static bool IsValidEmail(string email)
     {
@@ -410,16 +427,32 @@
     // Gesamt: Speichern nur erlaubt, wenn Email + Telefon gesetzt sind, mind. eine Freigabe aktiv ist und Passwortteil ok ist
     private bool CanSaveChanges => EmailProvidedAndValid && PhoneProvided && HasAtLeastOneContactShared && PasswordChangeValid;
 
-    // ======================================
-    // AKTIONEN
-    // ======================================
-    
-    private void ToggleLogoutMenu() => _showLogout = !_showLogout;
+    //Aktionen
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        Logger.LogDebug("Profilverwaltung: ToggleLogoutMenu -> ShowLogout={ShowLogout}.", _showLogout);
+    }
     
     private void SaveChanges()
     {
         if (!CanSaveChanges)
+        {
+            Logger.LogWarning(
+                "Profilverwaltung SaveChanges abgebrochen: CanSaveChanges=false (EmailValid={EmailValid}, PhoneProvided={PhoneProvided}, HasContactShared={HasContactShared}, PasswordChangeValid={PasswordChangeValid}).",
+                EmailValid,
+                PhoneProvided,
+                HasAtLeastOneContactShared,
+                PasswordChangeValid);
             return;
+        }
+
+        if (CurrentProfile.ProfileId is null)
+        {
+            Logger.LogWarning("Profilverwaltung SaveChanges: ProfileId ist null -> redirect '/' .");
+            Nav.NavigateTo("/");
+            return;
+        }
 
         var updateProfileDto = new PrivateProfileDto
         {
@@ -434,6 +467,13 @@
 
         try
         {
+            Logger.LogInformation(
+                "Profilverwaltung SaveChanges: UpdateProfile start (ProfileId={ProfileId}, ShareEmail={ShareEmail}, SharePhone={SharePhone}, PasswordChangeRequested={PasswordChangeRequested}).",
+                updateProfileDto.ProfileId,
+                updateProfileDto.ShareMail,
+                updateProfileDto.SharePhoneNumber,
+                !string.IsNullOrWhiteSpace(_newPassword));
+
             ProfileMgm.UpdateProfile(updateProfileDto);
 
             if (PasswordChangeValid && !string.IsNullOrWhiteSpace(_newPassword))
@@ -444,15 +484,18 @@
                     PasswordHash = _newPassword
                 };
 
+                Logger.LogInformation("Profilverwaltung SaveChanges: UpdateCredentials start (ProfileId={ProfileId}).", updateProfileDto.ProfileId);
                 ProfileMgm.UpdateCredentials(credentialDto);
             }
 
             CurrentProfile.RefreshProfile(ProfileMgm);
+
+            Logger.LogInformation("Profilverwaltung SaveChanges: Erfolgreich gespeichert (ProfileId={ProfileId}) -> redirect '/EigenesUserProfil'.", updateProfileDto.ProfileId);
             Nav.NavigateTo("/EigenesUserProfil");
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Logger.LogError(e, "Profilverwaltung SaveChanges fehlgeschlagen (ProfileId={ProfileId}).", CurrentProfile.ProfileId);
         }
     }
 }
