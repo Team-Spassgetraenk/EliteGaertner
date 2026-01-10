@@ -246,7 +246,7 @@
         try
         {
             //Löscht den HarvestUpload aus Datenbank + Webroot
-            ImageUploadService.TryDeleteByRelativeUrl(UploadService.DeleteUpload(harvestUpload.UploadId));
+            ImageUploadService.TryDeleteByRelativeUrl(UploadService.DeleteHarvestUpload(harvestUpload.UploadId));
 
             //UI schließen
             _showDeletePopupIndex = null;

@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace AppLogic.Interfaces;
 
-//TODO Kommentare fehlen
+//Diese Interfaces stellt alle Methoden zur Verfügung, die den HarvestUpload behandeln
 public interface IUploadService
 {
+    //Erstellt HarvestUpload
     public void CreateHarvestUpload(HarvestUploadDto uploadDto);
-    public HarvestUploadDto GetUploadDto(int uploadId);
-    public string? DeleteUpload(int uploadId); 
+
+    //Löscht HarvestUpload
+    public string? DeleteHarvestUpload(int uploadId); 
 }

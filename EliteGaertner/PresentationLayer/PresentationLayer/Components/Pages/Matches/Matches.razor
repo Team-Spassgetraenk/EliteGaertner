@@ -41,16 +41,27 @@
         @foreach (var match in _matches)
         {
         <div class="match-card">
-            <div class="card-inner">
-                <a class="username-link" href="@($"/profil/{match.ProfileId}")">
-                    <div class="username">@match.UserName</div>
-                </a>
+            <div class="card-inner match-card-flex">
 
-                <div class="info-row">
-                    <span class="label">Tel:</span> @match.Phone
+                <!-- Profilbild links -->
+                <div class="match-avatar">
+                    <img src="@match.PictureUrl"
+                         alt="Profilbild @match.UserName"
+                         class="match-avatar-img" />
                 </div>
-                <div class="info-row">
-                    <span class="label">E-Mail:</span> @match.Email
+
+                <!-- Profilinfos rechts -->
+                <div class="match-info">
+                    <a class="username-link" href="@($"/profil/{match.ProfileId}")">
+                        <div class="username">@match.UserName</div>
+                    </a>
+
+                    <div class="info-row">
+                        <span class="label">Tel:</span> @match.Phone
+                    </div>
+                    <div class="info-row">
+                        <span class="label">E-Mail:</span> @match.Email
+                    </div>
                 </div>
             </div>
         </div>
@@ -101,6 +112,7 @@
             _matches.Add(new UserMatch
             {
                 UserName = dto.UserName,
+                PictureUrl = dto.ProfilepictureUrl,
                 ProfileId = dto.ProfileId,
                 Phone = dto.Phonenumber,
                 Email = dto.EMail
@@ -111,6 +123,7 @@
     public record UserMatch
     {
         public string UserName { get; init; }
+        public string PictureUrl { get; init; }
         public int ProfileId { get; init; }
         public string Phone { get; init; } 
         public string Email { get; init; } 

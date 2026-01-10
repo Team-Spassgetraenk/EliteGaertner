@@ -32,7 +32,7 @@ public sealed class PreferenceState
             _currentProfileTagIds.Remove(tagId);
     }
 
-    //TODO KOMMENTAR FEHLT
+    //Erstellt aus den ausgewählten Präferenzen eine Liste an PreferenceDtos
     public List<PreferenceDto> CreatePreferenceDtos(int profileId)
     {
         List<PreferenceDto> result = new();

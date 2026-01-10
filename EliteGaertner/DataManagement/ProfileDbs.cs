@@ -34,7 +34,7 @@ public class ProfileDbs : IProfileDbs
     }
     
 
-    public bool CheckUsernameExists(string username)
+    public bool CheckProfileNameExists(string username)
     {
         // Falls username null oder leer -> true keine Vergabe
         if (string.IsNullOrWhiteSpace(username))
@@ -202,13 +202,13 @@ public class ProfileDbs : IProfileDbs
             SharePhoneNumber = p.Sharephonenumber,
             //Harvestuploads werden über eine andere Klasse geholt!
             //Hol dir die UserPreference des Profils
-            PreferenceDtos = GetUserPreference(profileId).ToList()
+            PreferenceDtos = GetProfilePreference(profileId).ToList()
         };
 
         return result;
     }
     
-    public IEnumerable<PreferenceDto> GetUserPreference(int profileId)
+    public IEnumerable<PreferenceDto> GetProfilePreference(int profileId)
     {
         //Falls die profileId <= 0 ist, return ein leeres PreferenceDto Enumerable 
         if (profileId <= 0)
@@ -255,7 +255,7 @@ public class ProfileDbs : IProfileDbs
         _dbContext.SaveChanges();
     }
 
-    public void SetUserPreference(List<PreferenceDto> preferences) // Wichtiger Hinweis: Methode überschreibt nur für
+    public void SetProfilePreference(List<PreferenceDto> preferences) // Wichtiger Hinweis: Methode überschreibt nur für
                                                                    // eine ProfileID (die erste in der Liste), damit
                                                                    // nicht aus Versehen andere Nutzer editiert werden
     {

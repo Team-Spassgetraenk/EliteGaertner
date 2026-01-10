@@ -25,19 +25,14 @@ public class UploadServiceImpl : IUploadService
         }
     }
 
-    public HarvestUploadDto GetUploadDto(int uploadId)
-    {
-       return _harvestDbs.GetUploadDb(uploadId);
-    }
-
-    public string? DeleteUpload(int uploadId) // gibt die ImageUrl zurück, damit die UI die Datei in wwwroot löschen kann
+    public string? DeleteHarvestUpload(int uploadId) // gibt die ImageUrl zurück, damit die UI die Datei in wwwroot löschen kann
     {
         HarvestUploadDto uploadDto;
         
         //Lädt HarvestUpload aus Datenbank
         try
         {
-            uploadDto = GetUploadDto(uploadId);
+            uploadDto = _harvestDbs.GetHarvestUploadDto(uploadId);
         }
         catch (Exception ex)
         {

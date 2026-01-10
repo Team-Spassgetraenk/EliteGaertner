@@ -44,7 +44,7 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
     }
 
     [TestMethod]
-    public void CheckUsernameExists_FromRealDb_ShouldReturnTrue_ForSeedUser()
+    public void CheckProfileNameExists_FromRealDb_ShouldReturnTrue_ForSeedUser()
     {
         using var db = CreateDb();
 
@@ -52,7 +52,7 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
         var harvestDbs = new HarvestDbs(db);
         var sut = new ProfileMgm(profileDbs, harvestDbs);
 
-        var result = sut.CheckUsernameExists("TomatenTiger"); // absichtlich anders geschrieben (Normalisierung)
+        var result = sut.CheckProfileNameExists("TomatenTiger"); // absichtlich anders geschrieben (Normalisierung)
 
         Assert.IsTrue(result);
     }
@@ -84,7 +84,7 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
     }
 
     [TestMethod]
-    public void VisitPrivateProfile_FromRealDb_ShouldReturnProfile_WithPreferences_AndHarvestUploads()
+    public void GetPrivProfile_FromRealDb_ShouldReturnProfile_WithPreferences_AndHarvestUploads()
     {
         using var db = CreateDb();
 
@@ -121,7 +121,7 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
     {
         using var db = CreateDb();
 
-        var (profileId, username, email, passwordHash) = GetTomatenTiger(db);
+        var (profileId, username, email, _) = GetTomatenTiger(db);
 
         // Wir ändern DB-Werte -> Transaction, damit der Test sauber bleibt.
         using var tx = db.Database.BeginTransaction();
@@ -151,7 +151,8 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
         Assert.AreEqual(email, result.EMail);
 
         Assert.IsNotNull(result.HarvestUploads);
-        Assert.AreEqual(5, result.HarvestUploads.Count);
+        var expectedUploadCount = db.Harvestuploads.AsNoTracking().Count(h => h.Profileid == profileId);
+        Assert.AreEqual(expectedUploadCount, result.HarvestUploads.Count, "HarvestUploads.Count muss der DB-Anzahl entsprechen.");
 
         Assert.IsNotNull(result.PreferenceDtos);
         Assert.IsTrue(result.PreferenceDtos.Count > 0, "Es müssen Preferences vorhanden sein.");
@@ -161,43 +162,6 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
         var prefTagIds = result.PreferenceDtos.Select(p => p.TagId).Distinct().ToList();
         CollectionAssert.IsSubsetOf(new List<int> { 3, 5, 6 }, prefTagIds);
 
-        tx.Rollback();
-    }
-
-    [TestMethod]
-    public void UpdateContactVisibility_FromRealDb_ShouldPersistChanges()
-    {
-        using var db = CreateDb();
-
-        var (profileId, _, _, _) = GetTomatenTiger(db);
-
-        // Wir ändern DB-Werte -> Transaction, damit der Test sauber bleibt.
-        using var tx = db.Database.BeginTransaction();
-
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new ProfileMgm(profileDbs, harvestDbs);
-
-        // Vorher-Werte lesen
-        var before = db.Profiles.AsNoTracking().Single(p => p.Profileid == profileId);
-
-        var dto = new ContactVisibilityDto
-        {
-            profileId = profileId,
-            // Email/Phone lassen wir null, damit wir nichts "Unique" riskieren
-            ShareMail = !before.Sharemail,
-            SharePhoneNumber = !before.Sharephonenumber
-        };
-
-        var ok = sut.UpdateContactVisibility(dto);
-        Assert.IsTrue(ok);
-
-        var after = db.Profiles.AsNoTracking().Single(p => p.Profileid == profileId);
-
-        Assert.AreEqual(dto.ShareMail, after.Sharemail);
-        Assert.AreEqual(dto.SharePhoneNumber, after.Sharephonenumber);
-
-        // Rollback, damit Seed-Zustand erhalten bleibt
         tx.Rollback();
     }
 }

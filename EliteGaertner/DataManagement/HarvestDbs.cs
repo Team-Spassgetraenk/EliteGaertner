@@ -15,17 +15,18 @@ public class HarvestDbs : IHarvestDbs
         _dbContext = dbContext;
     }   
     
-    //TODO KOMMENTARE FEHLEN
     public IEnumerable<HarvestUploadDto> GetProfileHarvestUploads(int profileId)
     {
         //Falls die profileId <= 0 ist, return leere HarvestUploadDto Enumerable 
         if (profileId <= 0)
             return Enumerable.Empty<HarvestUploadDto>();
         
-        
+        //Gib mir alle HarvestUploads
         var result = _dbContext.Harvestuploads
             .AsNoTracking()
+            //Die der ProfileId zugeordnet sind
             .Where(h => h.Profileid == profileId)
+            //Erstell aus den Ergebnissen neue HarvestUploadDtos
             .Select(h => new HarvestUploadDto()
             {
                 UploadId = h.Uploadid,
@@ -83,7 +84,7 @@ public class HarvestDbs : IHarvestDbs
         _dbContext.SaveChanges();
     }
 
-    public HarvestUploadDto GetUploadDb(int uploadId)
+    public HarvestUploadDto GetHarvestUploadDto(int uploadId)
     {
         if (uploadId <= 0)
             return new HarvestUploadDto();

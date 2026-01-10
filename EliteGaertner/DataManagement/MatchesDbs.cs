@@ -64,15 +64,6 @@ public class MatchesDbs : IMatchesDbs
         return result;
     }
 
-    //TODO Maybe obsolet
-    public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
-    {
-        return _dbContext.Ratings                    
-            .Any(r =>                               
-                r.Contentreceiverid == profileIdReceiver &&
-                r.Contentcreatorid == profileIdCreator); 
-    }
-
     public HashSet<int> GetAlreadyRatedProfileIds(int profileIdReceiver)
     {
         //Ungültige profileId -> leeres Ergebnis (keine Bewertungshistorie)
@@ -88,7 +79,7 @@ public class MatchesDbs : IMatchesDbs
             .ToHashSet();
     }
     
-    public void SaveMatchInfo(RateDto matchDto)
+    public void SaveRateInfo(RateDto matchDto)
     {
         //Prüfung, ob matchDto null ist -> ArgumentNullException
         if (matchDto is null)

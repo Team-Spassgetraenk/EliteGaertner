@@ -16,9 +16,9 @@ public class ProfileMgm : IProfileMgm
         _harvestDbs = harvestDbs;
     }
 
-    public bool CheckUsernameExists(string username)
+    public bool CheckProfileNameExists(string profileName)
     {
-        return _profileDbs.CheckUsernameExists(username);
+        return _profileDbs.CheckProfileNameExists(profileName);
     }
     
     public PublicProfileDto VisitPublicProfile(int profileId) //get
@@ -124,7 +124,7 @@ public class ProfileMgm : IProfileMgm
     {
         try
         {
-            _profileDbs.SetUserPreference(preferences);
+            _profileDbs.SetProfilePreference(preferences);
         }
         catch (Exception ex)
         {

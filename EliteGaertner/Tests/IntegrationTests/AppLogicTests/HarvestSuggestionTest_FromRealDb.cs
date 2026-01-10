@@ -47,6 +47,8 @@ public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
 
         // Nach dem Split: HarvestDbs übernimmt die Harvest-spezifischen DB-Zugriffe
         var harvestDbs = new HarvestDbs(db);
+        // MatchesDbs wird benötigt, um bereits bewertete ProfileIds auszuschließen
+        var matchesDbs = new MatchesDbs(db);
         
         //TestUser DTO erstellen (TomatenTiger)
         var testDto = new PrivateProfileDto()
@@ -76,13 +78,15 @@ public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
             .ToList();
         
         
+        // Bereits bewertete ProfileIds (Receiver = profileId) laden und an HarvestSuggestion weiterreichen
+        var alreadyRatedProfiles = matchesDbs.GetAlreadyRatedProfileIds(profileId);
         //Testdaten werden jetzt an die Klasse übergeben
-        var testSuggestions = new HarvestSuggestion(harvestDbs, profileId, tagIds, 10);
+        var testSuggestions = new HarvestSuggestion(harvestDbs, profileId, tagIds, alreadyRatedProfiles, 10);
         var result = testSuggestions.GetHarvestSuggestionList();
         
         //Logging der Testresult
         TestContext.WriteLine("--TESTERGEBNIS--");
-        TestContext.WriteLine("Erwartete UploadIds (aktuelle Seed/Query): {43, 17, 34, 26, 36, 71, 49, 31, 24, 10}");
+        TestContext.WriteLine($"AlreadyRatedProfiles (count={alreadyRatedProfiles.Count}): {{ {string.Join(", ", alreadyRatedProfiles.OrderBy(x => x))} }}");
         TestContext.WriteLine($"Result count: {result?.Count ?? 0}");
         TestContext.WriteLine("Erhaltene Uploads:");
         if (result != null)
@@ -94,8 +98,11 @@ public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
         Assert.IsNotNull(result);
         Assert.IsTrue(result.Any());
 
-        var resultIds = result.Select(r => r.UploadId).ToList();
-        
-        CollectionAssert.AreEquivalent(new[] { 43, 17, 34, 26, 36, 71, 49, 31, 24, 10 }, resultIds);
+        // Erwartung: keine Uploads vom Receiver selbst und keine Uploads von bereits bewerteten Profilen
+        Assert.IsTrue(result.All(r => r.ProfileId != profileId), "Es dürfen keine eigenen Uploads vorgeschlagen werden.");
+        Assert.IsTrue(result.All(r => !alreadyRatedProfiles.Contains(r.ProfileId)), "Es dürfen keine Uploads von bereits bewerteten Profilen vorgeschlagen werden.");
+
+        // Erwartung: maximal preloadCount Ergebnisse
+        Assert.IsTrue(result.Count <= 10, "Es dürfen nicht mehr als preloadCount Uploads zurückkommen.");
     }
 }

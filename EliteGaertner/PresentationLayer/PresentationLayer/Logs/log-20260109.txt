@@ -143,3 +143,4 @@ ORDER BY "MigrationId";
 2026-01-09 22:45:00.794 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_27.png responded 200 in 1.5988 ms
 2026-01-09 22:45:00.796 +01:00 [INF] HTTP GET /pictures/Profilbilder/Profilbild_10.png responded 200 in 3.1893 ms
 2026-01-09 22:45:00.796 +01:00 [INF] HTTP GET /pictures/uploads/Gurken_02.jpg responded 200 in 3.2990 ms
+2026-01-09 22:59:01.994 +01:00 [INF] HTTP CONNECT /_blazor responded 200 in 882180.8616 ms

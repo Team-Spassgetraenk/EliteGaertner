@@ -24,7 +24,7 @@ public sealed class UserRegistrationState
     //Seite PräferenzAuswahlRegistrierung
     public HashSet<int> SelectedTagIdsPreferences { get; } = new();
     
-    //Seite ErnteHochladenPrivat
+    //Seite ErnteHochladenRegistrierung
     public string ImageUrl { get; set; } = "";
     public string Description { get; set; } = "";
     public float? WeightGram { get; set; }

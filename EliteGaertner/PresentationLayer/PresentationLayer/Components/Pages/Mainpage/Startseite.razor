@@ -58,7 +58,7 @@
 
     @if (_showMatchOverlay)
     {
-        <div class="match-overlay">
+        <div class="match-overlay" @key="_confettiKey">
             @* Konfetti-Loop *@
             @for (int i = 0; i < 60; i++)
             {
@@ -267,10 +267,13 @@
     private int _cardKey = 0;
     private HarvestModel? _currentHarvest;
 
-    // Match overlay
+    //Match overlay
     private bool _showMatchOverlay = false;
     private PublicProfileDto? _matchedUser;
     private readonly string[] _confettiColors = { "#FFC107", "#2196F3", "#FF5722", "#4CAF50", "#E91E63" };
+
+    //Für die Konfetti Animation
+    private int _confettiKey = 0;
 
     // Queue for multiple matches created in quick succession
     private readonly Queue<PublicProfileDto> _pendingMatches = new();
@@ -387,7 +390,7 @@
     // ----------------------------
     private int _matchCount; 
 
-    //TODO KOMMENTAR FEHLT
+    //Gibt die aktuelle Anzahl an aktiven Matches zurück
     private int CurrentMatchesCount()
     {
         if (_matchManager is null)
@@ -426,6 +429,8 @@
         }
     }
 
+    
+    //TODO KOMMENTARE FEHLEN
     private async Task ShowNextMatchOverlayAsync()
     {
         PublicProfileDto? next;
@@ -437,7 +442,7 @@
 
         if (next is null)
         {
-            // Queue leer -> wir sind fertig
+            //Queue leer -> wir sind fertig
             lock (_matchQueueLock)
             {
                 _isShowingMatch = false;
@@ -449,6 +454,10 @@
         }
 
         _matchedUser = next;
+
+        //Sorgt dafür dass die Konfetti Animation immer abgespielt wird
+        _confettiKey++;
+
         _showMatchOverlay = true;
         _matchCount = _matchManager?.GetActiveMatches().Count ?? _matchCount;
 
@@ -758,7 +767,7 @@
             _=> reason.ToString()
         };
 
-
+    //Daten aus ProfileDto und HarvestUploadDto werden zusammengesetzt fürs rendern
     private sealed class HarvestModel
     {
         public string Username { get; set; } = "";

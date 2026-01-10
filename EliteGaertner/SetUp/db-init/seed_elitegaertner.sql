@@ -753,7 +753,7 @@ FROM PROFILE p WHERE p.UserName = 'kartoffelknight';
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
 SELECT 'pictures/uploads/Zwiebeln_03.jpg',
-       'Zwiebeln für den Salat – frisch geerntet.',
+       'Zwiebeln – frisch geerntet.',
        780, 16, 16, (:'seed_now')::timestamptz - interval '3 days' + interval '16 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'salatsamurai';
 

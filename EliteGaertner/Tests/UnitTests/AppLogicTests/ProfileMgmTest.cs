@@ -9,7 +9,7 @@ using Moq;
 
 namespace Tests.UnitTests.AppLogicTests;
 
-// generierter und händisch verbesserter Test (aktualisiert nach Split der DB-Interfaces)
+// generierter und händisch verbesserter Test (aktualisiert nach Split der DB-Interfaces + Interface-Änderungen)
 [TestClass]
 public class ProfileMgmUnitTests
 {
@@ -26,58 +26,54 @@ public class ProfileMgmUnitTests
     }
 
     [TestMethod]
-    public void CheckUsernameExists_UsernameExists_ReturnsTrue()
+    public void CheckProfileNameExists_NameExists_ReturnsTrue()
     {
         // Arrange
-        const string username = "testuser";
-        _mockProfileDbs.Setup(x => x.CheckUsernameExists(username)).Returns(true);
+        const string profileName = "testuser";
+        _mockProfileDbs.Setup(x => x.CheckProfileNameExists(profileName)).Returns(true);
 
         // Act
-        bool result = _profileMgm.CheckUsernameExists(username);
+        bool result = _profileMgm.CheckProfileNameExists(profileName);
 
         // Assert
         Assert.IsTrue(result);
-        _mockProfileDbs.Verify(x => x.CheckUsernameExists(username), Times.Once);
+        _mockProfileDbs.Verify(x => x.CheckProfileNameExists(profileName), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }
 
     [TestMethod]
-    public void CheckUsernameExists_UsernameNotExists_ReturnsFalse()
+    public void CheckProfileNameExists_NameNotExists_ReturnsFalse()
     {
         // Arrange
-        const string username = "nonexistent";
-        _mockProfileDbs.Setup(x => x.CheckUsernameExists(username)).Returns(false);
+        const string profileName = "nonexistent";
+        _mockProfileDbs.Setup(x => x.CheckProfileNameExists(profileName)).Returns(false);
 
         // Act
-        bool result = _profileMgm.CheckUsernameExists(username);
+        bool result = _profileMgm.CheckProfileNameExists(profileName);
 
         // Assert
         Assert.IsFalse(result);
-        _mockProfileDbs.Verify(x => x.CheckUsernameExists(username), Times.Once);
+        _mockProfileDbs.Verify(x => x.CheckProfileNameExists(profileName), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }
 
     [TestMethod]
-    public void VisitPublicProfile_ValidProfileId_ReturnsPublicProfileBuiltFromPrivateProfileAndHarvests()
+    public void VisitPublicProfile_ValidProfileId_ReturnsPublicProfileWithHarvests()
     {
         // Arrange
         const int profileId = 1;
 
-        var profileInfo = new PrivateProfileDto
+        var profileInfo = new PublicProfileDto
         {
             ProfileId = profileId,
             ProfilepictureUrl = "profile.jpg",
             UserName = "testuser",
             Profiletext = "Test profile",
             UserCreated = new DateTime(2023, 1, 1),
-            // Felder, die hier egal sind, dürfen gesetzt sein – werden aber in PublicProfileDto nicht übernommen
             EMail = "test@example.com",
             Phonenumber = "123456789",
-            ShareMail = true,
-            SharePhoneNumber = false,
-            PreferenceDtos = new List<PreferenceDto>()
         };
 
         var harvests = new List<HarvestUploadDto>
@@ -87,7 +83,7 @@ public class ProfileMgmUnitTests
         };
 
         _mockHarvestDbs.Setup(x => x.GetProfileHarvestUploads(profileId)).Returns(harvests);
-        _mockProfileDbs.Setup(x => x.GetPrivateProfile(profileId)).Returns(profileInfo);
+        _mockProfileDbs.Setup(x => x.GetPublicProfile(profileId)).Returns(profileInfo);
 
         // Act
         var result = _profileMgm.VisitPublicProfile(profileId);
@@ -98,18 +94,21 @@ public class ProfileMgmUnitTests
         Assert.AreEqual("testuser", result.UserName);
         Assert.AreEqual("Test profile", result.Profiletext);
         Assert.AreEqual(new DateTime(2023, 1, 1), result.UserCreated);
+
         Assert.IsNotNull(result.HarvestUploads);
         Assert.AreEqual(2, result.HarvestUploads.Count);
-        CollectionAssert.AreEqual(harvests.Select(h => h.UploadId).ToList(), result.HarvestUploads.Select(h => h.UploadId).ToList());
+        CollectionAssert.AreEqual(
+            harvests.Select(h => h.UploadId).ToList(),
+            result.HarvestUploads.Select(h => h.UploadId).ToList());
 
         _mockHarvestDbs.Verify(x => x.GetProfileHarvestUploads(profileId), Times.Once);
-        _mockProfileDbs.Verify(x => x.GetPrivateProfile(profileId), Times.Once);
+        _mockProfileDbs.Verify(x => x.GetPublicProfile(profileId), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }
 
     [TestMethod]
-    public void VisitPrivateProfile_ValidProfileId_ReturnsPrivateProfileWithHarvests()
+    public void GetPrivProfile_ValidProfileId_ReturnsPrivateProfileWithHarvests()
     {
         // Arrange
         const int profileId = 1;
@@ -122,7 +121,6 @@ public class ProfileMgmUnitTests
             FirstName = "Max",
             LastName = "Mustermann",
             EMail = "private@example.com",
-            //PasswordHash = "hash123",
             Phonenumber = "987654321",
             Profiletext = "Private profile text",
             ShareMail = true,
@@ -162,10 +160,6 @@ public class ProfileMgmUnitTests
         Assert.AreEqual(1, result.HarvestUploads.Count);
         Assert.AreEqual(21, result.HarvestUploads[0].UploadId);
 
-        Assert.IsNotNull(result.PreferenceDtos);
-        Assert.AreEqual(1, result.PreferenceDtos.Count);
-        Assert.AreEqual(1, result.PreferenceDtos[0].TagId);
-
         _mockHarvestDbs.Verify(x => x.GetProfileHarvestUploads(profileId), Times.Once);
         _mockProfileDbs.Verify(x => x.GetPrivateProfile(profileId), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
@@ -173,7 +167,7 @@ public class ProfileMgmUnitTests
     }
 
     [TestMethod]
-    public void UpdateProfile_Success_ReturnsTrue()
+    public void UpdateProfile_Success_CallsRepo()
     {
         // Arrange
         var dto = new PrivateProfileDto
@@ -186,88 +180,34 @@ public class ProfileMgmUnitTests
             EMail = "updated@example.com"
         };
 
-        var updatedProfile = new PrivateProfileDto { ProfileId = 1 };
-        _mockProfileDbs.Setup(x => x.EditProfile(dto)).Returns(updatedProfile);
+        _mockProfileDbs.Setup(x => x.EditProfile(dto));
 
         // Act
-        bool result = _profileMgm.UpdateProfile(dto);
+        _profileMgm.UpdateProfile(dto);
 
         // Assert
-        Assert.IsTrue(result);
         _mockProfileDbs.Verify(x => x.EditProfile(dto), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }
 
     [TestMethod]
-    public void UpdateProfile_Failure_ReturnsFalse()
+    public void UpdateProfile_RepoThrows_ThrowsInvalidOperationException()
     {
         // Arrange
-        var dto = new PrivateProfileDto { ProfileId = 0 };
-        _mockProfileDbs.Setup(x => x.EditProfile(dto)).Returns(dto);
+        var dto = new PrivateProfileDto { ProfileId = 1 };
+        _mockProfileDbs.Setup(x => x.EditProfile(dto)).Throws(new Exception("db fail"));
 
-        // Act
-        bool result = _profileMgm.UpdateProfile(dto);
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => _profileMgm.UpdateProfile(dto));
 
-        // Assert
-        Assert.IsFalse(result);
         _mockProfileDbs.Verify(x => x.EditProfile(dto), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }
 
     [TestMethod]
-    public void UpdateContactVisibility_Success_ReturnsTrue()
-    {
-        // Arrange
-        var dto = new ContactVisibilityDto
-        {
-            profileId = 1,
-            EMail = "test@example.com",
-            PhoneNumber = "123456789",
-            ShareMail = true,
-            SharePhoneNumber = false
-        };
-
-        _mockProfileDbs.Setup(x => x.UpdateContactVisibility(dto)).Returns(true);
-
-        // Act
-        bool result = _profileMgm.UpdateContactVisibility(dto);
-
-        // Assert
-        Assert.IsTrue(result);
-        _mockProfileDbs.Verify(x => x.UpdateContactVisibility(dto), Times.Once);
-        _mockProfileDbs.VerifyNoOtherCalls();
-        _mockHarvestDbs.VerifyNoOtherCalls();
-    }
-
-    [TestMethod]
-    public void UpdateContactVisibility_Failure_ReturnsFalse()
-    {
-        // Arrange
-        var dto = new ContactVisibilityDto
-        {
-            profileId = 1,
-            EMail = "test@example.com",
-            PhoneNumber = "123456789",
-            ShareMail = true,
-            SharePhoneNumber = false
-        };
-
-        _mockProfileDbs.Setup(x => x.UpdateContactVisibility(dto)).Returns(false);
-
-        // Act
-        bool result = _profileMgm.UpdateContactVisibility(dto);
-
-        // Assert
-        Assert.IsFalse(result);
-        _mockProfileDbs.Verify(x => x.UpdateContactVisibility(dto), Times.Once);
-        _mockProfileDbs.VerifyNoOtherCalls();
-        _mockHarvestDbs.VerifyNoOtherCalls();
-    }
-
-    [TestMethod]
-    public void RegisterProfile_CallsSetNewProfile_ReturnsProfileFromRepo()
+    public void RegisterProfile_CallsSetNewProfile_ReturnsProfileId()
     {
         // Arrange
         var newProfile = new PrivateProfileDto
@@ -278,41 +218,39 @@ public class ProfileMgmUnitTests
             FirstName = "New",
             LastName = "User",
             EMail = "new@example.com",
-            //PasswordHash = "newhash",
             HarvestUploads = null,
             PreferenceDtos = null
         };
 
-        var newCredential = new CredentialProfileDto()
+        var newCredential = new CredentialProfileDto
         {
             EMail = "new@example.com",
             PasswordHash = "newhash"
         };
 
-        var registeredProfile = new PrivateProfileDto
-        {
-            ProfileId = 1,
-            ProfilepictureUrl = "new.jpg",
-            UserName = "newuser",
-            FirstName = "New",
-            LastName = "User",
-            EMail = "new@example.com",
-            HarvestUploads = null,
-            PreferenceDtos = null
-        };
-
-        _mockProfileDbs.Setup(x => x.SetNewProfile(newProfile,newCredential)).Returns(registeredProfile);
+        _mockProfileDbs.Setup(x => x.SetNewProfile(newProfile, newCredential)).Returns(1);
 
         // Act
         var result = _profileMgm.RegisterProfile(newProfile, newCredential);
 
         // Assert
-        Assert.AreEqual(1, result.ProfileId);
-        Assert.AreEqual("new.jpg", result.ProfilepictureUrl);
-        Assert.AreEqual("newuser", result.UserName);
-        Assert.AreEqual("new@example.com", result.EMail);
-        Assert.IsNull(result.HarvestUploads);
-        Assert.IsNull(result.PreferenceDtos);
+        Assert.AreEqual(1, result);
+        _mockProfileDbs.Verify(x => x.SetNewProfile(newProfile, newCredential), Times.Once);
+        _mockProfileDbs.VerifyNoOtherCalls();
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void RegisterProfile_RepoThrows_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var newProfile = new PrivateProfileDto { ProfileId = 0 };
+        var newCredential = new CredentialProfileDto { EMail = "x@y.z", PasswordHash = "pw" };
+
+        _mockProfileDbs.Setup(x => x.SetNewProfile(newProfile, newCredential)).Throws(new Exception("db fail"));
+
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => _profileMgm.RegisterProfile(newProfile, newCredential));
 
         _mockProfileDbs.Verify(x => x.SetNewProfile(newProfile, newCredential), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
@@ -323,7 +261,7 @@ public class ProfileMgmUnitTests
     public void LoginProfile_ValidCredentials_ReturnsCompletePrivateProfile()
     {
         // Arrange
-        var loginProfile = new CredentialProfileDto()
+        var loginProfile = new CredentialProfileDto
         {
             EMail = "test@example.com",
             PasswordHash = "hash123"
@@ -370,7 +308,7 @@ public class ProfileMgmUnitTests
     public void LoginProfile_InvalidCredentials_ThrowsUnauthorizedAccessException()
     {
         // Arrange
-        var loginProfile = new CredentialProfileDto()
+        var loginProfile = new CredentialProfileDto
         {
             EMail = "invalid@example.com",
             PasswordHash = "wrong"
@@ -380,6 +318,7 @@ public class ProfileMgmUnitTests
 
         // Act & Assert
         Assert.ThrowsException<UnauthorizedAccessException>(() => _profileMgm.LoginProfile(loginProfile));
+
         _mockProfileDbs.Verify(x => x.CheckPassword(loginProfile.EMail, loginProfile.PasswordHash), Times.Once);
         _mockProfileDbs.Verify(x => x.GetPrivateProfile(It.IsAny<int>()), Times.Never);
         _mockHarvestDbs.Verify(x => x.GetProfileHarvestUploads(It.IsAny<int>()), Times.Never);
@@ -388,35 +327,59 @@ public class ProfileMgmUnitTests
     }
 
     [TestMethod]
-    public void GetPreference_ValidProfileId_ReturnsPreferences()
+    public void LoginProfile_CheckPasswordThrows_ThrowsInvalidOperationException()
     {
         // Arrange
-        const int profileId = 1;
-
-        var expectedPreferences = new[]
+        var loginProfile = new CredentialProfileDto
         {
-            new PreferenceDto { TagId = 1, Profileid = profileId, DateUpdated = DateTime.UtcNow },
-            new PreferenceDto { TagId = 2, Profileid = profileId, DateUpdated = DateTime.UtcNow }
+            EMail = "test@example.com",
+            PasswordHash = "hash123"
         };
 
-        _mockProfileDbs.Setup(x => x.GetUserPreference(profileId)).Returns(expectedPreferences);
+        _mockProfileDbs.Setup(x => x.CheckPassword(loginProfile.EMail, loginProfile.PasswordHash))
+            .Throws(new Exception("db fail"));
 
-        // Act
-        var result = _profileMgm.GetPreference(profileId);
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => _profileMgm.LoginProfile(loginProfile));
 
-        // Assert
-        Assert.AreEqual(2, result.Count);
-        Assert.AreEqual(1, result[0].TagId);
-        Assert.AreEqual(profileId, result[0].Profileid);
-        Assert.AreEqual(2, result[1].TagId);
-
-        _mockProfileDbs.Verify(x => x.GetUserPreference(profileId), Times.Once);
+        _mockProfileDbs.Verify(x => x.CheckPassword(loginProfile.EMail, loginProfile.PasswordHash), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }
 
     [TestMethod]
-    public void SetPreference_Success_ReturnsTrue()
+    public void UpdateCredentials_Success_CallsRepo()
+    {
+        // Arrange
+        var cred = new CredentialProfileDto { EMail = "x@y.z", PasswordHash = "pw" };
+        _mockProfileDbs.Setup(x => x.EditPassword(cred));
+
+        // Act
+        _profileMgm.UpdateCredentials(cred);
+
+        // Assert
+        _mockProfileDbs.Verify(x => x.EditPassword(cred), Times.Once);
+        _mockProfileDbs.VerifyNoOtherCalls();
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void UpdateCredentials_RepoThrows_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var cred = new CredentialProfileDto { EMail = "x@y.z", PasswordHash = "pw" };
+        _mockProfileDbs.Setup(x => x.EditPassword(cred)).Throws(new Exception("db fail"));
+
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => _profileMgm.UpdateCredentials(cred));
+
+        _mockProfileDbs.Verify(x => x.EditPassword(cred), Times.Once);
+        _mockProfileDbs.VerifyNoOtherCalls();
+        _mockHarvestDbs.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public void SetPreference_Success_CallsRepo()
     {
         // Arrange
         var preferences = new List<PreferenceDto>
@@ -425,31 +388,28 @@ public class ProfileMgmUnitTests
             new PreferenceDto { TagId = 2, Profileid = 1, DateUpdated = DateTime.UtcNow }
         };
 
-        _mockProfileDbs.Setup(x => x.SetUserPreference(preferences)).Returns(true);
+        _mockProfileDbs.Setup(x => x.SetProfilePreference(preferences));
 
         // Act
-        bool result = _profileMgm.SetPreference(preferences);
+        _profileMgm.SetPreference(preferences);
 
         // Assert
-        Assert.IsTrue(result);
-        _mockProfileDbs.Verify(x => x.SetUserPreference(preferences), Times.Once);
+        _mockProfileDbs.Verify(x => x.SetProfilePreference(preferences), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }
 
     [TestMethod]
-    public void SetPreference_Failure_ReturnsFalse()
+    public void SetPreference_RepoThrows_ThrowsInvalidOperationException()
     {
         // Arrange
         var preferences = new List<PreferenceDto>();
-        _mockProfileDbs.Setup(x => x.SetUserPreference(preferences)).Returns(false);
+        _mockProfileDbs.Setup(x => x.SetProfilePreference(preferences)).Throws(new Exception("db fail"));
 
-        // Act
-        bool result = _profileMgm.SetPreference(preferences);
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => _profileMgm.SetPreference(preferences));
 
-        // Assert
-        Assert.IsFalse(result);
-        _mockProfileDbs.Verify(x => x.SetUserPreference(preferences), Times.Once);
+        _mockProfileDbs.Verify(x => x.SetProfilePreference(preferences), Times.Once);
         _mockProfileDbs.VerifyNoOtherCalls();
         _mockHarvestDbs.VerifyNoOtherCalls();
     }

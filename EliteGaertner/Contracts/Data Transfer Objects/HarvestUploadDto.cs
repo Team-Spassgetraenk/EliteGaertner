@@ -1,5 +1,6 @@
 namespace Contracts.Data_Transfer_Objects;
 
+//Stellt alle benötigten Infos fürs Rendering des HarvestUploads bereit
 public record HarvestUploadDto
 {
     public int UploadId { get; init; }

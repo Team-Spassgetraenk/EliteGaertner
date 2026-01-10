@@ -74,11 +74,10 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
 
         TestContext.WriteLine($"Created UploadId={uploadId}, ProfileId={profileId}, Url={uniqueUrl}");
 
-        // Act 2: Get
-        var dto = sut.GetUploadDto(uploadId);
+        // Assert 2: Created upload should be retrievable via DataManagement
+        var dto = harvestDbs.GetHarvestUploadDto(uploadId);
 
-        // Assert Get
-        Assert.IsNotNull(dto);
+        Assert.IsNotNull(dto, "Nach Create muss der Upload über HarvestDbs wieder geladen werden können.");
         Assert.AreEqual(uploadId, dto.UploadId);
         Assert.AreEqual(profileId, dto.ProfileId);
         Assert.AreEqual(uniqueUrl, dto.ImageUrl);
@@ -89,14 +88,14 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
         Assert.IsNotNull(dto.TagIds);
         Assert.IsTrue(dto.TagIds.Contains(existingTagId), "Der Upload muss den gesetzten Tag enthalten.");
 
-        // Act 3: Delete (liefert filename/url zurück)
-        var returnedFileName = sut.DeleteUpload(uploadId);
+        // Act 3: Delete (liefert ImageUrl zurück)
+        var returnedFileName = sut.DeleteHarvestUpload(uploadId);
 
         // Assert Delete
-        Assert.AreEqual(uniqueUrl, returnedFileName, "DeleteUpload soll die ImageUrl zurückgeben.");
+        Assert.AreEqual(uniqueUrl, returnedFileName, "DeleteHarvestUpload soll die ImageUrl zurückgeben.");
 
         var stillExists = db.Harvestuploads.AsNoTracking().Any(h => h.Uploadid == uploadId);
-        Assert.IsFalse(stillExists, "Upload muss nach DeleteUpload aus der DB entfernt sein.");
+        Assert.IsFalse(stillExists, "Upload muss nach DeleteHarvestUpload aus der DB entfernt sein.");
 
         tx.Rollback(); // Datenbank bleibt wie Seed
     }
@@ -112,7 +111,7 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
         const int nonExistingUploadId = 9_999_999; // positive ID, die in der Seed-DB nicht existiert
 
         // Act
-        var result = sut.DeleteUpload(nonExistingUploadId);
+        var result = sut.DeleteHarvestUpload(nonExistingUploadId);
 
         // Assert
         Assert.IsNull(result, "Wenn Upload nicht existiert, soll DeleteUpload null zurückgeben.");

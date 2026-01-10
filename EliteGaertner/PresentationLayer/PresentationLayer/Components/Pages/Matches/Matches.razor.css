@@ -112,24 +112,56 @@
 }
 
 .match-card {
-    background-color: #b042ff;
-    border-radius: 15px;
-    padding: 5px;
+    background-color: #ffffff; /* weißer Kartenhintergrund wie Startseite */
+    border-radius: 18px;
+    padding: 6px;
     margin-bottom: 20px;
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
-    border: 2px solid rgba(255,255,255,0.5);
+    border: 3px solid #000; /* Comic-Outline */
+    box-shadow: 4px 4px 0 0 #000; /* Comic-Schatten */
 }
 
 .card-inner {
-    padding: 10px 15px;
-    color: white;
+    padding: 12px 16px;
+    color: #000; /* schwarzer Text */
     font-size: 1.2rem;
-    line-height: 1.4;
+    line-height: 1.3;
+}
+
+/* --- Match Card: Avatar links + Infos rechts --- */
+.match-card-flex {
+    display: flex;
+    align-items: center; /* Avatar vertikal mittig zum Textblock */
+    gap: 14px;
+}
+
+.match-avatar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+/* Avatar ungefähr so hoch wie Username+Tel+Email */
+.match-avatar-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 3px solid #000;
+    background: #fff;
+}
+
+.match-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    line-height: 1.2;
 }
 
 .username-link {
-    text-decoration: none; /* Entfernt die Unterstreichung vom Link */
-    color: white;
+    text-decoration: none;
+    color: #000;
     display: block;
     cursor: pointer;
 }
@@ -140,7 +172,7 @@
 
 .username {
     font-size: 1.5rem;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     display: block;
     font-weight: bold;
 }

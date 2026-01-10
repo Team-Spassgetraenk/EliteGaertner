@@ -64,7 +64,6 @@ public class MatchManager : IMatchManager
     
     public void RateUser(PublicProfileDto creatorProfile, bool value)
     {
-
         try
         {
             //Erstelle neue MatchDto mit der Bewertung und Zeitpunkt
@@ -75,7 +74,8 @@ public class MatchManager : IMatchManager
                 ContentReceiverValue = value,
                 ContentReceiverRatingDate = DateTime.UtcNow,
             };
-            _matchesDbs.SaveMatchInfo(dto);
+            //Speicher Bewertung ab
+            _matchesDbs.SaveRateInfo(dto);
         
             //Entferne Profil + HarvestUpload aus der Liste
             var keyToRemove = _profileSuggestionList.Keys

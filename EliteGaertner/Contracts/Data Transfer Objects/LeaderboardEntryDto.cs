@@ -1,7 +1,7 @@
 namespace Contracts.Data_Transfer_Objects;
 
 
-//TODO
+//Beinhaltet alle Informationen einer Ranglistenplatzierung
 public record LeaderboardEntryDto
 {
     public int Rank { get; init; }
