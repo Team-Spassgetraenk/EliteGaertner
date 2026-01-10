@@ -572,6 +572,17 @@ SELECT 'pictures/uploads/Auberginen_02.jpg',
        380, 7, 17, (:'seed_now')::timestamptz - interval '5 days' + interval '18 hours', p.ProfileId
 FROM PROFILE p WHERE p.UserName = 'paprikapiratin';
 
+-- ApfelAlchemist: zusätzliche Auberginen-Ernte
+INSERT INTO HARVESTUPLOADS
+(ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
+SELECT 'pictures/uploads/Aubergine67.jpeg',
+       'Das ist meine 6. oder 7. Auberginen Ernte. Bin mir nicht mehr ganz sicher',
+       6700, 67, 67,
+       (:'seed_now')::timestamptz - interval '1 days' + interval '15 hours',
+       p.ProfileId
+FROM PROFILE p
+WHERE p.UserName = 'apfelalchemist';
+
 INSERT INTO HARVESTUPLOADS
 (ImageUrl, Description, WeightGramm, WidthCm, LengthCm, UploadDate, ProfileId)
 SELECT 'pictures/uploads/Auberginen_03.jpg',
