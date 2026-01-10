@@ -3,6 +3,7 @@ using System.Linq;
 using AppLogic.Services;
 using Contracts.Enumeration;
 using DataManagement;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -29,7 +30,8 @@ public class LeaderboardServiceTest_FromRealDb : IntegrationTestBase
             .Options;
 
         using var db = new EliteGaertnerDbContext(options);
-        var dbs = new LeaderboardDbs(db);
+        var loggerFactory = NullLoggerFactory.Instance;
+        var dbs = new LeaderboardDbs(db, NullLogger<LeaderboardDbs>.Instance);
 
         // "Eingeloggter" User für PersonalEntry: beerenboss (hat im Seed 2 Likes)
         var myProfileId = db.Profiles
@@ -101,7 +103,8 @@ public class LeaderboardServiceTest_FromRealDb : IntegrationTestBase
 
         var goal = LeaderboardSearchGoal.Heaviest;
 
-        var dbs = new LeaderboardDbs(db);
+        var loggerFactory = NullLoggerFactory.Instance;
+        var dbs = new LeaderboardDbs(db, NullLogger<LeaderboardDbs>.Instance);
 
         var sut = new LeaderboardService(
             leaderboardTitle: "Heaviest Trauben",

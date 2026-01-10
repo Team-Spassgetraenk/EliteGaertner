@@ -1,5 +1,6 @@
 @page "/EigenesUserProfil"
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.Logging
 @using PresentationLayer.Services
 @using PresentationLayer.State
 @using PresentationLayer.Shared
@@ -14,6 +15,7 @@
 @inject CurrentProfileState CurrentProfile
 @inject SessionService Session
 @inject NavigationManager Nav
+@inject ILogger<EigenesUserProfil> Logger
 @implements IDisposable
 
 
@@ -191,23 +193,34 @@
 
     private HarvestUploadDto? _selectedHarvest;
 
+    private bool _showLogout = false;
+
     protected override void OnInitialized()
     {
+        Logger.LogInformation("EigenesUserProfil: OnInitialized started");
+
         //Überprüfung
         //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
         if (CurrentProfile.LoggedInProfile is null)
         {
+            Logger.LogWarning("EigenesUserProfil: No logged-in profile found. Redirecting to '/'.");
             Nav.NavigateTo("/");
             return;
         }
         
         CurrentProfile.Onchange += StateHasChanged;
+        Logger.LogDebug("EigenesUserProfil: Subscribed to CurrentProfile.Onchange");
         
         //Zuweisung der Currentprofile
         _profileName = "@" + CurrentProfile.UserName;
         _profilePictureUrl = CurrentProfile.ProfilepictureUrl ?? "";
         _bioText = CurrentProfile.Profiletext ?? "";
         _profileHarvestUploads = CurrentProfile.HarvestUploads?.ToList() ?? new List<HarvestUploadDto>();
+
+        Logger.LogInformation(
+            "EigenesUserProfil: Profile loaded. UserName={UserName}, HarvestUploads={UploadCount}",
+            _profileName,
+            _profileHarvestUploads.Count);
     }
     
     //Nimm TagId, mappe ihm mit dem TagCatalog und render den passenden String
@@ -223,6 +236,8 @@
 
     private void ToggleDeletePopup(int index)
     {
+        Logger.LogDebug("EigenesUserProfil: ToggleDeletePopup called. Index={Index}, CurrentPopupIndex={CurrentPopupIndex}", index, _showDeletePopupIndex);
+
         if (_showDeletePopupIndex == index)
         {
             _showDeletePopupIndex = null;
@@ -231,10 +246,13 @@
         {
             _showDeletePopupIndex = index;
         }
+
+        Logger.LogDebug("EigenesUserProfil: ToggleDeletePopup finished. NewPopupIndex={NewPopupIndex}", _showDeletePopupIndex);
     }
     
     public void Dispose()
     {
+        Logger.LogDebug("EigenesUserProfil: Dispose called. Unsubscribing from CurrentProfile.Onchange");
         CurrentProfile.Onchange -= StateHasChanged;
     }
     
@@ -243,10 +261,16 @@
         if (harvestUpload is null)
             return;
 
+        Logger.LogInformation(
+            "EigenesUserProfil: DeletePhoto requested. UploadId={UploadId}, ImageUrl={ImageUrl}",
+            harvestUpload.UploadId,
+            harvestUpload.ImageUrl);
+
         try
         {
             //Löscht den HarvestUpload aus Datenbank + Webroot
             ImageUploadService.TryDeleteByRelativeUrl(UploadService.DeleteHarvestUpload(harvestUpload.UploadId));
+            Logger.LogInformation("EigenesUserProfil: DeletePhoto succeeded. UploadId={UploadId}", harvestUpload.UploadId);
 
             //UI schließen
             _showDeletePopupIndex = null;
@@ -256,23 +280,60 @@
             //State neu laden + lokale Liste aktualisieren
             CurrentProfile.RefreshProfile(ProfileMgm);
             _profileHarvestUploads = CurrentProfile.HarvestUploads?.ToList() ?? new List<HarvestUploadDto>();
+            Logger.LogDebug(
+                "EigenesUserProfil: Profile refreshed after delete. HarvestUploads={UploadCount}",
+                _profileHarvestUploads.Count);
 
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "EigenesUserProfil: DeletePhoto failed. UploadId={UploadId}", harvestUpload.UploadId);
             Console.WriteLine("DeletePhoto failed:");
             Console.WriteLine(ex);
         }
     }
     
     //Navigation
-    private bool _showLogout = false;
-    private void ToggleLogoutMenu() => _showLogout = !_showLogout;
-    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
-    private void GoToMatches() => Nav.NavigateTo("/matches");
-    private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
-    private void GoToManageProfile() => Nav.NavigateTo("/profil/profilverwaltung");
-    private void AddPhoto() => Nav.NavigateTo("/ernte-hochladen-privat");
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        Logger.LogDebug("EigenesUserProfil: ToggleLogoutMenu. ShowLogout={ShowLogout}", _showLogout);
+    }
+
+    private void GoToRanks()
+    {
+        Logger.LogInformation("EigenesUserProfil: Navigate to Rangliste");
+        Nav.NavigateTo("/Rangliste");
+    }
+
+    private void GoToMatches()
+    {
+        Logger.LogInformation("EigenesUserProfil: Navigate to Matches");
+        Nav.NavigateTo("/matches");
+    }
+
+    private void GoToMainpage()
+    {
+        Logger.LogInformation("EigenesUserProfil: Navigate to Startseite");
+        Nav.NavigateTo("/startseite");
+    }
+
+    private void GoToProfile()
+    {
+        Logger.LogInformation("EigenesUserProfil: Navigate to EigenesUserProfil");
+        Nav.NavigateTo("/EigenesUserProfil");
+    }
+
+    private void GoToManageProfile()
+    {
+        Logger.LogInformation("EigenesUserProfil: Navigate to Profilverwaltung");
+        Nav.NavigateTo("/profil/profilverwaltung");
+    }
+
+    private void AddPhoto()
+    {
+        Logger.LogInformation("EigenesUserProfil: Navigate to Ernte hochladen privat");
+        Nav.NavigateTo("/ernte-hochladen-privat");
+    }
 }

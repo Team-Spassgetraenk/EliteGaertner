@@ -2,6 +2,7 @@
 @layout Layout.MainLayout
 @using AppLogic.Interfaces
 @using PresentationLayer.State
+@inject ILogger<Login> Logger
 @inject IProfileMgm ProfileMgm
 @inject CurrentProfileState CurrentProfile
 @inject NavigationManager Nav
@@ -74,6 +75,11 @@
 
         _errorMessage = ""; // Reset
 
+        Logger.LogInformation(
+            "Login attempt started for email {Email}",
+            _email
+        );
+
         try
         {
             var loginDto = new CredentialProfileDto
@@ -84,26 +90,47 @@
 
             var loggedInProfile = ProfileMgm.LoginProfile(loginDto);
 
-            // WICHTIG: wenn LoginProfile "leeres DTO" zurückgibt (ProfileId = 0),
-            // dann behandeln wir das wie "Login fehlgeschlagen".
+            //Loggin fehlgeschlagen
             if (loggedInProfile is null || loggedInProfile.ProfileId <= 0)
             {
-                _errorMessage = "Login fehlgeschlagen (kein gültiges Profil zurückgegeben).";
+                Logger.LogWarning(
+                    "Login failed for email {Email} – no valid profile returned",
+                    _email
+                );
+
+                _errorMessage = "Login fehlgeschlagen.";
                 return;
             }
-            
+
+            // Erfolg
+            Logger.LogInformation(
+                "Login successful for ProfileId {ProfileId} (Email {Email})",
+                loggedInProfile.ProfileId,
+                _email
+            );
+
             CurrentProfile.Login(loggedInProfile);
-            
             Nav.NavigateTo("/startseite");
         }
         catch (UnauthorizedAccessException ex)
         {
+            Logger.LogWarning(
+                ex,
+                "Unauthorized login attempt for email {Email}",
+                _email
+            );
+
             _errorMessage = ex.Message;
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Technischer Fehler beim Login: {ex.GetType().Name}";
-            Console.WriteLine(ex);
+            Logger.LogError(
+                ex,
+                "Technical error during login for email {Email}",
+                _email
+            );
+
+            _errorMessage = "Technischer Fehler beim Login.";
         }
     }
 }

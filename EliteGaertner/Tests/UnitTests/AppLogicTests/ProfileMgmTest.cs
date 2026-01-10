@@ -6,11 +6,14 @@ using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.UnitTests.AppLogicTests;
 
 // generierter und händisch verbesserter Test (aktualisiert nach Split der DB-Interfaces + Interface-Änderungen)
 [TestClass]
+[TestCategory("Unit")]
 public class ProfileMgmUnitTests
 {
     private Mock<IProfileDbs> _mockProfileDbs = null!;
@@ -22,7 +25,7 @@ public class ProfileMgmUnitTests
     {
         _mockProfileDbs = new Mock<IProfileDbs>(MockBehavior.Strict);
         _mockHarvestDbs = new Mock<IHarvestDbs>(MockBehavior.Strict);
-        _profileMgm = new ProfileMgm(_mockProfileDbs.Object, _mockHarvestDbs.Object);
+        _profileMgm = new ProfileMgm(_mockProfileDbs.Object, _mockHarvestDbs.Object, NullLogger<ProfileMgm>.Instance);
     }
 
     [TestMethod]

@@ -6,6 +6,7 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 using Contracts.Enumeration;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.UnitTests.AppLogicTests;
 
@@ -44,7 +45,7 @@ public class MatchManagerTests
             new List<HarvestUploadDto>() // AddSuggestions()
         });
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, NullLoggerFactory.Instance);
 
         var creator = profileDbs.GetPublicProfile(2);
 
@@ -100,7 +101,7 @@ public class MatchManagerTests
             }
         });
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, NullLoggerFactory.Instance);
 
         var creator2 = profileDbs.GetPublicProfile(2);
 
@@ -150,7 +151,7 @@ public class MatchManagerTests
             ReportCountToReturn = 5
         };
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, NullLoggerFactory.Instance);
 
         // Act
         sut.ReportHarvestUpload(uploadId: 123, reason: ReportReasons.Spam);
@@ -188,7 +189,7 @@ public class MatchManagerTests
             ReportCountToReturn = 4
         };
 
-        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var sut = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, NullLoggerFactory.Instance);
 
         // Act
         sut.ReportHarvestUpload(uploadId: 456, reason: ReportReasons.CatFishing);

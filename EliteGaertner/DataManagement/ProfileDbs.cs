@@ -2,20 +2,25 @@ using Contracts.Data_Transfer_Objects;
 using DataManagement.Entities;
 using DataManagement.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace DataManagement;
 
 public class ProfileDbs : IProfileDbs
 {
     private readonly EliteGaertnerDbContext _dbContext;
+    private readonly ILogger<ProfileDbs> _logger;
     
-    public ProfileDbs(EliteGaertnerDbContext dbContext)
+    public ProfileDbs(EliteGaertnerDbContext dbContext, ILogger<ProfileDbs> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }   
     
     public int? CheckPassword(string eMail, string klartextPassword)
     {
+        _logger.LogDebug("CheckPassword called. EmailProvided={EmailProvided}", !string.IsNullOrWhiteSpace(eMail));
+        
         if (string.IsNullOrWhiteSpace(eMail) || string.IsNullOrWhiteSpace(klartextPassword))
             return null;
         
@@ -26,16 +31,23 @@ public class ProfileDbs : IProfileDbs
                 p.Email == normalizedEmail);
         
         if (profile == null)
+        {
+            _logger.LogInformation("CheckPassword: profile not found for email={Email}", normalizedEmail);
             return null;
+        }
 
         bool isValid = BCrypt.Net.BCrypt.Verify(klartextPassword, profile.Passwordhash);
-    
+        
+        _logger.LogInformation("CheckPassword completed. Email={Email}, IsValid={IsValid}", normalizedEmail, isValid);
+        
         return isValid ? profile.Profileid : null;
     }
     
 
     public bool CheckProfileNameExists(string username)
     {
+        _logger.LogDebug("CheckProfileNameExists called. UsernameProvided={UsernameProvided}", !string.IsNullOrWhiteSpace(username));
+        
         // Falls username null oder leer -> true keine Vergabe
         if (string.IsNullOrWhiteSpace(username))
             return false;
@@ -43,13 +55,19 @@ public class ProfileDbs : IProfileDbs
         // Normalisiere username (wie in SetNewProfile)
         var normalizedUsername = username.Trim().ToLowerInvariant();
         
-        return _dbContext.Profiles
+        var exists = _dbContext.Profiles
             .AsNoTracking()
             .Any(p => p.Username == normalizedUsername);
+
+        _logger.LogInformation("CheckProfileNameExists completed. Username={Username}, Exists={Exists}", normalizedUsername, exists);
+
+        return exists;
     }
     
     public int SetNewProfile(PrivateProfileDto privateProfile, CredentialProfileDto credentials)
     {
+        _logger.LogInformation("SetNewProfile called.");
+        
         //Überprüfungen
         if (privateProfile is null)
             throw new ArgumentNullException(nameof(privateProfile));
@@ -59,6 +77,7 @@ public class ProfileDbs : IProfileDbs
         //UserName und Email normalisieren. Uppercase -> Lowercase
         var userName = privateProfile.UserName?.Trim().ToLowerInvariant();
         var eMail = credentials.EMail?.Trim().ToLowerInvariant();
+        _logger.LogDebug("SetNewProfile normalized inputs. Username={Username}, Email={Email}", userName, eMail);
         
         //Pflichtfelder vorhanden?
         if (string.IsNullOrWhiteSpace(userName) ||
@@ -76,6 +95,8 @@ public class ProfileDbs : IProfileDbs
         var eMailExists = _dbContext.Profiles
             .AsNoTracking()
             .Any(p => p.Email == eMail);
+        _logger.LogDebug("SetNewProfile duplicate checks. UsernameExists={UsernameExists}, EmailExists={EmailExists}", userNameExists, eMailExists);
+        
         //Exceptions bei Duplikate
         if (userNameExists)
             throw new InvalidOperationException("Der Benutzername ist bereits vergeben.");
@@ -105,6 +126,7 @@ public class ProfileDbs : IProfileDbs
         //Entity wird in Datenbank gespeichert
         _dbContext.Profiles.Add(profileEntity);
         _dbContext.SaveChanges();
+        _logger.LogInformation("SetNewProfile succeeded. NewProfileId={ProfileId}, Username={Username}", profileEntity.Profileid, userName);
 
         //ProfileId zurückgeben
         return profileEntity.Profileid;
@@ -112,6 +134,7 @@ public class ProfileDbs : IProfileDbs
 
     public void EditProfile(PrivateProfileDto privateProfile)
     {
+        _logger.LogInformation("EditProfile called. ProfileId={ProfileId}", privateProfile?.ProfileId);
         if (privateProfile == null || privateProfile.ProfileId <= 0)
             throw new ArgumentNullException(nameof(privateProfile), "Dto darf nicht null sein, oder ID negativ");
    
@@ -120,7 +143,10 @@ public class ProfileDbs : IProfileDbs
             .SingleOrDefault(p => p.Profileid == privateProfile.ProfileId);
 
         if (profile == null)
+        {
+            _logger.LogWarning("EditProfile: profile not found. ProfileId={ProfileId}", privateProfile.ProfileId);
             throw new ArgumentException($"Profil mit ID {privateProfile.ProfileId} nicht gefunden.", nameof(privateProfile.ProfileId));
+        }
 
         // DTO-Werte auf Entity mappen (alle editierbaren Felder)
         profile.Profilepictureurl = privateProfile.ProfilepictureUrl;
@@ -138,10 +164,14 @@ public class ProfileDbs : IProfileDbs
 
         //Änderungen persistieren
         _dbContext.SaveChanges();
+        
+        _logger.LogInformation("EditProfile succeeded. ProfileId={ProfileId}", privateProfile.ProfileId);
     }
     
     public Profile? GetProfile(int profileId)
     {
+        _logger.LogDebug("GetProfile called. ProfileId={ProfileId}", profileId);
+        
         //Falls die profileId <= 0 ist, return ein leeres ProfileDto
         if (profileId <= 0)
             return null;
@@ -152,18 +182,25 @@ public class ProfileDbs : IProfileDbs
             .AsNoTracking()
             //Gib mir maximal ein Profil zurück, dass mit der Id übereinstimmt
             .SingleOrDefault(x => x.Profileid == profileId);
-
+        
+        _logger.LogDebug("GetProfile completed. ProfileId={ProfileId}, Found={Found}", profileId, p is not null);
+        
         return p;
     }
     
     public PublicProfileDto GetPublicProfile(int profileId)
     {
+        _logger.LogDebug("GetPublicProfile called. ProfileId={ProfileId}", profileId);
+        
         //Entität Profil wird zurückgegeben
         var p = GetProfile(profileId);
 
         //Falls kein Profil gefunden wird -> Gib leeres PublicProfileDto zurück
         if (p is null)
+        {
+            _logger.LogInformation("GetPublicProfile: profile not found. ProfileId={ProfileId}", profileId);
             return new PublicProfileDto();
+        }
         
         //Erstelle aus dem Ergebnis der Query ein PublicProfileDto
         var result = new PublicProfileDto()
@@ -175,17 +212,24 @@ public class ProfileDbs : IProfileDbs
             UserCreated = p.Usercreated,
         };
         
+        _logger.LogDebug("GetPublicProfile completed. ProfileId={ProfileId}, Username={Username}", profileId, result.UserName);
+        
         return result;
     }
 
     public PrivateProfileDto GetPrivateProfile(int profileId)
     {
+        _logger.LogDebug("GetPrivateProfile called. ProfileId={ProfileId}", profileId);
+        
         //Entität Profil wird zurückgegeben
         var p = GetProfile(profileId);
 
         //Falls kein Profil gefunden wird -> Gib leeres PrivateProfileDto zurück
         if (p is null)
+        {
+            _logger.LogInformation("GetPrivateProfile: profile not found. ProfileId={ProfileId}", profileId);
             return new PrivateProfileDto();
+        }
         
         //Erstelle aus dem Ergebnis der Query ein PrivateProfileDto
         var result = new PrivateProfileDto
@@ -204,12 +248,15 @@ public class ProfileDbs : IProfileDbs
             //Hol dir die UserPreference des Profils
             PreferenceDtos = GetProfilePreference(profileId).ToList()
         };
-
+        _logger.LogDebug("GetPrivateProfile completed. ProfileId={ProfileId}, Username={Username}, PreferencesCount={PreferencesCount}", profileId, result.UserName, result.PreferenceDtos?.Count ?? 0);
+        
         return result;
     }
     
     public IEnumerable<PreferenceDto> GetProfilePreference(int profileId)
     {
+        _logger.LogDebug("GetProfilePreference called. ProfileId={ProfileId}", profileId);
+        
         //Falls die profileId <= 0 ist, return ein leeres PreferenceDto Enumerable 
         if (profileId <= 0)
             return Enumerable.Empty<PreferenceDto>();
@@ -226,12 +273,15 @@ public class ProfileDbs : IProfileDbs
                 TagId = p.Tagid,
                 DateUpdated = p.Dateupdated
             });
+        _logger.LogDebug("GetProfilePreference query built. ProfileId={ProfileId}", profileId);
 
         return result;
     }
 
     public void EditPassword(CredentialProfileDto credentials)
     {
+        _logger.LogInformation("EditPassword called. EmailProvided={EmailProvided}", !string.IsNullOrWhiteSpace(credentials?.EMail));
+        
         //Überprüfungen
         if (credentials is null)
             throw new ArgumentNullException(nameof(credentials));
@@ -244,21 +294,27 @@ public class ProfileDbs : IProfileDbs
 
         //Holt das gesuchte Profil aus der Datenbank
         var profile = _dbContext.Profiles.SingleOrDefault(p => p.Email == email);
-        //Falls Profil nicht gefunden worden ist
         if (profile is null)
+        {
+            _logger.LogWarning("EditPassword: profile not found. Email={Email}", email);
             throw new ArgumentException("Profil mit dieser E-Mail nicht gefunden.", nameof(credentials.EMail));
+        }
 
         //Passwort hashen (BCrypt)
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(credentials.PasswordHash);
         profile.Passwordhash = hashedPassword;
 
         _dbContext.SaveChanges();
+        
+        _logger.LogInformation("EditPassword succeeded. Email={Email}", email);
     }
 
     public void SetProfilePreference(List<PreferenceDto> preferences) // Wichtiger Hinweis: Methode überschreibt nur für
                                                                    // eine ProfileID (die erste in der Liste), damit
                                                                    // nicht aus Versehen andere Nutzer editiert werden
     {
+        _logger.LogInformation("SetProfilePreference called. PreferencesCount={PreferencesCount}", preferences?.Count ?? 0);
+        
         // Input-Validierung (Write-Operation -> Exceptions)
         if (preferences is null)
             throw new ArgumentNullException(nameof(preferences));
@@ -268,6 +324,8 @@ public class ProfileDbs : IProfileDbs
 
         // ProfileId muss vorhanden und bei allen gleich sein
         var profileId = preferences[0].Profileid;
+        _logger.LogDebug("SetProfilePreference target profile. ProfileId={ProfileId}", profileId);
+        
         if (profileId <= 0)
             throw new ArgumentException("ProfileId muss größer als 0 sein.", nameof(preferences));
 
@@ -281,6 +339,8 @@ public class ProfileDbs : IProfileDbs
         // 1) Bestehende Preferences dieses Profils löschen
         var existingPreferences = _dbContext.Profilepreferences
             .Where(pp => pp.Profileid == profileId);
+        var existingCount = existingPreferences.Count();
+        _logger.LogDebug("SetProfilePreference removing existing preferences. ProfileId={ProfileId}, ExistingCount={ExistingCount}", profileId, existingCount);
 
         _dbContext.Profilepreferences.RemoveRange(existingPreferences);
 
@@ -293,9 +353,12 @@ public class ProfileDbs : IProfileDbs
                 ? DateTime.UtcNow
                 : p.DateUpdated
         }).ToList();
+        _logger.LogDebug("SetProfilePreference adding new preferences. ProfileId={ProfileId}, NewCount={NewCount}", profileId, newPreferences.Count);
 
         _dbContext.Profilepreferences.AddRange(newPreferences);
 
         _dbContext.SaveChanges();
+        
+        _logger.LogInformation("SetProfilePreference succeeded. ProfileId={ProfileId}, NewCount={NewCount}", profileId, newPreferences.Count);
     }
 }

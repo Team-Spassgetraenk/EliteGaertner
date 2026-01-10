@@ -5,6 +5,8 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.IntegrationTests.AppLogicTests;
@@ -30,6 +32,15 @@ public class ProfileSuggestionTest_FromRealDb : IntegrationTestBase
 
         using var db = new EliteGaertnerDbContext(options);
 
+        var loggerFactory = NullLoggerFactory.Instance;
+
+        var matchesDbsLogger = loggerFactory.CreateLogger<MatchesDbs>();
+        var profileDbsLogger = loggerFactory.CreateLogger<ProfileDbs>();
+        var harvestDbsLogger = loggerFactory.CreateLogger<HarvestDbs>();
+
+        var harvestSuggestionLogger = loggerFactory.CreateLogger<HarvestSuggestion>();
+        var profileSuggestionLogger = loggerFactory.CreateLogger<ProfileSuggestion>();
+
         TestContext.WriteLine("------------------------------------");
         TestContext.WriteLine("--ANZAHL DER TUPEL IN DEN TABELLEN--");
         TestContext.WriteLine($"Profiles: {db.Profiles.Count()}");
@@ -43,9 +54,9 @@ public class ProfileSuggestionTest_FromRealDb : IntegrationTestBase
         TestContext.WriteLine("------------------------------------");
 
         // Nach dem Split: separate DB-Klassen pro Interface
-        var matchesDbs = new MatchesDbs(db);
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
+        var matchesDbs = new MatchesDbs(db, matchesDbsLogger);
+        var profileDbs = new ProfileDbs(db, profileDbsLogger);
+        var harvestDbs = new HarvestDbs(db, harvestDbsLogger);
 
         const int receiverProfileId = 1;
 
@@ -76,7 +87,7 @@ public class ProfileSuggestionTest_FromRealDb : IntegrationTestBase
         const int preloadCount = 10;
 
         // 1) HarvestSuggestions als Basis
-        var harvestSuggestion = new HarvestSuggestion(harvestDbs, profileId, tagIds, alreadyRatedProfiles, preloadCount);
+        var harvestSuggestion = new HarvestSuggestion(harvestSuggestionLogger, harvestDbs, profileId, tagIds, alreadyRatedProfiles, preloadCount);
         var harvestResults = harvestSuggestion.GetHarvestSuggestionList();
 
         Assert.IsNotNull(harvestResults);
@@ -94,7 +105,7 @@ public class ProfileSuggestionTest_FromRealDb : IntegrationTestBase
         var harvestUploadIds = harvestResults.Select(hu => hu.UploadId).ToHashSet();
 
         // Act
-        var profileSuggestion = new ProfileSuggestion(matchesDbs, profileDbs, harvestDbs, profileId, tagIds, preloadCount);
+        var profileSuggestion = new ProfileSuggestion(matchesDbs, profileDbs, harvestDbs, profileId, tagIds, preloadCount, profileSuggestionLogger, harvestSuggestionLogger);
         var resultDict = profileSuggestion.GetProfileSuggestionList();
 
         // Assert – Basis

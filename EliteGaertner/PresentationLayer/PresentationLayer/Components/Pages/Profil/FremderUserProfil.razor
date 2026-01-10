@@ -5,11 +5,13 @@
 @using PresentationLayer.State
 @using Contracts.Data_Transfer_Objects
 @using Microsoft.AspNetCore.Components
+@using Microsoft.Extensions.Logging
 @using PresentationLayer.Shared
 @inject IProfileMgm ProfileMgm
 @inject CurrentProfileState CurrentProfile
 @inject SessionService Session
 @inject NavigationManager Nav
+@inject ILogger<FremderUserProfil> Logger
 
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -148,26 +150,47 @@
 
     protected override void OnParametersSet()
     {
-        // Guard: not logged in
+        Logger.LogInformation("FremderUserProfil: OnParametersSet. ProfileId={ProfileId}", ProfileId);
+
+        //Überprüfung
         if (CurrentProfile.LoggedInProfile is null)
         {
+            Logger.LogWarning("FremderUserProfil: Not logged in. Redirecting to '/' for ProfileId={ProfileId}", ProfileId);
             Nav.NavigateTo("/");
             return;
         }
 
-        var publicProfile = ProfileMgm.VisitPublicProfile(ProfileId);
-        if (publicProfile is null)
+        try
         {
-            // Profil existiert nicht (oder Zugriff nicht möglich)
-            Nav.NavigateTo("/matches");
-            return;
-        }
+            Logger.LogDebug("FremderUserProfil: Loading public profile. RequestedProfileId={ProfileId}, ViewerProfileId={ViewerProfileId}",
+                ProfileId, CurrentProfile.ProfileId);
 
-        // Zuweisung des PublicProfiles
-        _profileName = "@" + (publicProfile.UserName ?? string.Empty);
-        _profilePictureUrl = publicProfile.ProfilepictureUrl ?? string.Empty;
-        _bioText = publicProfile.Profiletext ?? string.Empty;
-        _profileHarvestUploads = publicProfile.HarvestUploads?.ToList() ?? new List<HarvestUploadDto>();
+            var publicProfile = ProfileMgm.VisitPublicProfile(ProfileId);
+            if (publicProfile is null)
+            {
+                // Profil existiert nicht (oder Zugriff nicht möglich)
+                Logger.LogWarning("FremderUserProfil: Public profile not found or access denied. RequestedProfileId={ProfileId}. Redirecting to '/matches'.", ProfileId);
+                Nav.NavigateTo("/matches");
+                return;
+            }
+
+            // Zuweisung des PublicProfiles
+            _profileName = "@" + (publicProfile.UserName ?? string.Empty);
+            _profilePictureUrl = publicProfile.ProfilepictureUrl ?? string.Empty;
+            _bioText = publicProfile.Profiletext ?? string.Empty;
+            _profileHarvestUploads = publicProfile.HarvestUploads?.ToList() ?? new List<HarvestUploadDto>();
+
+            Logger.LogInformation(
+                "FremderUserProfil: Public profile loaded. RequestedProfileId={ProfileId}, UserName={UserName}, HarvestUploads={HarvestCount}",
+                ProfileId,
+                publicProfile.UserName,
+                _profileHarvestUploads.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "FremderUserProfil: Failed to load public profile. RequestedProfileId={ProfileId}", ProfileId);
+            Nav.NavigateTo("/matches");
+        }
     }
     
     //Nimm erste TagId, mappe sie mit dem TagCatalog und rendere den passenden String
@@ -181,9 +204,14 @@
         return tagItem is null ? string.Empty : $"{tagItem.Icon} {tagItem.Name}";
     }
     
-    private void ToggleLogoutMenu() => _showLogout = !_showLogout;
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        Logger.LogDebug("FremderUserProfil: ToggleLogoutMenu -> ShowLogout={ShowLogout}, RequestedProfileId={ProfileId}", _showLogout, ProfileId);
+    }
+    
     private bool _showLogout = false;
-    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
+    private void GoToRanks() => Nav.NavigateTo("/Rangliste");
     private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");
     private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");

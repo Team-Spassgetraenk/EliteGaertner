@@ -6,6 +6,7 @@ using Contracts.Data_Transfer_Objects;
 using DataManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.IntegrationTests.AppLogicTests;
 
@@ -45,10 +46,12 @@ public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
         TestContext.WriteLine($"Reports: {db.Reports.Count()}");
         TestContext.WriteLine("------------------------------------");
 
+        var loggerFactory = NullLoggerFactory.Instance;
+
         // Nach dem Split: HarvestDbs übernimmt die Harvest-spezifischen DB-Zugriffe
-        var harvestDbs = new HarvestDbs(db);
+        var harvestDbs = new HarvestDbs(db, NullLogger<HarvestDbs>.Instance);
         // MatchesDbs wird benötigt, um bereits bewertete ProfileIds auszuschließen
-        var matchesDbs = new MatchesDbs(db);
+        var matchesDbs = new MatchesDbs(db, NullLogger<MatchesDbs>.Instance);
         
         //TestUser DTO erstellen (TomatenTiger)
         var testDto = new PrivateProfileDto()
@@ -81,7 +84,14 @@ public class HarvestSuggestionTest_FromRealDb : IntegrationTestBase
         // Bereits bewertete ProfileIds (Receiver = profileId) laden und an HarvestSuggestion weiterreichen
         var alreadyRatedProfiles = matchesDbs.GetAlreadyRatedProfileIds(profileId);
         //Testdaten werden jetzt an die Klasse übergeben
-        var testSuggestions = new HarvestSuggestion(harvestDbs, profileId, tagIds, alreadyRatedProfiles, 10);
+        var testSuggestions = new HarvestSuggestion(
+            NullLogger<HarvestSuggestion>.Instance,
+            harvestDbs,
+            profileId,
+            tagIds,
+            alreadyRatedProfiles,
+            10
+        );
         var result = testSuggestions.GetHarvestSuggestionList();
         
         //Logging der Testresult

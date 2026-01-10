@@ -2,9 +2,11 @@
 @layout Layout.MainLayout
 @using PresentationLayer.State
 @using PresentationLayer.Shared
+@using Microsoft.Extensions.Logging
 
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
+@inject ILogger<ProfilBildRegistrierung> Logger
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -106,13 +108,17 @@
         //Überprüfung, ob alle nötigen Registrierungsseiten durchlaufen worden sind
         if (!RegistrationState.IsStepProfilDataValid)
         {
+            Logger.LogWarning("ProfilBildRegistrierung: StepProfilData ist ungültig. Redirect zur /registrierung.");
             Nav.NavigateTo("/registrierung");
+            return;
         }
 
         _currentIndex = 0;
         
         //Setzen vom Profilbild
         _selectedProfilePicture = ProfilePictureCatalog.profilePictures.First();
+
+        Logger.LogInformation("ProfilBildRegistrierung initialisiert. SelectedProfilePicture={SelectedProfilePicture}", _selectedProfilePicture);
     }
     
     //Profilepicture Handling
@@ -127,6 +133,7 @@
     {
         _currentIndex = (_currentIndex + 1) % ProfilePictureCatalog.profilePictures.Count;
         _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+        Logger.LogDebug("ProfilBildRegistrierung: NextProfilePicture gewählt. CurrentIndex={CurrentIndex}, SelectedProfilePicture={SelectedProfilePicture}", _currentIndex, _selectedProfilePicture);
     }
     
     private void SelectPreviousProfilePicture()
@@ -134,15 +141,18 @@
         _currentIndex = (_currentIndex - 1 + ProfilePictureCatalog.profilePictures.Count) 
                         % ProfilePictureCatalog.profilePictures.Count;
         _selectedProfilePicture = ProfilePictureCatalog.profilePictures[_currentIndex];
+        Logger.LogDebug("ProfilBildRegistrierung: PreviousProfilePicture gewählt. CurrentIndex={CurrentIndex}, SelectedProfilePicture={SelectedProfilePicture}", _currentIndex, _selectedProfilePicture);
     }
     
     private void NextRegistrationStep()
     {
         //Fehlermeldung zurücksetzen
         RegistrationError = "";
+        Logger.LogInformation("ProfilBildRegistrierung: NextRegistrationStep geklickt. RegisterEnabled={RegisterEnabled}", RegisterEnabled);
         
         if (string.IsNullOrWhiteSpace(_bio?.Trim()))
         {
+            Logger.LogWarning("ProfilBildRegistrierung: Bio fehlt/leer. Navigation wird abgebrochen.");
             RegistrationError = "Bitte gib eine Profilbeschreibung (Bio) ein.";
             return;
         }
@@ -150,7 +160,11 @@
         //RegistrationState
         RegistrationState.ProfileText = _bio.Trim();
         RegistrationState.ProfilePictureUrl = $"pictures/Profilbilder/{_selectedProfilePicture}";
-        
+        Logger.LogInformation(
+            "ProfilBildRegistrierung: Daten in RegistrationState übernommen. ProfilePictureUrl={ProfilePictureUrl}, BioLength={BioLength}",
+            RegistrationState.ProfilePictureUrl,
+            RegistrationState.ProfileText?.Length ?? 0);
+        Logger.LogInformation("ProfilBildRegistrierung: Navigiere zu /registrierung/praeferenzendatenregistrierung");
         Nav.NavigateTo("/registrierung/praeferenzendatenregistrierung");
     }
 }

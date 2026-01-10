@@ -8,6 +8,7 @@
 
 @inject UserRegistrationState RegistrationState
 @inject NavigationManager Nav
+@inject Microsoft.Extensions.Logging.ILogger<PräferenzenAuswahlRegistrierung> Logger
 
 
 @* WICHTIG: Beide Schriftarten laden, da Patrick Hand für den allgemeinen Text und Playfair Display für den EliteGärtner-Titel verwendet wird *@
@@ -73,9 +74,17 @@
 
     protected override void OnInitialized()
     {
+        Logger.LogInformation("Preferences registration page initialized. ProfilDataValid={ProfilDataValid}, ProfilPictureValid={ProfilPictureValid}",
+            RegistrationState.IsStepProfilDataValid,
+            RegistrationState.IsStepProfilPictureValid);
+
         //Überprüfung, ob alle nötigen Registrierungsseiten durchlaufen worden sind
         if (!RegistrationState.IsStepProfilDataValid || !RegistrationState.IsStepProfilPictureValid)
         {
+            Logger.LogWarning("Redirecting to /registrierung because prerequisites are not met. ProfilDataValid={ProfilDataValid}, ProfilPictureValid={ProfilPictureValid}",
+                RegistrationState.IsStepProfilDataValid,
+                RegistrationState.IsStepProfilPictureValid);
+
             Nav.NavigateTo("/registrierung");
         }
     }
@@ -83,7 +92,9 @@
 
     void ToggleTag(int tagId)
     {
-        if (_selectedTagIds.Contains(tagId))
+        var wasSelected = _selectedTagIds.Contains(tagId);
+
+        if (wasSelected)
         {
             _selectedTagIds.Remove(tagId);
         }
@@ -91,27 +102,38 @@
         {
             _selectedTagIds.Add(tagId);
         }
-        
+
+        Logger.LogInformation("Preference tag toggled. TagId={TagId}, Action={Action}, SelectedCount={SelectedCount}",
+            tagId,
+            wasSelected ? "Removed" : "Added",
+            _selectedTagIds.Count);
+
         StateHasChanged();
     }
 
     void NextRegistrationStep()
     {
+        Logger.LogInformation("NextRegistrationStep clicked. SelectedCount={SelectedCount}", _selectedTagIds.Count);
+
         //Überprüfung
         if (!_selectedTagIds.Any())
         {
+            Logger.LogWarning("NextRegistrationStep aborted because no tags are selected.");
             return;
         }
-        
+
         //Den State vorsichtshalber zurücksetzen
         RegistrationState.SelectedTagIdsPreferences.Clear();
-        
+
         //TagIds hinzufügen zu RegistrationState
         foreach (var id in _selectedTagIds)
         {
             RegistrationState.SelectedTagIdsPreferences.Add(id);
         }
-        
+
+        Logger.LogInformation("Preferences saved to RegistrationState. Count={Count}. Navigating to /registrierung/erntehochladenregistrierung",
+            RegistrationState.SelectedTagIdsPreferences.Count);
+
         Nav.NavigateTo("/registrierung/erntehochladenregistrierung");
     }
 }

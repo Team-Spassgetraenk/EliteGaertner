@@ -1,12 +1,14 @@
 @page "/registrierung"
 @layout Layout.MainLayout
 @using System.Text.RegularExpressions
+@using Microsoft.Extensions.Logging
 @using PresentationLayer.State
 @using PresentationLayer.Shared
 @using AppLogic.Interfaces
 @inject UserRegistrationState RegistrationState
 @inject IProfileMgm ProfileMgm
 @inject NavigationManager Nav
+@inject ILogger<ProfilDatenRegistrierung> Logger
 
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -224,6 +226,7 @@
     {
         //Vorsichtshalber immer den Registrationstate auf der ersten Registrierungsseite leeren
         RegistrationState.Reset();
+        Logger.LogInformation("ProfilDatenRegistrierung initialisiert. RegistrationState wurde zurückgesetzt.");
     }
 
     //Erstellt die lokale Telefonnummer
@@ -279,15 +282,32 @@
         _lastName = _lastName?.Trim() ?? "";
         _email = _email?.Trim() ?? "";
 
+        Logger.LogInformation(
+            "Registrierung Step1: Weiter geklickt. UserName={UserName}, Email={Email}, Phone={Phone}, ShareEmail={ShareEmail}, SharePhone={SharePhone}, RegisterEnabled={RegisterEnabled}",
+            _userName,
+            _email,
+            FullTelephoneNumber,
+            _shareEmail,
+            _sharePhoneNumber,
+            RegisterEnabled);
+
         
         if (!RegisterEnabled)
         {
+            Logger.LogWarning(
+                "Registrierung Step1 abgebrochen: RegisterEnabled=false. RequiredFieldsFilled={RequiredFieldsFilled}, PasswordMismatch={PasswordMismatch}, ContactShareSelected={ContactShareSelected}, EmailValid={EmailValid}, IsPasswordStrong={IsPasswordStrong}",
+                RequiredFieldsFilled,
+                PasswordMismatch,
+                ContactShareSelected,
+                EmailValid,
+                IsPasswordStrong);
             RegistrationError = "Bitte prüfe deine Eingaben.";
             return;
         }
 
         if (ProfileMgm.CheckProfileNameExists(_userName))
         {
+            Logger.LogWarning("Registrierung Step1 abgebrochen: Benutzername existiert bereits. UserName={UserName}", _userName);
             RegistrationError = "Benutzername existiert bereits";
             return;
         }
@@ -303,6 +323,7 @@
         RegistrationState.ShareEmail = _shareEmail;
         RegistrationState.SharePhoneNumber = _sharePhoneNumber;
         
+        Logger.LogInformation("Registrierung Step1 erfolgreich. Navigation zur Profilbild-Seite.");
         //Zur nächsten Seite wechseln
         Nav.NavigateTo("/registrierung/profilbildregistrierung");
     }

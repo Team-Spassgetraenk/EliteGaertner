@@ -12,6 +12,7 @@
 @inject UserRegistrationState RegistrationState
 @inject IImageUploadService ImageUploadService
 @inject NavigationManager Nav
+@inject ILogger<ErnteHochladenRegistrierung> Logger
 
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -150,8 +151,14 @@
 
     protected override void OnInitialized()
     {
+        Logger.LogInformation("Registration harvest step initialized. StepValid: ProfilData={ProfilDataValid}, ProfilPicture={ProfilPictureValid}, Preference={PreferenceValid}",
+            RegistrationState.IsStepProfilDataValid,
+            RegistrationState.IsStepProfilPictureValid,
+            RegistrationState.IsStepPreferenceValid);
+
         if (!RegistrationState.IsStepProfilDataValid || !RegistrationState.IsStepProfilPictureValid || !RegistrationState.IsStepPreferenceValid)
         {
+            Logger.LogWarning("Registration harvest step accessed without completing previous steps. Redirecting to /registrierung.");
             Nav.NavigateTo("/registrierung");
         }
     }
@@ -164,12 +171,14 @@
         {
             //Nochmal klicken -> abwählen
             _selectedTagIds.Clear();
+            Logger.LogInformation("Harvest registration tag deselected. TagId={TagId}", tagId);
             return;
         }
 
         // Neues Tag wählen -> alle anderen abwählen
         _selectedTagIds.Clear();
         _selectedTagIds.Add(tagId);
+        Logger.LogInformation("Harvest registration tag selected. TagId={TagId}", tagId);
     }
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
@@ -185,21 +194,31 @@
             // Rückgabe ist ein relativer Pfad (z.B. "/tempUploads/<guid>.jpg"), den wir direkt rendern können.
             _hochgeladenesBild = await ImageUploadService.SaveImageAsync(file);
 
-            Console.WriteLine($"Bild gespeichert: {_hochgeladenesBild}");
+            Logger.LogInformation("Harvest registration image saved. RelativeUrl={RelativeUrl}", _hochgeladenesBild);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Fehler beim Hochladen: {ex.Message}");
+            Logger.LogError(ex, "Harvest registration image upload failed.");
+            RegistrationError = "Fehler beim Hochladen des Bildes.";
         }
     }
 
     private async Task VeröffentlichenAsync()
     {
         RegistrationError = "";
+        Logger.LogInformation("Harvest registration publish clicked. IsFormValid={IsFormValid}", IsFormValid);
 
         // Defensive: falls Button trotzdem auslöst
         if (!IsFormValid)
         {
+            Logger.LogWarning("Harvest registration publish blocked due to invalid form. TagCount={TagCount}, HasImage={HasImage}, CommentLength={CommentLength}, Gewicht={Gewicht}, Laenge={Laenge}, Breite={Breite}",
+                _selectedTagIds.Count,
+                !string.IsNullOrWhiteSpace(_hochgeladenesBild),
+                Kommentar?.Length ?? 0,
+                Gewicht,
+                Laenge,
+                Breite);
+
             RegistrationError = "Bitte lade ein Bild hoch, wähle ein Tag aus, schreibe einen Kommentar und fülle Gewicht, Länge und Breite aus.";
             return;
         }
@@ -220,6 +239,7 @@
         //Prüfen ob alle vorherigen Schritte erfüllt sind
         if (!RegistrationState.IsReadyForRegistration)
         {
+            Logger.LogWarning("Harvest registration publish blocked because RegistrationState is not ready. Redirecting to /registrierung.");
             RegistrationError = "Registrierung ist unvollständig. Bitte gehe die vorherigen Schritte erneut durch.";
             Nav.NavigateTo("/registrierung");
             return;
@@ -251,9 +271,11 @@
         try
         {
             profileId = ProfileMgm.RegisterProfile(newProfileDto, newCredentialDto);
+            Logger.LogInformation("RegisterProfile succeeded. ProfileId={ProfileId}", profileId);
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "RegisterProfile failed during harvest registration.");
             RegistrationError = ex.Message;
             return;
         }
@@ -268,12 +290,14 @@
             })
             .ToList();
 
+        Logger.LogInformation("Setting preferences during harvest registration. ProfileId={ProfileId}, PreferenceCount={PreferenceCount}", profileId, preferences.Count);
         try
         {
             ProfileMgm.SetPreference(preferences);
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "SetPreference failed during harvest registration. ProfileId={ProfileId}", profileId);
             RegistrationError = ex.Message;
             return;
         }
@@ -290,20 +314,28 @@
             TagIds = RegistrationState.SelectedTagIdsHarvestUpload.ToList(),
         };
 
+        Logger.LogInformation("Creating harvest upload during registration. ProfileId={ProfileId}, TagCount={TagCount}, Gewicht={Gewicht}, Laenge={Laenge}, Breite={Breite}",
+            profileId,
+            newHarvestUploadDto.TagIds?.Count ?? 0,
+            newHarvestUploadDto.WeightGram,
+            newHarvestUploadDto.LengthCm,
+            newHarvestUploadDto.WidthCm);
         try
         {
             UploadService.CreateHarvestUpload(newHarvestUploadDto);
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "CreateHarvestUpload failed during harvest registration. ProfileId={ProfileId}, ImageUrl={ImageUrl}", profileId, newHarvestUploadDto.ImageUrl);
             RegistrationError = ex.Message;
             return;
         }
 
         //RegistrationState zurücksetzen
         RegistrationState.Reset();
-
+        Logger.LogInformation("RegistrationState reset after successful harvest registration. Redirecting to welcome page.");
         
+        Logger.LogInformation("Navigating to /registrierung/willkommenregistrierung.");
         Nav.NavigateTo("/registrierung/willkommenregistrierung");
 
         await Task.CompletedTask;

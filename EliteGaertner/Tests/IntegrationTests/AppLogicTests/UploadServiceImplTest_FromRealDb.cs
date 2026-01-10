@@ -5,6 +5,8 @@ using Contracts.Data_Transfer_Objects;
 using DataManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.IntegrationTests.AppLogicTests;
 
@@ -35,8 +37,10 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
         using var db = CreateDb();
         using var tx = db.Database.BeginTransaction(); // rollback am Ende
 
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new UploadServiceImpl(harvestDbs);
+        ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
+
+        var harvestDbs = new HarvestDbs(db, loggerFactory.CreateLogger<HarvestDbs>());
+        var sut = new UploadServiceImpl(harvestDbs, loggerFactory.CreateLogger<UploadServiceImpl>());
 
         // Für CreateUploadDbs muss mindestens ein gültiger Tag angegeben werden
         var existingTagId = db.Tags.AsNoTracking().Select(t => t.Tagid).First();
@@ -104,8 +108,11 @@ public class UploadServiceImplTest_FromRealDb : IntegrationTestBase
     public void DeleteUpload_ShouldReturnNull_WhenUploadDoesNotExist()
     {
         using var db = CreateDb();
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new UploadServiceImpl(harvestDbs);
+
+        ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
+
+        var harvestDbs = new HarvestDbs(db, loggerFactory.CreateLogger<HarvestDbs>());
+        var sut = new UploadServiceImpl(harvestDbs, loggerFactory.CreateLogger<UploadServiceImpl>());
 
         // Arrange
         const int nonExistingUploadId = 9_999_999; // positive ID, die in der Seed-DB nicht existiert

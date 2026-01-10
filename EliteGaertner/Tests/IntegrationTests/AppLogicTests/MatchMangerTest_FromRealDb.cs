@@ -7,6 +7,8 @@ using Contracts.Enumeration;
 using DataManagement;
 using DataManagement.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.IntegrationTests.AppLogicTests;
@@ -31,9 +33,11 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
 
         using var db = new EliteGaertnerDbContext(options);
 
-        var matchesDbs = new MatchesDbs(db);
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
+        ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
+
+        var matchesDbs = new MatchesDbs(db, loggerFactory.CreateLogger<MatchesDbs>());
+        var profileDbs = new ProfileDbs(db, loggerFactory.CreateLogger<ProfileDbs>());
+        var harvestDbs = new HarvestDbs(db, loggerFactory.CreateLogger<HarvestDbs>());
 
         var receiver = new PrivateProfileDto
         {
@@ -54,7 +58,7 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
             }
         };
         
-        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, loggerFactory);
 
         var suggestionsBefore = manager.GetProfileSuggestionList();
         Assert.IsNotNull(suggestionsBefore);
@@ -112,9 +116,12 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
             .Options;
 
         using var db = new EliteGaertnerDbContext(options);
-        var matchesDbs = new MatchesDbs(db);
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
+
+        ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
+
+        var matchesDbs = new MatchesDbs(db, loggerFactory.CreateLogger<MatchesDbs>());
+        var profileDbs = new ProfileDbs(db, loggerFactory.CreateLogger<ProfileDbs>());
+        var harvestDbs = new HarvestDbs(db, loggerFactory.CreateLogger<HarvestDbs>());
 
         var receiver = new PrivateProfileDto
         {
@@ -125,7 +132,7 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
             }
         };
 
-        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, loggerFactory);
 
         var uploadId = CreateTestUpload(db, profileId: 1);
 
@@ -152,9 +159,12 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
             .Options;
 
         using var db = new EliteGaertnerDbContext(options);
-        var matchesDbs = new MatchesDbs(db);
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
+
+        ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
+
+        var matchesDbs = new MatchesDbs(db, loggerFactory.CreateLogger<MatchesDbs>());
+        var profileDbs = new ProfileDbs(db, loggerFactory.CreateLogger<ProfileDbs>());
+        var harvestDbs = new HarvestDbs(db, loggerFactory.CreateLogger<HarvestDbs>());
 
         var receiver = new PrivateProfileDto
         {
@@ -165,7 +175,7 @@ public class MatchManagerTest_FromRealDb : IntegrationTestBase
             }
         };
 
-        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver);
+        var manager = new MatchManager(matchesDbs, profileDbs, harvestDbs, receiver, loggerFactory);
 
         var uploadId = CreateTestUpload(db, profileId: 1);
 

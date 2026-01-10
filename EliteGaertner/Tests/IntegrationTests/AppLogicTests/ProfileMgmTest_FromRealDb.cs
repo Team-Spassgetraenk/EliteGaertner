@@ -5,6 +5,8 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.IntegrationTests.AppLogicTests;
@@ -16,6 +18,8 @@ namespace Tests.IntegrationTests.AppLogicTests;
 public class ProfileMgmTest_FromRealDb : IntegrationTestBase
 {
     public TestContext TestContext { get; set; } = null!;
+
+    private static ILoggerFactory LoggerFactory => NullLoggerFactory.Instance;
 
     private static string ConnectionString
     {
@@ -48,9 +52,9 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
     {
         using var db = CreateDb();
 
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new ProfileMgm(profileDbs, harvestDbs);
+        var profileDbs = new ProfileDbs(db, LoggerFactory.CreateLogger<ProfileDbs>());
+        var harvestDbs = new HarvestDbs(db, LoggerFactory.CreateLogger<HarvestDbs>());
+        var sut = new ProfileMgm(profileDbs, harvestDbs, LoggerFactory.CreateLogger<ProfileMgm>());
 
         var result = sut.CheckProfileNameExists("TomatenTiger"); // absichtlich anders geschrieben (Normalisierung)
 
@@ -64,9 +68,9 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
 
         var (profileId, username, _, _) = GetTomatenTiger(db);
 
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new ProfileMgm(profileDbs, harvestDbs);
+        var profileDbs = new ProfileDbs(db, LoggerFactory.CreateLogger<ProfileDbs>());
+        var harvestDbs = new HarvestDbs(db, LoggerFactory.CreateLogger<HarvestDbs>());
+        var sut = new ProfileMgm(profileDbs, harvestDbs, LoggerFactory.CreateLogger<ProfileMgm>());
 
         var result = sut.VisitPublicProfile(profileId);
 
@@ -90,9 +94,9 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
 
         var (profileId, username, email, _) = GetTomatenTiger(db);
 
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new ProfileMgm(profileDbs, harvestDbs);
+        var profileDbs = new ProfileDbs(db, LoggerFactory.CreateLogger<ProfileDbs>());
+        var harvestDbs = new HarvestDbs(db, LoggerFactory.CreateLogger<HarvestDbs>());
+        var sut = new ProfileMgm(profileDbs, harvestDbs, LoggerFactory.CreateLogger<ProfileMgm>());
 
         var result = sut.GetPrivProfile(profileId);
 
@@ -131,9 +135,9 @@ public class ProfileMgmTest_FromRealDb : IntegrationTestBase
         pEntity.Passwordhash = BCrypt.Net.BCrypt.HashPassword(plainPassword);
         db.SaveChanges();
 
-        var profileDbs = new ProfileDbs(db);
-        var harvestDbs = new HarvestDbs(db);
-        var sut = new ProfileMgm(profileDbs, harvestDbs);
+        var profileDbs = new ProfileDbs(db, LoggerFactory.CreateLogger<ProfileDbs>());
+        var harvestDbs = new HarvestDbs(db, LoggerFactory.CreateLogger<HarvestDbs>());
+        var sut = new ProfileMgm(profileDbs, harvestDbs, LoggerFactory.CreateLogger<ProfileMgm>());
 
         var credentials = new CredentialProfileDto
         {

@@ -4,12 +4,14 @@
 @using PresentationLayer.Services
 @using PresentationLayer.Shared
 @using PresentationLayer.State
+@using Microsoft.Extensions.Logging
 
 @inject CurrentProfileState CurrentProfile
 @inject IUploadService UploadService
 @inject IProfileMgm ProfileMgm
 @inject IImageUploadService ImageUploadService
 @inject NavigationManager Nav
+@inject ILogger<ErnteHochladenPrivat> Logger
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -151,6 +153,7 @@
         //Überprüfung
         if (CurrentProfile.LoggedInProfile is null)
         {
+            Logger.LogWarning("ErnteHochladenPrivat: Kein eingeloggtes Profil gefunden. Redirect zu /.");
             Nav.NavigateTo("/");
         }
     }
@@ -163,20 +166,26 @@
         {
             //Nochmal klicken -> abwählen
             _selectedTagIds.Clear();
+            Logger.LogInformation("ErnteHochladenPrivat: Tag abgewählt. TagId={TagId}", tagId);
             return;
         }
 
         // Neues Tag wählen -> alle anderen abwählen
         _selectedTagIds.Clear();
         _selectedTagIds.Add(tagId);
+        Logger.LogInformation("ErnteHochladenPrivat: Tag gewählt. TagId={TagId}", tagId);
     }
 
     private async Task HandleFileSelection(InputFileChangeEventArgs e)
     {
         var file = e.File;
+        Logger.LogDebug("ErnteHochladenPrivat: Datei-Auswahl Event empfangen.");
         
         if (file is null)
+        {
+            Logger.LogWarning("ErnteHochladenPrivat: Keine Datei im InputFileChangeEvent.");
             return;
+        }
 
         try
         {
@@ -184,11 +193,11 @@
             // Rückgabe ist ein relativer Pfad (z.B. "/tempUploads/<guid>.jpg"), den wir direkt rendern können.
             _hochgeladenesBild = await ImageUploadService.SaveImageAsync(file);
 
-            Console.WriteLine($"Bild gespeichert: {_hochgeladenesBild}");
+            Logger.LogInformation("ErnteHochladenPrivat: Bild gespeichert. Pfad={BildPfad} Dateiname={Dateiname} GroesseBytes={Groesse}", _hochgeladenesBild, file.Name, file.Size);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Fehler beim Hochladen: {ex.Message}");
+            Logger.LogError(ex, "ErnteHochladenPrivat: Fehler beim Hochladen. Dateiname={Dateiname} GroesseBytes={Groesse}", file.Name, file.Size);
         }
     }
 
@@ -197,19 +206,29 @@
         //Überprüfung
         if (CurrentProfile.ProfileId is null)
         {
+            Logger.LogWarning("ErnteHochladenPrivat: ProfileId ist null. Redirect zu /.");
             Nav.NavigateTo("/");
             return;
         }
         //Tags + Bild müssen da sein
         if (string.IsNullOrWhiteSpace(_hochgeladenesBild) || _selectedTagIds.Count == 0)
+        {
+            Logger.LogDebug("ErnteHochladenPrivat: Validierung fehlgeschlagen (Bild/Tag). BildLeer={BildLeer} TagCount={TagCount}", string.IsNullOrWhiteSpace(_hochgeladenesBild), _selectedTagIds.Count);
             return;
+        }
         
         //Beschreibung (Kommentar) muss vorhanden sein
         if (string.IsNullOrWhiteSpace(Kommentar))
+        {
+            Logger.LogDebug("ErnteHochladenPrivat: Validierung fehlgeschlagen (Kommentar leer)." );
             return;
+        }
         //Gewicht, Breite, Länge müssen da sein
         if (Gewicht is null || Laenge is null || Breite is null)
+        {
+            Logger.LogDebug("ErnteHochladenPrivat: Validierung fehlgeschlagen (Parameter null). GewichtNull={GewichtNull} LaengeNull={LaengeNull} BreiteNull={BreiteNull}", Gewicht is null, Laenge is null, Breite is null);
             return;
+        }
 
         var harvestUpload = new HarvestUploadDto
         {
@@ -225,18 +244,20 @@
 
         try
         {
+            Logger.LogInformation("ErnteHochladenPrivat: HarvestUpload wird erstellt. ProfileId={ProfileId} TagIds={TagIds} Gewicht={Gewicht} Laenge={Laenge} Breite={Breite} BildPfad={BildPfad}", harvestUpload.ProfileId, string.Join(",", harvestUpload.TagIds ?? new List<int>()), harvestUpload.WeightGram, harvestUpload.LengthCm, harvestUpload.WidthCm, harvestUpload.ImageUrl);
             UploadService.CreateHarvestUpload(harvestUpload);
 
             // State aktualisieren, damit neues Bild sofort sichtbar ist
             CurrentProfile.RefreshProfile(ProfileMgm);
+            Logger.LogInformation("ErnteHochladenPrivat: State refresh durchgeführt. Navigiere zu /EigenesUserProfil.");
 
             // Zur Profilseite zurück
             Nav.NavigateTo("/EigenesUserProfil");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("VeröffentlichenAsync failed:");
-            Console.WriteLine(ex);
+            //VeröffentlichenAsync failed:
+            Logger.LogError(ex, "ErnteHochladenPrivat: VeröffentlichenAsync failed.");
         }
     }
 }

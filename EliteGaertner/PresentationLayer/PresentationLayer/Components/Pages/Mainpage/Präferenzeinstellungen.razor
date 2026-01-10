@@ -7,7 +7,9 @@
 @inject CurrentProfileState CurrentProfile
 @inject PreferenceState Preference
 @inject IProfileMgm ProfileMgm
+
 @inject NavigationManager Nav
+@inject ILogger<Präferenzeinstellungen> Logger
 
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -74,15 +76,28 @@
         //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
         if (CurrentProfile.LoggedInProfile is null)
         {
+            Logger.LogWarning("Preferences page opened without logged-in profile. Redirecting to /");
             Nav.NavigateTo("/");
             return;
         }
-        
+
+        Logger.LogInformation(
+            "Preferences page initialized for ProfileId {ProfileId}. Existing preference count: {Count}",
+            CurrentProfile.ProfileId,
+            CurrentProfile.PreferenceDtos?.Count ?? 0
+        );
+
         CurrentProfile.Onchange += StateHasChanged;
-        
+
         //Initialisiert die TagId Liste in PreferenceState
         //Falls PreferenceDto is null -> Leere Liste übergeben
         Preference.InitializeCurrentProfileTagIds(CurrentProfile.PreferenceDtos ?? Array.Empty<PreferenceDto>());
+
+        Logger.LogDebug(
+            "PreferenceState initialized with {SelectedCount} selected tags for ProfileId {ProfileId}",
+            Preference.CurrentProfileTagIds.Count,
+            CurrentProfile.ProfileId
+        );
     }
     
     void Speichern()
@@ -90,22 +105,48 @@
         //Überprüft ob ProfileId null ist
         if (CurrentProfile.ProfileId is null)
         {
+            Logger.LogWarning("Preferences save attempted but ProfileId is null. Redirecting to /");
             //Falls ja, Zurück zur Login Seite 
             Nav.NavigateTo("/");
             return;
         }
-        
-        //Speichern der neuen Preferences
-        ProfileMgm.SetPreference(
-            //Die Preference HashSet muss erstmal wieder in DTOS gepackt werden
-            Preference.CreatePreferenceDtos(CurrentProfile.ProfileId.Value)
+
+        var profileId = CurrentProfile.ProfileId.Value;
+        var selectedTagIds = Preference.CurrentProfileTagIds.OrderBy(x => x).ToArray();
+
+        Logger.LogInformation(
+            "Saving preferences for ProfileId {ProfileId}. SelectedTagCount={Count}. SelectedTagIds={TagIds}",
+            profileId,
+            selectedTagIds.Length,
+            selectedTagIds
+        );
+
+        try
+        {
+            //Speichern der neuen Preferences
+            ProfileMgm.SetPreference(
+                //Die Preference HashSet muss erstmal wieder in DTOS gepackt werden
+                Preference.CreatePreferenceDtos(profileId)
             );
-        
-        CurrentProfile.RefreshProfile(ProfileMgm);
-        
-        Dispose();
-        //Zurück zu Startseite
-        Nav.NavigateTo("/startseite");
+
+            Logger.LogInformation("Preferences saved successfully for ProfileId {ProfileId}. Refreshing profile...", profileId);
+
+            CurrentProfile.RefreshProfile(ProfileMgm);
+
+            Logger.LogInformation(
+                "Profile refreshed after preference save for ProfileId {ProfileId}. Navigating to /startseite",
+                profileId
+            );
+
+            Dispose();
+            
+            //Zurück zu Startseite
+            Nav.NavigateTo("/startseite");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error while saving preferences for ProfileId {ProfileId}", profileId);
+        }
     }
     
     private void Dispose()

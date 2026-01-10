@@ -6,6 +6,8 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 using Contracts.Enumeration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.UnitTests.AppLogicTests;
 
@@ -41,7 +43,9 @@ public class ProfileSuggestionTests
             harvestDbs,
             receiverId,
             tagIds: new List<int> { 1, 2 },
-            preloadCount: 10
+            preloadCount: 10,
+            logger: NullLogger<ProfileSuggestion>.Instance,
+            harvestLogger: NullLogger<HarvestSuggestion>.Instance
         );
 
         // Act
@@ -94,9 +98,6 @@ public class ProfileSuggestionTests
 
         public MatchesDbsFake(IEnumerable<(int receiver, int creator)> ratedPairs)
             => _ratedPairs = ratedPairs.ToHashSet();
-
-        public bool ProfileAlreadyRated(int profileIdReceiver, int profileIdCreator)
-            => _ratedPairs.Contains((profileIdReceiver, profileIdCreator));
 
         public HashSet<int> GetAlreadyRatedProfileIds(int profileIdReceiver)
             => _ratedPairs

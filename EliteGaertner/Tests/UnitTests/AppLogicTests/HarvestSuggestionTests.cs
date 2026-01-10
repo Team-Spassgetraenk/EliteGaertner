@@ -5,6 +5,8 @@ using AppLogic.Services;
 using Contracts.Data_Transfer_Objects;
 using Contracts.Enumeration;
 using DataManagement.Interfaces;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.VisualStudio.TestPlatform.Common.ExtensionFramework;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests.UnitTests.AppLogicTests;
@@ -71,9 +73,16 @@ public class HarvestSuggestionTests
         var tagIds = new List<int> { 3, 6, 9 };
         var alreadyRatedProfiles = new HashSet<int> { 111, 222 };
         var preloadCount = 10;
-
+        
         // Act
-        var sut = new HarvestSuggestion(fakeRepo, profileId, tagIds, alreadyRatedProfiles, preloadCount);
+        var sut = new HarvestSuggestion(
+            NullLogger<HarvestSuggestion>.Instance,
+            fakeRepo,
+            profileId,
+            tagIds,
+            alreadyRatedProfiles,
+            preloadCount
+        );
         var result = sut.GetHarvestSuggestionList();
 
         // Assert
@@ -94,7 +103,14 @@ public class HarvestSuggestionTests
         var fakeRepo = new HarvestDbsFake(Array.Empty<HarvestUploadDto>());
 
         // Act
-        var sut = new HarvestSuggestion(fakeRepo, 1, new List<int> { 3 }, new HashSet<int>(), 10);
+        var sut = new HarvestSuggestion(
+            NullLogger<HarvestSuggestion>.Instance,
+            fakeRepo,
+            1,
+            new List<int> { 3 },
+            new HashSet<int>(),
+            10
+        );
         var result = sut.GetHarvestSuggestionList();
 
         // Assert

@@ -10,6 +10,7 @@ namespace Tests.UnitTests.AppLogicTests;
 
 //Komplett von ChatGPT erstellt!!
 [TestClass]
+[TestCategory("Unit")]
 public class LeaderboardServiceTests
 {
     private sealed class FakeLeaderBoardDbs : ILeaderBoardDbs

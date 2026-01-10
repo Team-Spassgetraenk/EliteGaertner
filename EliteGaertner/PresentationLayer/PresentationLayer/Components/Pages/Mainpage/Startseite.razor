@@ -5,6 +5,7 @@
 @using PresentationLayer.State
 @using PresentationLayer.Shared
 @using System.Timers
+@using Microsoft.Extensions.Logging
 @using PresentationLayer.Services
 @inject CurrentProfileState CurrentProfile
 @inject SessionService Session
@@ -13,6 +14,8 @@
 @inject IProfileDbs ProfileDbs
 @inject IJSRuntime JS
 @inject NavigationManager Nav
+@inject ILogger<Startseite> Logger
+@inject ILoggerFactory LoggerFactory
 @implements IDisposable
 
 
@@ -325,30 +328,33 @@
     // ----------------------------
     protected override void OnInitialized()
     {
+        Logger.LogInformation("Startseite initialized.");
         //Überprüfung
         //Wenn kein Profil im CurrentProfileState -> zurück zur Startseite
         if (CurrentProfile.LoggedInProfile is null)
         {
-            
+            Logger.LogWarning("Startseite accessed without logged-in profile. Redirecting to login.");
             Nav.NavigateTo("/");
             return;
         }
         
         //Rückgabe welcher User eingeloggt ist
         _loggedInUserName = "@" + CurrentProfile.UserName;
+        Logger.LogInformation("Logged-in user loaded: {UserName} (ProfileId={ProfileId}).", CurrentProfile.UserName, CurrentProfile.ProfileId);
+        
+        
+        Logger.LogDebug("Matches: Übergabe von LoggerFactory an MatchManager.");
         
         //MatchManager wird initialisiert
-        _matchManager = new MatchManager(
-            MatchesDbs,
-            ProfileDbs,
-            HarvestDbs,
-            CurrentProfile.LoggedInProfile
-        );
+        _matchManager = new MatchManager(MatchesDbs, ProfileDbs, HarvestDbs, CurrentProfile.LoggedInProfile, LoggerFactory);
+        Logger.LogDebug("MatchManager created.");
         
         _matchManager.CreateMatch += OnMatchCreated;
+        Logger.LogDebug("Subscribed to MatchManager.CreateMatch event.");
         
         //Erste Suggestion laden
         TryLoadNextSuggestion();
+        Logger.LogDebug("Initial suggestion load triggered.");
         
         //Hier wird der WerbeBlock abgehandelt
         _currentAdImage = _adImages[0];
@@ -362,20 +368,25 @@
         _adTimer.Elapsed += _adTimerElapsedHandler;
         _adTimer.AutoReset = true;
         _adTimer.Enabled = true;
+        Logger.LogDebug("Ad timer started. IntervalMs={IntervalMs}", _adTimer.Interval);
     }
     
     //Falls Seite verlassen wird
     public void Dispose()
     {
+        Logger.LogInformation("Startseite disposed.");
         //-> Create Match Subscription beenden
         if (_matchManager is not null)
+        {
             _matchManager.CreateMatch -= OnMatchCreated;
+            Logger.LogDebug("Unsubscribed from MatchManager.CreateMatch event.");
+        }
         
         //-> AdTimer beenden
         if (_adTimer is not null)
         {
             _adTimer.Stop();
-
+            Logger.LogDebug("Ad timer stopped.");
             if (_adTimerElapsedHandler is not null)
                 _adTimer.Elapsed -= _adTimerElapsedHandler;
 
@@ -394,15 +405,20 @@
     private int CurrentMatchesCount()
     {
         if (_matchManager is null)
+        {
+            Logger.LogDebug("CurrentMatchesCount called but MatchManager is null.");
             return 0;
+        }
         
         _matchCount = _matchManager.GetActiveMatches().Count;
+        Logger.LogDebug("Current match count resolved: {MatchCount}", _matchCount);
         return _matchCount;
     }
     
     //Subscription auf MatchManager Event: wird aufgerufen, sobald ein neuer Match entsteht
     private void OnMatchCreated(PublicProfileDto matchProfile)
     {
+        Logger.LogInformation("Match created event received. MatchedProfileId={MatchedProfileId} MatchedUserName={MatchedUserName}", matchProfile.ProfileId, matchProfile.UserName);
         _ = EnqueueAndShowMatchAsync(matchProfile);
     }
     
@@ -414,6 +430,7 @@
         lock (_matchQueueLock)
         {
             _pendingMatches.Enqueue(matchProfile);
+            Logger.LogDebug("Match enqueued. QueueSize={QueueSize}", _pendingMatches.Count);
 
             //Wenn gerade kein Match-Overlay läuft, starten wir die Anzeige
             if (!_isShowingMatch)
@@ -439,6 +456,7 @@
         {
             next = _pendingMatches.Count > 0 ? _pendingMatches.Dequeue() : null;
         }
+        Logger.LogDebug("ShowNextMatchOverlayAsync called. NextIsNull={NextIsNull}", next is null);
 
         if (next is null)
         {
@@ -447,13 +465,14 @@
             {
                 _isShowingMatch = false;
             }
-
+            Logger.LogDebug("No pending matches left. Closing overlay.");
             _showMatchOverlay = false;
             await InvokeAsync(StateHasChanged);
             return;
         }
 
         _matchedUser = next;
+        Logger.LogInformation("Showing match overlay for ProfileId={ProfileId} UserName={UserName}", next.ProfileId, next.UserName);
 
         //Sorgt dafür dass die Konfetti Animation immer abgespielt wird
         _confettiKey++;
@@ -478,14 +497,21 @@
     {
         //Sperre, wenn Animation läuft ODER Match-Overlay offen ist
         if (_isAnimating || _showMatchOverlay)
+        {
+            Logger.LogDebug("Swipe ignored. IsAnimating={IsAnimating} ShowMatchOverlay={ShowMatchOverlay}", _isAnimating, _showMatchOverlay);
             return;
+        }
         
         //Keine Karte vorhanden
         if (_matchManager is null || _currentSuggestion is null || _currentHarvest is null)
+        {
+            Logger.LogWarning("Swipe ignored due to missing state. MatchManagerNull={MatchManagerNull} CurrentSuggestionNull={CurrentSuggestionNull} CurrentHarvestNull={CurrentHarvestNull}", _matchManager is null, _currentSuggestion is null, _currentHarvest is null);
             return;
+        }
         
         //Muss true sein, damit Animation überhaupt möglich werden
         _isAnimating = true;
+        Logger.LogInformation("Swipe started. Like={Like} SuggestedCreatorProfileId={CreatorProfileId} SuggestedCreatorUserName={CreatorUserName}", like, _currentSuggestion.Value.Creator.ProfileId, _currentSuggestion.Value.Creator.UserName);
 
         //Falls der try Block nicht funktioniert -> isAnimating immer sicher zurücksetzen lassen
         //Sonst friert UI ein
@@ -521,7 +547,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.LogError(ex, "Swipe failed. Like={Like}", like);
         }
         finally
         {
@@ -578,20 +604,33 @@
         //Überprüfungen
         // Sperre, wenn Animation läuft oder Match-Overlay offen ist
         if (_isAnimating || _showMatchOverlay)
+        {
+            Logger.LogDebug("Report ignored. IsAnimating={IsAnimating} ShowMatchOverlay={ShowMatchOverlay}", _isAnimating, _showMatchOverlay);
             return;
+        }
         //MatchManager initialisiert?
         if (_matchManager is null)
+        {
+            Logger.LogWarning("Report ignored because MatchManager is null.");
             return;
+        }
         //Vorschläge vorhanden?
         if (_currentSuggestion is null)
+        {
+            Logger.LogWarning("Report ignored because current suggestion is null.");
             return;
+        }
         //Überprüft, ob _selectedReportReason einen gültigen Enum Wert besitzt
         //Falls ja -> Enum wird in reason abgespeichert 
         if (_selectedReportReason is not ReportReasons reason)
+        {
+            Logger.LogDebug("Report ignored because no reason selected.");
             return;
+        }
         
         //UI sperren damit keine parallelen Klicks registirert werden
         _isAnimating = true;
+        Logger.LogInformation("Reporting harvest upload. UploadId={UploadId} Reason={Reason} CreatorProfileId={CreatorProfileId} CreatorUserName={CreatorUserName}", _currentSuggestion.Value.Harvest.UploadId, reason, _currentSuggestion.Value.Creator.ProfileId, _currentSuggestion.Value.Creator.UserName);
 
         try
         {
@@ -654,7 +693,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Logger.LogError(ex, "ReportProfile failed.");
             _animationClass = "";
             StateHasChanged();
         }
@@ -693,14 +732,17 @@
         
         //Gib mir den ersten Eintrag aus der Vorschlagsliste zurück
         var next = _matchManager.GetNextSuggestion();
-        
-        Console.WriteLine($"Harvest UploadId: {next.Value.harvest.UploadId}");
-        Console.WriteLine($"TagIds: {(next.Value.harvest.TagIds is null ? "NULL" : string.Join(",", next.Value.harvest.TagIds))}");
+        Logger.LogDebug("Next suggestion fetched. IsNull={IsNull}", next is null);
+        if (next is not null)
+        {
+            Logger.LogDebug("Harvest UploadId={UploadId} TagIds={TagIds}", next.Value.harvest.UploadId, next.Value.harvest.TagIds is null ? "NULL" : string.Join(",", next.Value.harvest.TagIds));
+        }
         
         //Falls Vorschlagsliste leeren Key zurückgibt -> 
         //Zeigt die "Keine Vorschläge" Karte an
         if (next is null)
         {
+            Logger.LogInformation("No more suggestions available. Loading empty suggestion.");
             LoadEmptySuggestion();
             return;
         }
@@ -730,6 +772,7 @@
 
         //Blazor weiß damit, dass hier ein neues Dom Element gerendert werden soll
         _cardKey++;
+        Logger.LogDebug("Suggestion rendered. CardKey={CardKey}", _cardKey);
     }
     
     private void TryLoadNextSuggestion()
@@ -740,8 +783,7 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Startseite LoadNextSuggestion crashed:");
-            Console.WriteLine(ex);
+            Logger.LogError(ex, "Startseite LoadNextSuggestion crashed.");
             LoadEmptySuggestion();
             StateHasChanged(); // optional, aber hilft sofort UI zu aktualisieren
         }
@@ -749,6 +791,7 @@
     
     private void LoadEmptySuggestion()
     {
+        Logger.LogDebug("Loading empty suggestion.");
         _currentSuggestion = null;
         _currentHarvest = null;
         _cardKey++;
@@ -801,7 +844,7 @@
 
     private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
     private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
-    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
+    private void GoToRanks() => Nav.NavigateTo("/Rangliste");
     private void GoToMatches() => Nav.NavigateTo("/matches");
     private void GoToMainpage() => Nav.NavigateTo("/startseite");
     private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");

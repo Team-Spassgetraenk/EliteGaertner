@@ -3,11 +3,13 @@ using Contracts.Data_Transfer_Objects;
 using DataManagement.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 using AppLogic.Services;
 
 namespace Tests.UnitTests.AppLogicTests;
 
 [TestClass]
+[TestCategory("Unit")]
 public class UploadServiceImplTests
 {
     private Mock<IHarvestDbs> _mockHarvestDbs = null!;
@@ -17,7 +19,7 @@ public class UploadServiceImplTests
     public void TestInitialize()
     {
         _mockHarvestDbs = new Mock<IHarvestDbs>(MockBehavior.Strict);
-        _uploadService = new UploadServiceImpl(_mockHarvestDbs.Object);
+        _uploadService = new UploadServiceImpl(_mockHarvestDbs.Object, NullLogger<UploadServiceImpl>.Instance);
     }
 
     [TestMethod]

@@ -4,12 +4,16 @@
 @using DataManagement.Interfaces
 @using PresentationLayer.Services
 @using PresentationLayer.State
+@using Contracts.Data_Transfer_Objects
+@using Microsoft.Extensions.Logging
 @inject CurrentProfileState CurrentProfile
 @inject IHarvestDbs HarvestDbs
 @inject IMatchesDbs MatchesDbs
 @inject IProfileDbs ProfileDbs
 @inject SessionService Session
 @inject NavigationManager Nav
+@inject ILogger<Matches> Logger
+@inject ILoggerFactory LoggerFactory
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
@@ -95,19 +99,24 @@
     
     protected override void OnInitialized()
     {
+        Logger.LogInformation("Matches: OnInitialized gestartet.");
         //Überprüfung
         if (CurrentProfile.LoggedInProfile is null)
         {
+            Logger.LogWarning("Matches: Kein eingeloggtes Profil gefunden -> Navigation zur Login-Seite.");
             Nav.NavigateTo("/");
             return;
         }
 
-        _matchManager = new MatchManager(MatchesDbs, ProfileDbs, HarvestDbs, CurrentProfile.LoggedInProfile);
-
+        Logger.LogInformation("Matches: Initialisiere MatchManager für ProfileId={ProfileId} UserName={UserName}.", CurrentProfile.ProfileId, CurrentProfile.UserName);
+        Logger.LogDebug("Matches: Übergabe von LoggerFactory an MatchManager.");
+        _matchManager = new MatchManager(MatchesDbs, ProfileDbs, HarvestDbs, CurrentProfile.LoggedInProfile, LoggerFactory);
 
         var matchDtos = _matchManager.GetActiveMatches();
+        var matchDtoList = matchDtos?.ToList() ?? new List<PublicProfileDto>();
+        Logger.LogInformation("Matches: {Count} aktive Matches aus AppLogic geladen.", matchDtoList.Count);
 
-        foreach (var dto in matchDtos)
+        foreach (var dto in matchDtoList)
         {
             _matches.Add(new UserMatch
             {
@@ -117,7 +126,9 @@
                 Phone = dto.Phonenumber,
                 Email = dto.EMail
             });
+            Logger.LogDebug("Matches: Match hinzugefügt -> ProfileId={MatchProfileId} UserName={MatchUserName}.", dto.ProfileId, dto.UserName);
         }
+        Logger.LogInformation("Matches: UI-Liste aufgebaut. _matches.Count={Count}.", _matches.Count);
     }
 
     public record UserMatch
@@ -133,12 +144,28 @@
     private void ToggleLogoutMenu()
     {
         _showLogout = !_showLogout;
+        Logger.LogDebug("Matches: Logout-Menü toggled -> ShowLogout={ShowLogout}.", _showLogout);
     }
     
     //Navigation
-    
-    private void GoToRanks() => Nav.NavigateTo("/RanglisteTest");
-    private void GoToMatches() => Nav.NavigateTo("/matches");
-    private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
+    private void GoToRanks()
+    {
+        Logger.LogInformation("Matches: Navigation -> RanglisteTest.");
+        Nav.NavigateTo("/Rangliste");
+    }
+    private void GoToMatches()
+    {
+        Logger.LogInformation("Matches: Navigation -> Matches.");
+        Nav.NavigateTo("/matches");
+    }
+    private void GoToMainpage()
+    {
+        Logger.LogInformation("Matches: Navigation -> Startseite.");
+        Nav.NavigateTo("/startseite");
+    }
+    private void GoToProfile()
+    {
+        Logger.LogInformation("Matches: Navigation -> EigenesUserProfil.");
+        Nav.NavigateTo("/EigenesUserProfil");
+    }
 }
