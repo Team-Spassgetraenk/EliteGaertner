@@ -15,6 +15,11 @@
         
 
         <div class="login-card">
+            
+            @* Info Icon *@
+            <div class="info-icon" @onclick="GoToUeberUns" title="Über EliteGärtner">
+                i
+            </div>
 
             <div class="logo-container">
                 <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo"/>
@@ -47,7 +52,7 @@
             {
                 <p class="error-message">@_errorMessage</p>
             }
-            
+
             <div class="register-text">
                 <p>Ich habe noch keinen Account?</p>
                 <a href="/registrierung" class="register-link">Jetzt registrieren</a>
@@ -133,4 +138,12 @@
             _errorMessage = "Technischer Fehler beim Login.";
         }
     }
+    
+    //Navigation
+    private void GoToUeberUns()
+    {
+        Logger.LogInformation("Login: Navigation -> Ueber-uns-Login.");
+        Nav.NavigateTo("/ueber-uns-login");
+    }
+    
 }
