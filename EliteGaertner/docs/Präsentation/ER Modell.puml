@@ -1,0 +1,109 @@
+@startuml
+' ER / DB-Style
+hide circle
+skinparam linetype ortho
+
+skinparam nodesep 160
+skinparam ranksep 200
+
+' =====================
+' ENTITIES
+' =====================
+
+entity "PROFILE" as Profile #E3F2FD {
+  *ProfileId : int <<PK>>
+  --
+  ProfilePictureUrl : text
+  UserName : text
+  FirstName : text
+  LastName : text
+  EMail : text
+  PasswordHash : text
+  PhoneNumber : text
+  ProfileText : text
+  ShareMail : boolean
+  SharePhoneNumber : boolean
+  UserCreated : timestamptz
+}
+
+entity "HARVESTUPLOADS" as HarvestUploads #F8BBD0 {
+  *UploadId : int <<PK>>
+  --
+  ImageUrl : text
+  Description : text
+  WeightGramm : real
+  WidthCm : real
+  LengthCm : real
+  UploadDate : timestamptz
+  ProfileId : int <<FK>>
+}
+
+entity "TAGS" as Tags #FFE0B2 {
+  *TagId : int <<PK>>
+  --
+  Label : text
+}
+
+entity "REPORT" as Report #FFF9C4 {
+  *ReportId : int <<PK>>
+  --
+  Reason : text
+  ReportDate : timestamptz
+  UploadId : int <<FK>>
+}
+
+' =====================
+' M:N JOIN TABLES
+' =====================
+
+entity "HARVESTTAGS" as HarvestTags #F8BBD0 {
+  *TagId : int <<PK,FK>>
+  *UploadId : int <<PK,FK>>
+}
+
+entity "PROFILEPREFERENCES" as ProfilePreferences #E3F2FD {
+  *TagId : int <<PK,FK>>
+  *ProfileId : int <<PK,FK>>
+  --
+  DateUpdated : timestamptz
+}
+
+' =====================
+' RATING (Self-Relationship)
+' =====================
+
+entity "RATING" as Rating #DDFFDD {
+  *ContentReceiverId : int <<PK,FK>>
+  *ContentCreatorId : int <<PK,FK>>
+  --
+  ProfileRating : boolean
+  RatingDate : timestamptz
+}
+
+Profile -[hidden]-> HarvestUploads
+
+
+
+' =====================
+' RELATIONSHIPS
+' =====================
+
+' Profile 1 ---- n HarvestUpload
+Profile "1" -- "n" HarvestUploads : hat
+
+' HarvestUpload 1 ---- n Report
+HarvestUploads "1" -- "n" Report : hat
+
+' HarvestUpload m ---- n Tag (über Join)
+HarvestUploads "1" -- "n" HarvestTags
+Tags "1" -- "n" HarvestTags
+
+' Profile m ---- n Tag (Preferences über Join)
+Profile "1" -- "n" ProfilePreferences
+Tags "1" -- "n" ProfilePreferences
+
+' Rating: Profile bewertet Profile (zwei Rollen)
+Profile "1" -- "n" Rating : ContentCreator
+Profile "1" -- "n" Rating : ContentReceiver
+
+@enduml

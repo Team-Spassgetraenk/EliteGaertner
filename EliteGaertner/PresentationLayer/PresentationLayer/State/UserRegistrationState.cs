@@ -1,9 +1,6 @@
 namespace PresentationLayer.State;
 
-/// <summary>
-/// Hält den kompletten Registrierungszustand über mehrere Seiten hinweg.
-/// Wird erst am Ende in DTOs gemappt und persistiert.
-/// </summary>
+//Hält den kompletten Registrierungszustand über mehrere Seiten hinweg. Wird erst am Ende in DTOs gemappt und persistiert.
 public sealed class UserRegistrationState
 {
     //Seite ProfilDatenRegistrierung

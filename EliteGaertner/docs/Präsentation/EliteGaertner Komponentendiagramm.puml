@@ -1,19 +1,19 @@
 @startuml
-left to right direction
+top to bottom direction
 skinparam componentStyle rectangle
 
-package "PresentationLayer" {
+package "PresentationLayer" #DDDDFF {
   [Blazor Pages/Components] as UI
   [State/Session/Shared] as State
 }
 
-package "AppLogic" {
-    [IHarvestSuggestion] as IHarvestSuggestion
-    [ILeaderBoardService] as ILeaderBoardService
-    [IMatchManager] as IMatchManager
-    [IProfileMgm] as IProfileMgm 
-    [IProfileSuggestion] as IProfileSuggestion
-    [IUploadService] as IUploadService 
+package "AppLogic" #DDFFDD {
+    interface IHarvestSuggestion
+    interface ILeaderBoardService
+    interface IMatchManager
+    interface IProfileMgm
+    interface IProfileSuggestion
+    interface IUploadService 
     [MatchManager] as MatchManager 
     [ProfileSuggestion] as ProfileSuggestion 
     [HarvestSuggestion] as HarvestSuggestion
@@ -22,11 +22,11 @@ package "AppLogic" {
     [LeaderBoardService] as LeaderBoardService 
 }
 
-package "DataManagement" {
-    [ILeaderBoardDbs] as ILeaderBoardDbs
-    [IMatchesDbs] as IMatchesDbs
-    [IHarvestDbs] as IHarvestDbs
-    [IProfileDbs] as IProfileDbs
+package "DataManagement" #CCEEFF{
+    interface ILeaderBoardDbs
+    interface IMatchesDbs
+    interface IHarvestDbs
+    interface IProfileDbs
     [ProfileDbs] as ProfileDbs
     [HarvestDbs] as HarvestDbs
     [MatchesDbs] as MatchesDbs
@@ -36,20 +36,20 @@ package "DataManagement" {
 
 
 
-package "Contracts" {
+package "Contracts" #FFF9C4 {
     [DTOs] as DTOs
     [Enums] as Enums
 }
 
 
-package "PostgreSQL Docker Container"{
-    [Seed] as Seed
-    [Test-Seed] as TestSeed 
+package "PostgreSQL Docker Container" #F8BBD0 {
+    [Seed + Schema] as Seed
+    [Test-Seed + Schema] as TestSeed 
     database "Produktiv-Datenbank" as PD
     database "Test-Datenbank" as TD 
 }
 
-package "Tests"{
+package "Tests" #FFE0B2{
     [UnitTests] as UnitTests 
     [IntegrationsTests] as IT
 }
@@ -73,6 +73,8 @@ IHarvestSuggestion --> HarvestSuggestion
 MatchManager --> IHarvestDbs
 MatchManager --> IProfileDbs
 MatchManager --> IMatchesDbs
+MatchManager -> ProfileSuggestion
+ProfileSuggestion -> HarvestSuggestion
 HarvestSuggestion --> IHarvestDbs
 ProfileSuggestion --> IHarvestDbs 
 ProfileSuggestion --> IProfileDbs 

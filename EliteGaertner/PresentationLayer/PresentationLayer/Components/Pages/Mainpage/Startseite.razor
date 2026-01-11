@@ -421,7 +421,7 @@
         _ = EnqueueAndShowMatchAsync(matchProfile);
     }
     
-    //Implementierung der Match Anzeigen Logik, sodass mehrere Matches hintereinander angezeigt werden können
+    //Regelt die Queue der Match "anzeigen" Logik
     private async Task EnqueueAndShowMatchAsync(PublicProfileDto matchProfile)
     {
         bool shouldStartShowing = false;
@@ -446,17 +446,19 @@
     }
 
     
-    //TODO KOMMENTARE FEHLEN
+    //Regelt die Queue Logik der neuen Active Matches
     private async Task ShowNextMatchOverlayAsync()
     {
         PublicProfileDto? next;
 
+        //Holt das Nächste Match aus der Pending Matches Liste
         lock (_matchQueueLock)
         {
             next = _pendingMatches.Count > 0 ? _pendingMatches.Dequeue() : null;
         }
         Logger.LogDebug("ShowNextMatchOverlayAsync called. NextIsNull={NextIsNull}", next is null);
 
+        //Queue leer?
         if (next is null)
         {
             //Queue leer -> wir sind fertig
@@ -470,6 +472,7 @@
             return;
         }
 
+        //Queue nicht leer? -> Nächstes Match abspielen
         _matchedUser = next;
         Logger.LogInformation("Showing match overlay for ProfileId={ProfileId} UserName={UserName}", next.ProfileId, next.UserName);
 
@@ -481,6 +484,13 @@
 
         await PlayMatchSound();
         await InvokeAsync(StateHasChanged);
+    }
+    
+    private async Task CloseMatchOverlay()
+    {
+        // Wenn noch weitere neue Matches warten, zeigen wir direkt das nächste Overlay.
+        // Sonst schließen wir komplett.
+        await ShowNextMatchOverlayAsync();
     }
     
     private async Task PlayMatchSound()
@@ -553,13 +563,6 @@
             //Animationen sollen nicht mehr möglich sein
             _isAnimating = false;  
         }
-    }
-
-    private async Task CloseMatchOverlay()
-    {
-        // Wenn noch weitere neue Matches warten, zeigen wir direkt das nächste Overlay.
-        // Sonst schließen wir komplett.
-        await ShowNextMatchOverlayAsync();
     }
 
     // ----------------------------
