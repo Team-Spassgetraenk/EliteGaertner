@@ -4,9 +4,12 @@
 @using AppLogic.Interfaces
 @using PresentationLayer.State
 @using PresentationLayer.Shared
+@using PresentationLayer.Services
+
 @inject CurrentProfileState CurrentProfile
 @inject PreferenceState Preference
 @inject IProfileMgm ProfileMgm
+@inject SessionService Session
 
 @inject NavigationManager Nav
 @inject ILogger<Präferenzeinstellungen> Logger
@@ -14,20 +17,58 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<div class="register-page-container">
+
+<div class="page-container background-style">
+    <header class="top-bar">
+        @* Linke Seite *@
+        <div class="icon-wrapper left"
+             style="display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.5rem;"
+             @onclick="GoBackToProfile">
+            <i class="bi bi-chevron-left"></i>
+            <span>Zurück</span>
+        </div>
+
+        @* Mitte (wird durch CSS absolut zentriert) *@
+        <h1 class="page-title">Präferenzeinstellungen</h1>
+
+        @* Rechte Seite *@
+        <div class="header-right-group" style="display: flex; align-items: center; gap: 20px;">
+            @if (!string.IsNullOrEmpty(CurrentProfile.UserName))
+            {
+                <span class="logged-in-user" style="font-weight: bold; font-size: 1.5rem;">
+                    👤 @($"@{CurrentProfile.UserName}")
+                </span>
+            }
+            <div class="menu-icon-container" @onclick="ToggleLogoutMenu">
+                <span class="menu-icon">☰</span>
+            </div>
+        </div>
+    </header>
+    
+    @if (_showLogout)
+    {
+        <div class="logout-menu admin-menu-ext">
+            <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>  
+            <div class="admin-header" @onclick="NavigateToAboutUs">
+                <span>ℹ️ Über uns</span>
+            </div>
+        </div>
+    }
+    
     <div class="login-center">
 
         <div class="register-card">
 
             <div class="logo-container">
-                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo" />
+                <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner Logo" class="app-logo"/>
                 @* über die CSS-Klasse elitegaertner-title definiert *@
                 <h2 class="elitegaertner-title mt-2">EliteGärtner.</h2>
             </div>
-            
-            <h3 class="register-title">Präferenzeinstellungen</h3>
-            
+
+            <h3 class="register-title">Wähle deine Interessen</h3>
+
             <h4 class="tag-headline">Gemüse</h4>
             <div class="tag-grid">
                 @foreach (var tag in TagCatalog.Gemuese)
@@ -53,12 +94,12 @@
             </div>
 
             <button class="app-button primary-button weiter-button"
-                    disabled="@( !Preference.CurrentProfileTagIds.Any() )"
+                    disabled="@(!Preference.CurrentProfileTagIds.Any())"
                     @onclick="Speichern">
                 Speichern
             </button>
-            
-            @if ( !Preference.CurrentProfileTagIds.Any() )
+
+            @if (!Preference.CurrentProfileTagIds.Any())
             {
                 <p class="disabled-hint">Bitte mindestens ein Tag auswählen.</p>
             }
@@ -69,6 +110,13 @@
 </div>
 
 @code {
+
+    // ----------------------------
+    // UI State
+    // ----------------------------
+    private string _loggedInUserName = "";
+
+    private bool _showLogout = false;
     
     protected override void OnInitialized()
     {
@@ -152,5 +200,24 @@
     private void Dispose()
     {
         CurrentProfile.Onchange -= StateHasChanged;
+    }
+    
+    //Aktionen
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        Logger.LogDebug("Präferenzeinstellungen: ToggleLogoutMenu -> ShowLogout={ShowLogout}.", _showLogout);
+    }
+
+    //Navigation
+    private void GoBackToProfile()
+    {
+        Logger.LogInformation("Präferenzeinstellungen: Navigation -> Startseite.");
+        Nav.NavigateTo("/startseite");
+    }
+    private void NavigateToAboutUs()
+    {
+        Logger.LogInformation("Präferenzeinstellungen: Navigation -> Ueber-Uns.");
+        Nav.NavigateTo("/ueber-uns");
     }
 }

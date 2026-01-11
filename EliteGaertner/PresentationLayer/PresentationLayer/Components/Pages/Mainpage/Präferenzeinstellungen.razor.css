@@ -1,13 +1,109 @@
-.register-page-container {
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.background-style {
     background-image: url('pictures/LightIconBackground.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    height: 100vh;
     width: 100%;
+    min-height: 100vh;
     font-family: 'Patrick Hand', cursive, sans-serif;
 }
 
+/* =========================================
+   TOP BAR
+   ========================================= */
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 3px solid #000;
+    background-color: #fff;
+    z-index: 10;
+    box-shadow: 0 4px 0 0 #000;
+    position: relative;
+    height: 70px;
+}
+
+.page-title {
+    position: absolute;
+    left: 50%;          /* Genau in die Mitte schieben */
+    transform: translateX(-50%); /* Um die eigene Breite zurückkorrigieren */
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.icon-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.icon-wrapper:hover { transform: scale(1.05); }
+.menu-icon-container { cursor: pointer; }
+.menu-icon { font-size: 30px; line-height: 1; color: #000; }
+
+/* --- Logout-Menü (Dropdown) --- */
+.logout-menu {
+    position: absolute;
+    top: 60px;
+    right: 15px;
+    width: 180px;
+    background-color: #fff;
+    border: 3px solid #000;
+    border-radius: 8px;
+    box-shadow: 3px 3px 0 0 #000;
+    z-index: 20;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Logout Styling: Hellroter Hintergrund, rote Schrift */
+.logout-link {
+    padding: 8px 10px;
+    margin: 0;
+    cursor: pointer;
+    font-size: 18px;
+    text-align: right;
+    border-bottom: 2px solid #000;
+    background-color: #fff0f0;
+    color: #D62828;
+    font-weight: bold;
+}
+
+.logout-link:hover {
+    background-color: #ffdada;
+}
+
+.admin-header {
+    background-color: #f0f0f0;
+    padding: 8px 10px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #000;
+}
+
+/* ================================= */
 .login-center {
     display: flex;
     justify-content: center;

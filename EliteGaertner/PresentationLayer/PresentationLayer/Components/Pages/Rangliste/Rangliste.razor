@@ -20,43 +20,57 @@
     
     <header class="top-bar">
         
-        @* NEU: Titelausrichtung für Rangliste (Kein Link links) *@
-        <div class="icon-wrapper left"></div> @* Abstandshalter für Symmetrie *@
+        @* Linker Platzhalter da sich sonst das MenüIcon nach links verschiebt *@
+        <div class="header-left-spacer"></div>
 
+        @* Mitte (wird durch CSS absolut zentriert) *@
         <h1 class="page-title">Ranglisten</h1>
 
-        <div class="menu-icon-container">
-            <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
+        @* Rechte Seite *@
+        <div class="header-right-group" style="display: flex; align-items: center; gap: 20px;">
+            @if (!string.IsNullOrEmpty(CurrentProfile.UserName))
+            {
+                <span class="logged-in-user" style="font-weight: bold; font-size: 1.5rem;">
+                    👤 @($"@{CurrentProfile.UserName}")
+                </span>
+            }
+            <div class="menu-icon-container" @onclick="ToggleLogoutMenu">
+                <span class="menu-icon">☰</span>
+            </div>
         </div>
     </header>
-
+    
     @if (_showLogout)
     {
-    <div class="logout-menu">
-        <p @onclick="Session.Logout">Logout ➜</p>
-    </div>
+        <div class="logout-menu admin-menu-ext">
+            <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>  
+            <div class="admin-header" @onclick="NavigateToAboutUs">
+                <span>ℹ️ Über uns</span>
+            </div>
+        </div>
     }
 
+
     <div class="scroll-content rangliste-content">
-        
-        <div class="category-selector">
-            <span class="current-category">@_currentLeaderboard.LeaderboardTitle</span>
-            <span class="dropdown-arrow" @onclick="ToggleCategoryMenu">▼</span>
-        </div>
-        
-        @if (_showLeaderboardMenu)
-        {
+
+        <div class="rangliste-card comic-box-card">
+            <div class="category-selector">
+                <span class="current-category">@_currentLeaderboard.LeaderboardTitle</span>
+                <span class="dropdown-arrow" @onclick="ToggleCategoryMenu">▼</span>
+            </div>
+
+            @if (_showLeaderboardMenu)
+            {
             <div class="category-dropdown-menu comic-box-dropdown">
                 @foreach (var cat in _leaderboardList)
                 {
-                    <div class="dropdown-item" @onclick="() => SelectCategory(cat)">
-                        @cat.LeaderboardTitle
-                    </div>
+                <div class="dropdown-item" @onclick="() => SelectCategory(cat)">
+                    @cat.LeaderboardTitle
+                </div>
                 }
             </div>
-        }
-
-        <div class="rangliste-card comic-box-card">
+            }
+            
             <div class="trophy-icon">
                 <img src="pictures/Rangliste.png" alt="Rangliste" height="80" /> 
             </div>
@@ -104,33 +118,36 @@
     </div>
 
     <footer class="bottom-nav">
-        <div class="nav-item" @onclick="GoToMatches">
-            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" /> 
+        <div class="nav-item active" @onclick="GoToMatches">
+            <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
             <span>Matches</span>
-            @* Roter Punkt (notification-dot) entfernt *@
         </div>
-        
+
         <div class="nav-item" @onclick="GoToMainpage">
-            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" /> 
+            <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
             <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
         </div>
-        
+
         <div class="nav-item" @onclick="GoToProfile">
-            <img src="pictures/Profil_04.png" alt="Profile" height="40" /> 
+            <img src="pictures/Profil_04.png" alt="Profile" height="40" />
             <span>Profil</span>
         </div>
     </footer>
 </div>
 
 @code {
-
+    
+    // ----------------------------
+    // UI State
+    // ----------------------------
+    private string _loggedInUserName = "";
+    
     private bool _showLogout = false; 
     private bool _showLeaderboardMenu = false;
     private List<LeaderboardDto> _leaderboardList = new();
     private LeaderboardDto _currentLeaderboard;
     
-    
-    
+
     protected override void OnInitialized()
     {
         Logger.LogInformation("Rangliste: OnInitialized started");
@@ -270,5 +287,10 @@
     {
         Logger.LogInformation("Rangliste: Navigating to /EigenesUserProfil");
         Nav.NavigateTo("/EigenesUserProfil");
+    }
+    private void NavigateToAboutUs()
+    {
+        Logger.LogInformation("Rangliste: Navigation -> Ueber-Uns.");
+        Nav.NavigateTo("/ueber-uns");
     }
 }

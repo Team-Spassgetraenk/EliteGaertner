@@ -19,26 +19,37 @@
 
 <div class="mobile-container background-style">
     <header class="top-bar">
-        @* Hier wird .icon-wrapper verwendet *@
+        @* Linke Seite *@
         <div class="icon-wrapper left" @onclick="GoToRanks">
             <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
             <span class="icon-label">Rangliste</span>
         </div>
 
+        @* Mitte (wird durch CSS absolut zentriert) *@
         <h1 class="page-title">Meine Matches</h1>
 
-        @* HIER: Ersetzt durch den klickbaren Menü-Container *@
-        <div class="menu-icon-container">
-            <span class="menu-icon" @onclick="ToggleLogoutMenu">☰</span>
+        @* Rechte Seite *@
+        <div class="header-right-group" style="display: flex; align-items: center; gap: 20px;">
+            @if (!string.IsNullOrEmpty(CurrentProfile.UserName))
+            {
+                <span class="logged-in-user" style="font-weight: bold; font-size: 1.5rem;">
+                    👤 @($"@{CurrentProfile.UserName}")
+                </span>
+            }
+            <div class="menu-icon-container" @onclick="ToggleLogoutMenu">
+                <span class="menu-icon">☰</span>
+            </div>
         </div>
     </header>
-
-    @* HIER: Dropdown-Menü für Logout *@
+    
     @if (_showLogout)
     {
-    <div class="logout-menu">
-        <p @onclick="Session.Logout">Logout &lt;</p>
-    </div>
+        <div class="logout-menu admin-menu-ext">
+            <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>  
+            <div class="admin-header" @onclick="NavigateToAboutUs">
+                <span>ℹ️ Über uns</span>
+            </div>
+        </div>
     }
 
     <div class="scroll-content">
@@ -95,6 +106,7 @@
     private readonly List<UserMatch> _matches = new List<UserMatch>();
     private IMatchManager _matchManager;
     private bool _showLogout = false; 
+    private string _loggedInUserName = "";
 
     
     protected override void OnInitialized()
@@ -148,6 +160,11 @@
     }
     
     //Navigation
+    private void NavigateToAboutUs()
+    {
+        Logger.LogInformation("Matches: Navigation -> Ueber-Uns.");
+        Nav.NavigateTo("/ueber-uns");
+    }
     private void GoToRanks()
     {
         Logger.LogInformation("Matches: Navigation -> RanglisteTest.");

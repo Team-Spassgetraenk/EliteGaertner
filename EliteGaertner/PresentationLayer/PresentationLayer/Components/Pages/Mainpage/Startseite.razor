@@ -45,6 +45,16 @@
             </div>
         </div>
     </header>
+    
+    @if (_showLogout)
+    {
+        <div class="logout-menu admin-menu-ext">
+            <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>  
+            <div class="admin-header" @onclick="NavigateToAboutUs">
+                <span>ℹ️ Über uns</span>
+            </div>
+        </div>
+    }
 
     @if (_showAd)
     {
@@ -90,16 +100,6 @@
                 </div>
             </div>
         </div>
-    }
-
-    @if (_showLogout)
-    {
-    <div class="logout-menu admin-menu-ext">
-        <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>
-        <div class="admin-header" @onclick="NavigateToAboutUs">
-            <span>ℹ️ Über uns</span>
-        </div>
-    </div>
     }
     
     @* Standard Vorschlags Karte *@
@@ -240,7 +240,7 @@
 
         <div class="nav-item" @onclick="GoToMainpage">
             <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
-            <span>EliteGärtner.</span>
+            <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
         </div>
 
         <div class="nav-item" @onclick="GoToProfile">
@@ -283,10 +283,9 @@
     private bool _isShowingMatch = false;
     private readonly object _matchQueueLock = new();
 
-    // Logout/admin menu
+    // Logout menu
     private bool _showLogout = false;
-    private bool _showAdminNav = false;
-
+    
     // Report modal
     private bool _showReportModal = false;
     private bool _isProfileVisible = true;
@@ -827,14 +826,6 @@
     // ----------------------------
     // Menus / Navigation
     // ----------------------------
-    private void ToggleLogoutMenu()
-    {
-        _showLogout = !_showLogout;
-        if (!_showLogout)
-            _showAdminNav = false;
-    }
-
-    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
 
     private void NavTo(string path)
     {
@@ -842,11 +833,41 @@
         Nav.NavigateTo(path);
     }
 
-    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
-    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
-    private void GoToRanks() => Nav.NavigateTo("/Rangliste");
-    private void GoToMatches() => Nav.NavigateTo("/matches");
-    private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
-
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        Logger.LogDebug("Startseite: Logout-Menü toggled -> ShowLogout={ShowLogout}.", _showLogout);
+    }
+    
+    //Navigation
+    private void NavigateToPreferences()
+    {
+        Logger.LogInformation("Startseite: Navigation -> Präferenzeinstellungen.");
+        Nav.NavigateTo("/präferenzeinstellungen");
+    }
+    private void NavigateToAboutUs()
+    {
+        Logger.LogInformation("Startseite: Navigation -> Ueber-Uns.");
+        Nav.NavigateTo("/ueber-uns");
+    }
+    private void GoToRanks()
+    {
+        Logger.LogInformation("Startseite: Navigation -> RanglisteTest.");
+        Nav.NavigateTo("/Rangliste");
+    }
+    private void GoToMatches()
+    {
+        Logger.LogInformation("Startseite: Navigation -> Matches.");
+        Nav.NavigateTo("/matches");
+    }
+    private void GoToMainpage()
+    {
+        Logger.LogInformation("Startseite: Navigation -> Startseite.");
+        Nav.NavigateTo("/startseite");
+    }
+    private void GoToProfile()
+    {
+        Logger.LogInformation("Startseite: Navigation -> EigenesUserProfil.");
+        Nav.NavigateTo("/EigenesUserProfil");
+    }
 }
