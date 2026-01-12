@@ -15,6 +15,9 @@
     justify-content: center;
     align-items: flex-start;
     width: 100%;
+
+    /* Verkleinert die Erntehochladen-Karte sodass man sie ohne scrollen bedienen kann */
+    zoom: 0.9;
 }
 
 .register-card {

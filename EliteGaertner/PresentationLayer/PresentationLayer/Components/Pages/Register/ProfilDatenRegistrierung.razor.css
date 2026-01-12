@@ -15,6 +15,9 @@
     justify-content: center;
     align-items: center;
     height: 100%;
+
+    /* Verkleinert die Registrierungskarte sodass man sie ohne scrollen bedienen kann */
+    zoom: 0.75;
 }
 
 .register-card {
