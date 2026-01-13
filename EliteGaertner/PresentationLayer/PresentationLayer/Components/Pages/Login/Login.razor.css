@@ -1,11 +1,24 @@
+:global(html),
+:global(body) {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+/* Falls ein parent container padding/margin hat, erzwingen wir echten Viewport-Fullscreen */
 .login-page-container {
+    position: fixed;
+    inset: 0; /* top/right/bottom/left = 0 */
+
     background-image: url('pictures/LightIconBackground.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    height: 100vh;
-    width: 100%;
+
     font-family: 'Patrick Hand', cursive, sans-serif;
+
+    /* damit die Karte bei kleinen Screens trotzdem scrollen kann */
+    overflow: auto;
 }
 
 .login-center {
@@ -30,6 +43,54 @@
 .logo-container {
     text-align: center;
     margin-bottom: 30px;
+}
+
+/* --- Info Icon oben rechts --- */
+.login-card {
+    position: relative;
+}
+
+.info-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.4rem;
+    font-weight: bold;
+    font-family: 'Patrick Hand', cursive, sans-serif;
+
+    background: white;
+    color: #000;
+
+    border: 3px solid #000;
+    border-radius: 50%;
+    box-shadow: 2px 2px 0 0 #000;
+
+    cursor: pointer;
+    user-select: none;
+
+    transition:
+            transform 0.1s,
+            box-shadow 0.1s,
+            background-color 0.2s,
+            color 0.2s;
+}
+
+.info-icon:hover {
+    background-color: #8B45B3;
+    color: white;
+}
+
+.info-icon:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 0 #000;
 }
 
 .app-logo {
@@ -142,4 +203,3 @@
 .register-link:hover {
     opacity: 0.8;
 }
-    

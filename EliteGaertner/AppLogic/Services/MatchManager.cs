@@ -29,10 +29,11 @@ public class MatchManager : IMatchManager
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger<MatchManager>();
         
-        //Aufbereitung der ProfileId und der dazugehörigen TagIds
+        //Aufbereitung der ProfileId
         _profileId = contentReceiver.ProfileId;
         _logger.LogInformation("MatchManager initialized. ContentReceiverProfileId={ProfileId}", _profileId);
         
+        //Aufbereitung der TagIds
         _tagIds = contentReceiver.PreferenceDtos
             .Select(p => p.TagId)
             .Distinct()
@@ -149,6 +150,7 @@ public class MatchManager : IMatchManager
     
     public List<PublicProfileDto> UpdateActiveMatches()
     {
+        //Holt sich die aktuellen Aktiven Matches aus der Datenbank
         var newActiveMatchesList = _matchesDbs.GetActiveMatches(_profileId).ToList();
         
         _logger.LogDebug("UpdateActiveMatches called. PreviousCount={PreviousCount}, NewCount={NewCount}",
@@ -177,6 +179,7 @@ public class MatchManager : IMatchManager
             CreateMatch?.Invoke(newMatch);
         }
         
+        //_activeMatchesList wird durch die neue aktualisierte ActiveMatches Liste ersetzt
         _activeMatchesList = newActiveMatchesList;
         return _activeMatchesList;
     }

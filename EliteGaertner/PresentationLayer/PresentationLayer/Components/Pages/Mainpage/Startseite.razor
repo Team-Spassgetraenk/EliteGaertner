@@ -45,6 +45,16 @@
             </div>
         </div>
     </header>
+    
+    @if (_showLogout)
+    {
+        <div class="logout-menu admin-menu-ext">
+            <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>  
+            <div class="admin-header" @onclick="NavigateToAboutUs">
+                <span>ℹ️ Über uns</span>
+            </div>
+        </div>
+    }
 
     @if (_showAd)
     {
@@ -78,7 +88,7 @@
 
                 <div class="match-images">
                     <div class="match-photo-circle left-photo">
-                        <img src="pictures/Profilbilder/Profilbild_27.png" alt="Dein Profil" style="width:100%; height:100%; object-fit:cover;" />
+                        <img src="@CurrentProfile.ProfilepictureUrl" alt="Dein Profil" style="width:100%; height:100%; object-fit:cover;" />
                     </div>
                     <div class="match-photo-circle right-photo">
                         <img src="@_matchedUser?.ProfilepictureUrl" alt="Match Profil" style="width:100%; height:100%; object-fit:cover;" />
@@ -90,16 +100,6 @@
                 </div>
             </div>
         </div>
-    }
-
-    @if (_showLogout)
-    {
-    <div class="logout-menu admin-menu-ext">
-        <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>
-        <div class="admin-header" @onclick="NavigateToAboutUs">
-            <span>ℹ️ Über uns</span>
-        </div>
-    </div>
     }
     
     @* Standard Vorschlags Karte *@
@@ -240,7 +240,7 @@
 
         <div class="nav-item" @onclick="GoToMainpage">
             <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
-            <span>EliteGärtner.</span>
+            <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
         </div>
 
         <div class="nav-item" @onclick="GoToProfile">
@@ -283,10 +283,9 @@
     private bool _isShowingMatch = false;
     private readonly object _matchQueueLock = new();
 
-    // Logout/admin menu
+    // Logout menu
     private bool _showLogout = false;
-    private bool _showAdminNav = false;
-
+    
     // Report modal
     private bool _showReportModal = false;
     private bool _isProfileVisible = true;
@@ -422,7 +421,7 @@
         _ = EnqueueAndShowMatchAsync(matchProfile);
     }
     
-    //Implementierung der Match Anzeigen Logik, sodass mehrere Matches hintereinander angezeigt werden können
+    //Regelt die Queue der Match "anzeigen" Logik
     private async Task EnqueueAndShowMatchAsync(PublicProfileDto matchProfile)
     {
         bool shouldStartShowing = false;
@@ -447,17 +446,19 @@
     }
 
     
-    //TODO KOMMENTARE FEHLEN
+    //Regelt die Queue Logik der neuen Active Matches
     private async Task ShowNextMatchOverlayAsync()
     {
         PublicProfileDto? next;
 
+        //Holt das Nächste Match aus der Pending Matches Liste
         lock (_matchQueueLock)
         {
             next = _pendingMatches.Count > 0 ? _pendingMatches.Dequeue() : null;
         }
         Logger.LogDebug("ShowNextMatchOverlayAsync called. NextIsNull={NextIsNull}", next is null);
 
+        //Queue leer?
         if (next is null)
         {
             //Queue leer -> wir sind fertig
@@ -471,6 +472,7 @@
             return;
         }
 
+        //Queue nicht leer? -> Nächstes Match abspielen
         _matchedUser = next;
         Logger.LogInformation("Showing match overlay for ProfileId={ProfileId} UserName={UserName}", next.ProfileId, next.UserName);
 
@@ -482,6 +484,13 @@
 
         await PlayMatchSound();
         await InvokeAsync(StateHasChanged);
+    }
+    
+    private async Task CloseMatchOverlay()
+    {
+        // Wenn noch weitere neue Matches warten, zeigen wir direkt das nächste Overlay.
+        // Sonst schließen wir komplett.
+        await ShowNextMatchOverlayAsync();
     }
     
     private async Task PlayMatchSound()
@@ -554,13 +563,6 @@
             //Animationen sollen nicht mehr möglich sein
             _isAnimating = false;  
         }
-    }
-
-    private async Task CloseMatchOverlay()
-    {
-        // Wenn noch weitere neue Matches warten, zeigen wir direkt das nächste Overlay.
-        // Sonst schließen wir komplett.
-        await ShowNextMatchOverlayAsync();
     }
 
     // ----------------------------
@@ -827,14 +829,6 @@
     // ----------------------------
     // Menus / Navigation
     // ----------------------------
-    private void ToggleLogoutMenu()
-    {
-        _showLogout = !_showLogout;
-        if (!_showLogout)
-            _showAdminNav = false;
-    }
-
-    private void ToggleAdminNav() => _showAdminNav = !_showAdminNav;
 
     private void NavTo(string path)
     {
@@ -842,11 +836,46 @@
         Nav.NavigateTo(path);
     }
 
-    private void NavigateToAboutUs() => Nav.NavigateTo("/ueber-uns");
-    private void NavigateToPreferences() => Nav.NavigateTo("/präferenzeinstellungen");
-    private void GoToRanks() => Nav.NavigateTo("/Rangliste");
-    private void GoToMatches() => Nav.NavigateTo("/matches");
-    private void GoToMainpage() => Nav.NavigateTo("/startseite");
-    private void GoToProfile() => Nav.NavigateTo("/EigenesUserProfil");
-
+    private void ToggleLogoutMenu()
+    {
+        _showLogout = !_showLogout;
+        Logger.LogDebug("Startseite: Logout-Menü toggled -> ShowLogout={ShowLogout}.", _showLogout);
+    }
+    
+    //Navigation
+    private void NavigateToPreferences()
+    {
+        Logger.LogInformation("Startseite: Navigation -> Präferenzeinstellungen.");
+        Nav.NavigateTo("/präferenzeinstellungen");
+    }
+    
+    private void NavigateToAboutUs()
+    {
+        Logger.LogInformation("Startseite: Navigation -> Ueber-Uns.");
+        Nav.NavigateTo("/ueber-uns");
+    }
+    
+    private void GoToRanks()
+    {
+        Logger.LogInformation("Startseite: Navigation -> RanglisteTest.");
+        Nav.NavigateTo("/Rangliste");
+    }
+    
+    private void GoToMatches()
+    {
+        Logger.LogInformation("Startseite: Navigation -> Matches.");
+        Nav.NavigateTo("/matches");
+    }
+    
+    private void GoToMainpage()
+    {
+        Logger.LogInformation("Startseite: Navigation -> Startseite.");
+        Nav.NavigateTo("/startseite");
+    }
+    
+    private void GoToProfile()
+    {
+        Logger.LogInformation("Startseite: Navigation -> EigenesUserProfil.");
+        Nav.NavigateTo("/EigenesUserProfil");
+    }
 }

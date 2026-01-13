@@ -57,64 +57,6 @@
     pointer-events: none;
 }
 
-.icon-wrapper {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    font-weight: bold;
-    font-size: 12px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.icon-wrapper:hover { transform: scale(1.05); }
-.menu-icon-container { cursor: pointer; }
-.menu-icon { font-size: 30px; line-height: 1; color: #000; }
-
-/* --- Logout-Menü (Dropdown) --- */
-.logout-menu {
-    position: absolute;
-    top: 60px;
-    right: 15px;
-    width: 180px;
-    background-color: #fff;
-    border: 3px solid #000;
-    border-radius: 8px;
-    box-shadow: 3px 3px 0 0 #000;
-    z-index: 20;
-    padding: 0;
-    overflow: hidden;
-}
-
-/* Logout Styling: Hellroter Hintergrund, rote Schrift */
-.logout-link {
-    padding: 8px 10px;
-    margin: 0;
-    cursor: pointer;
-    font-size: 18px;
-    text-align: right;
-    border-bottom: 2px solid #000;
-    background-color: #fff0f0;
-    color: #D62828;
-    font-weight: bold;
-}
-
-.logout-link:hover {
-    background-color: #ffdada;
-}
-
-.admin-header {
-    background-color: #f0f0f0;
-    padding: 8px 10px;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #000;
-}
-
 /* --- CONTENT CARD (Unverändert) --- */
 .main-content {
     flex: 1;
@@ -314,7 +256,6 @@
 .blue-theme { background: #bbdefb; }
 .yellow-theme { background: #fff9c4; }
 
-
 /* --- Angepasste COMIC BOXES für Timeline --- */
 .white-comic-box {
     background: white;
@@ -357,7 +298,6 @@
     border-color: transparent white transparent transparent; /* Weißes Dreieck */
     z-index: 3;
 }
-
 
 .box-title { font-weight: bold; font-size: 1.3rem; margin: 0 0 5px 0; }
 .box-desc { margin: 0; font-size: 1.1rem; color: #333; line-height: 1.3; }

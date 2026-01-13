@@ -22,26 +22,39 @@
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
 
 <div class="page-container background-style">
-
-    @* --- TOP BAR --- *@
     <header class="top-bar">
-        <div class="icon-wrapper" @onclick="GoToRanks">
+        @* Linke Seite *@
+        <div class="icon-wrapper left" @onclick="GoToRanks">
             <img src="pictures/Rangliste.png" alt="Rangliste" height="40" />
             <span class="icon-label">Rangliste</span>
         </div>
 
+        @* Mitte (wird durch CSS absolut zentriert) *@
         <h1 class="page-title">Mein Profil</h1>
 
-        <div class="header-right-action menu-wrapper">
-            <span class="hamburger-icon" @onclick="ToggleLogoutMenu">☰</span>
-            @if (_showLogout)
+        @* Rechte Seite *@
+        <div class="header-right-group" style="display: flex; align-items: center; gap: 20px;">
+            @if (!string.IsNullOrEmpty(CurrentProfile.UserName))
             {
-            <div class="logout-menu comic-box">
-                <p @onclick="Session.Logout">Logout ➜]</p>
-            </div>
+                <span class="logged-in-user" style="font-weight: bold; font-size: 1.5rem;">
+                    👤 @($"@{CurrentProfile.UserName}")
+                </span>
             }
+            <div class="menu-icon-container" @onclick="ToggleLogoutMenu">
+                <span class="menu-icon">☰</span>
+            </div>
         </div>
     </header>
+    
+    @if (_showLogout)
+    {
+        <div class="logout-menu admin-menu-ext">
+            <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>  
+            <div class="admin-header" @onclick="NavigateToAboutUs">
+                <span>ℹ️ Über uns</span>
+            </div>
+        </div>
+    }
 
     @* --- HAUPTBEREICH (Zweispaltig) --- *@
     <div class="main-profile-layout">
@@ -167,14 +180,16 @@
 
     @* --- BOTTOM NAV --- *@
     <footer class="bottom-nav">
-        <div class="nav-item" @onclick="GoToMatches">
+        <div class="nav-item active" @onclick="GoToMatches">
             <img src="pictures/MatchesIcon.png" alt="Matches" height="40" />
             <span>Matches</span>
         </div>
+
         <div class="nav-item" @onclick="GoToMainpage">
             <img src="pictures/EliteGärtner_logo.png" alt="EliteGärtner" height="40" />
-            <span class="elitegaertner-title mt-2">EliteGärtner.</span>
+            <span class="elitegaertner-title mt-2" style="font-weight: 600; font-size: 1.0rem">EliteGärtner.</span>
         </div>
+
         <div class="nav-item" @onclick="GoToProfile">
             <img src="pictures/Profil_04.png" alt="Profile" height="40" />
             <span>Profil</span>
@@ -184,6 +199,9 @@
 
 @code {
     private int? _showDeletePopupIndex = null;
+    
+    // UI State
+    private string _loggedInUserName = "";
 
     //Profildaten
     private string _profileName;
@@ -299,6 +317,12 @@
     {
         _showLogout = !_showLogout;
         Logger.LogDebug("EigenesUserProfil: ToggleLogoutMenu. ShowLogout={ShowLogout}", _showLogout);
+    }
+    
+    private void NavigateToAboutUs()
+    {
+        Logger.LogInformation("EigenesUserProfil: Navigation -> Ueber-Uns.");
+        Nav.NavigateTo("/ueber-uns");
     }
 
     private void GoToRanks()

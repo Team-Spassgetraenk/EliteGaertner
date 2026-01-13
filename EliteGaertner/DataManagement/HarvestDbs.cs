@@ -240,6 +240,7 @@ public class HarvestDbs : IHarvestDbs
     {
         _logger.LogInformation("DB: GetHarvestUploadRepo start. profileId={ProfileId}, tagIdsCount={TagIdsCount}, alreadyRatedCount={AlreadyRatedCount}, preloadCount={PreloadCount}",
             profileId, tagIds?.Count ?? 0, alreadyRatedProfiles?.Count ?? 0, preloadCount);
+        
         //Überprüfung ob ProfilId, TagIds vorhanden sind und PreloadCount > 0 ist
         //Falls nicht -> leere Liste zurückgeben
         if (profileId <= 0 || tagIds is null || tagIds.Count == 0 || preloadCount <= 0)

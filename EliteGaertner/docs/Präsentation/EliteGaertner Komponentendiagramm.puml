@@ -1,0 +1,112 @@
+@startuml
+top to bottom direction
+skinparam componentStyle rectangle
+
+package "PresentationLayer" #DDDDFF {
+  [Blazor Pages/Components] as UI
+  [State/Session/Shared] as State
+}
+
+package "AppLogic" #DDFFDD {
+    interface IHarvestSuggestion
+    interface ILeaderBoardService
+    interface IMatchManager
+    interface IProfileMgm
+    interface IProfileSuggestion
+    interface IUploadService 
+    [MatchManager] as MatchManager 
+    [ProfileSuggestion] as ProfileSuggestion 
+    [HarvestSuggestion] as HarvestSuggestion
+    [ProfileMgm] as ProfileMgm 
+    [UploadServiceImpl] as UploadServiceImpl 
+    [LeaderBoardService] as LeaderBoardService 
+}
+
+package "DataManagement" #CCEEFF{
+    interface ILeaderBoardDbs
+    interface IMatchesDbs
+    interface IHarvestDbs
+    interface IProfileDbs
+    [ProfileDbs] as ProfileDbs
+    [HarvestDbs] as HarvestDbs
+    [MatchesDbs] as MatchesDbs
+    [LeaderboardDbs] as LeaderboardDbs
+    [EliteGaertnerDbContext] as DbContext
+}
+
+
+
+package "Contracts" #FFF9C4 {
+    [DTOs] as DTOs
+    [Enums] as Enums
+}
+
+
+package "PostgreSQL Docker Container" #F8BBD0 {
+    [Seed + Schema] as Seed
+    [Test-Seed + Schema] as TestSeed 
+    database "Produktiv-Datenbank" as PD
+    database "Test-Datenbank" as TD 
+}
+
+package "Tests" #FFE0B2{
+    [UnitTests] as UnitTests 
+    [IntegrationsTests] as IT
+}
+
+
+UI -> State
+UI ---> IProfileSuggestion
+UI ---> IProfileMgm
+UI ---> IUploadService
+UI ---> IMatchManager
+UI ---> ILeaderBoardService
+UI ---> IHarvestSuggestion
+
+IProfileMgm --> ProfileMgm
+IProfileSuggestion --> ProfileSuggestion
+IMatchManager --> MatchManager
+IUploadService --> UploadServiceImpl 
+ILeaderBoardService --> LeaderBoardService
+IHarvestSuggestion --> HarvestSuggestion
+
+MatchManager --> IHarvestDbs
+MatchManager --> IProfileDbs
+MatchManager --> IMatchesDbs
+MatchManager -> ProfileSuggestion
+ProfileSuggestion -> HarvestSuggestion
+HarvestSuggestion --> IHarvestDbs
+ProfileSuggestion --> IHarvestDbs 
+ProfileSuggestion --> IProfileDbs 
+ProfileSuggestion --> IMatchesDbs 
+ProfileMgm --> IHarvestDbs
+ProfileMgm --> IProfileDbs
+LeaderBoardService --> ILeaderBoardDbs
+UploadServiceImpl --> IHarvestDbs
+
+
+
+IProfileDbs --> ProfileDbs
+IHarvestDbs --> HarvestDbs
+IMatchesDbs --> MatchesDbs
+ILeaderBoardDbs --> LeaderboardDbs 
+
+
+ProfileDbs --> DbContext
+HarvestDbs --> DbContext
+MatchesDbs --> DbContext
+LeaderboardDbs --> DbContext
+
+
+
+AppLogic ..> Contracts
+DataManagement ..> Contracts
+PresentationLayer ..> Contracts
+
+DbContext --> PD
+PD --> Seed
+TD --> TestSeed
+
+IT --> TD
+
+@enduml

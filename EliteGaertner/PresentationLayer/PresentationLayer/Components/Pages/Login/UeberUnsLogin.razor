@@ -1,10 +1,8 @@
-@page "/ueber-uns"
-@using PresentationLayer.Services
+@page "/ueber-uns-login"
+@layout Layout.MainLayout
 
 @inject NavigationManager Nav
-@inject SessionService Session
-
-@inject Microsoft.Extensions.Logging.ILogger<ÜberUns> Logger
+@inject Microsoft.Extensions.Logging.ILogger<UeberUnsLogin> Logger
 
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -14,32 +12,16 @@
     <header class="top-bar">
         @* Linke Seite *@
         <div class="icon-wrapper left"
-             style="display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.5rem;"
-             @onclick="GoBackToStartseite">
+             style="display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.5rem; cursor: pointer"
+             @onclick="GoBackToLogin">
             <i class="bi bi-chevron-left"></i>
             <span>Zurück</span>
         </div>
 
         @* Mitte (wird durch CSS absolut zentriert) *@
-        <h1 class="page-title">Unsere Wurzeln</h1>
-
-        @* Rechte Seite *@
-        <div class="header-right-group" style="display: flex; align-items: center; gap: 20px;">
-            <div class="menu-icon-container" @onclick="ToggleLogoutMenu">
-                <span class="menu-icon">☰</span>
-            </div>
-        </div>
+        <h1 class="page-title">Das ist EliteGärtner.</h1>
+       
     </header>
-    
-    @if (_showLogout)
-    {
-        <div class="logout-menu admin-menu-ext">
-            <p class="logout-link" @onclick="Session.Logout">Logout ➜]</p>  
-            <div class="admin-header" @onclick="NavigateToAboutUs">
-                <span>ℹ️ Über uns</span>
-            </div>
-        </div>
-    }
 
     <main class="main-content">
         <div class="content-wrapper-card">
@@ -166,36 +148,11 @@
 
 @code {
     
-    // ----------------------------
-    // UI State
-    // ----------------------------
-    private string _loggedInUserName = "";
-    
-    private bool _showLogout = false;
-    
-    protected override void OnInitialized()
-    {
-        Logger.LogInformation("Über-uns page opened.");
-    }
-
-    //Aktionen
-    private void ToggleLogoutMenu()
-    {
-        _showLogout = !_showLogout;
-        Logger.LogDebug("Ueber-uns: ToggleLogoutMenu -> ShowLogout={ShowLogout}.", _showLogout);
-    }
-
     //Navigation
     
-    private void NavigateToAboutUs()
+    private void GoBackToLogin()
     {
-        Logger.LogInformation("Ueber-uns: Navigation -> Ueber-Uns.");
-        Nav.NavigateTo("/ueber-uns");
-    }
-    
-    private void GoBackToStartseite()
-    {
-        Logger.LogInformation("User clicked 'Zurück' on Über-uns page. Navigating to /startseite.");
-        Nav.NavigateTo("/startseite");
+        Logger.LogInformation("User clicked 'Zurück' on Über-uns page. Navigating to /.");
+        Nav.NavigateTo("/");
     }
 }

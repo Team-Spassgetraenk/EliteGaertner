@@ -1,13 +1,24 @@
+:global(html),
+:global(body) {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
 .register-page-container {
+    /* Erzwingt echten Fullscreen-Hintergrund ohne weiße Ränder */
+    position: fixed;
+    inset: 0; /* top/right/bottom/left = 0 */
+
     background-image: url('pictures/LightIconBackground.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    height: 100%;
-    min-height: 100vh;
-    width: 100%;
+
     font-family: 'Patrick Hand', cursive, sans-serif;
-    padding: 40px 0;
+
+    /* Scrollbar erlauben bei kleinen Screens */
+    overflow: auto;
 }
 
 .login-center {
@@ -15,6 +26,9 @@
     justify-content: center;
     align-items: flex-start;
     width: 100%;
+
+    /* Verkleinert die Erntehochladen-Karte sodass man sie ohne scrollen bedienen kann */
+    zoom: 0.85;
 }
 
 .register-card {
@@ -24,8 +38,8 @@
     border: 3px solid #000;
     border-radius: 15px;
     box-shadow: 6px 6px 0 0 #000;
-    padding: 30px;
-    margin: 20px;
+    padding: 20px;
+    margin: 12px;
 }
 
 .ernte-parameter-card {
@@ -34,7 +48,7 @@
 
 .logo-container {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .app-logo {
@@ -44,7 +58,7 @@
 .elitegaertner-title {
     font-family: 'Playfair Display', serif;
     font-weight: 600;
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     color: #000;
     margin-top: 8px;
     line-height: 1;
@@ -52,9 +66,9 @@
 
 .register-title {
     font-weight: bold;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     color: #000;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     text-align: center;
     border-bottom: 2px solid #000;
     padding-bottom: 10px;
@@ -64,15 +78,15 @@
     font-weight: bold;
     font-size: 1.4rem;
     color: #000;
-    margin-top: 20px;
-    margin-bottom: 10px;
+    margin-top: 12px;
+    margin-bottom: 6px;
 }
 
 /* --- Form Layout: Zentriert Linke Spalte --- */
 .form-layout {
     display: flex;
-    gap: 30px;
-    margin-bottom: 20px;
+    gap: 18px;
+    margin-bottom: 12px;
     align-items: center; /* Zentriert die linke Spalte (Bild) vertikal zur rechten Spalte */
 }
 
@@ -117,7 +131,7 @@
 .ernte-image {
     width: 100%;
     height: auto;
-    max-height: 400px;
+    max-height: 280px;
     display: block;
 }
 
@@ -146,7 +160,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .app-tag {
@@ -190,7 +204,7 @@
 }
 
 .input-group {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     display: flex;
     flex-direction: column;
 }
@@ -215,7 +229,7 @@
 .parameter-row {
     display: flex;
     gap: 20px;
-    margin-top: 20px;
+    margin-top: 12px;
 }
 
 .parameter-row .input-group {
@@ -251,7 +265,7 @@ textarea.app-input {
     border: 3px solid #000;
     border-radius: 8px;
     cursor: pointer;
-    margin-top: 20px;
+    margin-top: 12px;
 
     box-shadow: 4px 4px 0 0 #000;
     transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
