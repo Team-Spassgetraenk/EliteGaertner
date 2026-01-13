@@ -1,13 +1,26 @@
+:global(html),
+:global(body) {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
 .register-page-container {
+    /* Falls ein parent container padding/margin hat, erzwingen wir echten Viewport-Fullscreen */
+    position: fixed;
+    inset: 0; /* top/right/bottom/left = 0 */
+
     background-image: url('pictures/LightIconBackground.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    height: 100%;
-    min-height: 100vh;
-    width: 100%;
+
     font-family: 'Patrick Hand', cursive, sans-serif;
-    padding: 40px 0;
+
+    /* Container-Padding nicht mehr nötig – Card steuert Abstände */
+
+    /* damit die Karte bei kleinen Screens trotzdem scrollen kann */
+    overflow: auto;
 }
 
 .login-center {

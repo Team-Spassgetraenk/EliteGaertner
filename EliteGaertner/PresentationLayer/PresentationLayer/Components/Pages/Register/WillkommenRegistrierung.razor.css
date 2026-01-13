@@ -1,3 +1,10 @@
+:global(html),
+:global(body) {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
 /* =========================================
    GLOBAL LAYOUT
    ========================================= */
@@ -5,19 +12,24 @@
 .page-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100%;
     width: 100%;
-    overflow: hidden;
     font-family: 'Patrick Hand', cursive, sans-serif;
+    overflow: auto;
 }
 
 .background-style {
+    /* Erzwingt echten Fullscreen-Hintergrund ohne weiße Ränder */
+    position: fixed;
+    inset: 0; /* top/right/bottom/left = 0 */
+
     background-image: url('pictures/LightIconBackground.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    width: 100%;
-    min-height: 100vh;
+
+    /* Scrollbar erlauben bei kleinen Screens */
+    overflow: auto;
 }
 
 /* =========================================
