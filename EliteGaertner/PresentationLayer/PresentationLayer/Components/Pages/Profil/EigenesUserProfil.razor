@@ -191,7 +191,9 @@
         </div>
 
         <div class="nav-item" @onclick="GoToProfile">
-            <img src="pictures/Profil_04.png" alt="Profile" height="40" />
+            <div class="profile-goto">
+                <img src="@CurrentProfile.ProfilepictureUrl" alt="Profilbild" />
+            </div>
             <span>Profil</span>
         </div>
     </footer>
