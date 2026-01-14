@@ -244,7 +244,9 @@
         </div>
 
         <div class="nav-item" @onclick="GoToProfile">
-            <img src="pictures/Profil_04.png" alt="Profile" height="40" />
+            <div class="profile-goto">
+                <img src="@CurrentProfile.ProfilepictureUrl" alt="Profilbild" />
+            </div>
             <span>Profil</span>
         </div>
     </footer>
@@ -303,24 +305,11 @@
     // Ads
     // ----------------------------
     private bool _showAd = true;
-    private string _currentAdImage = "pictures/ads/pimpyourblechad02.jpg";
     private int _adCounter = 0;
     private Timer? _adTimer;
     private ElapsedEventHandler? _adTimerElapsedHandler;
-    private readonly string[] _adImages =
-    {
-        "pictures/ads/pimpyourblechad02.jpg",
-        "pictures/ads/Drachenlord_Schanzenfest_Werbeplakat.jpg",
-        "pictures/ads/GurkenStandAd.jpg",
-        "pictures/ads/OBI_werbung.jpg",
-        "pictures/ads/ralphschuhmacherad.png",
-        "pictures/ads/werbeplakat-leberkaessemmel.jpg",
-        "pictures/ads/DieLilaVersuchung.jpg",
-        "pictures/ads/pimpyourblech01.jpg",
-        "pictures/ads/werbeplakat-leberkassemmel02.jpg",
-        "pictures/ads/WürstlStandAd.jpg",
-        "pictures/ads/pimpyourblechad03.jpg"
-    };
+    private readonly IReadOnlyList<string> _adImages = AdCatalog.adPictures;
+    private string _currentAdImage;
 
     // ----------------------------
     // Lifecycle
@@ -361,7 +350,7 @@
         _adTimerElapsedHandler = async (_, _) =>
         {
             _adCounter++;
-            _currentAdImage = _adImages[_adCounter % _adImages.Length];
+            _currentAdImage = _adImages[_adCounter % _adImages.Count];
             await InvokeAsync(StateHasChanged);
         };
         _adTimer.Elapsed += _adTimerElapsedHandler;
